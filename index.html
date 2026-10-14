@@ -96,50 +96,39 @@
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Rýchle Kanály (100% stabilné) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                        🔥 Top príspevky na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
                     </h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold">Všetky vedľa seba</button>
+                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Slovakia</button>
+                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Gunners</button>
                 </div>
             </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
+            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- r/Slovakia -->
-                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-6 flex flex-col justify-between gap-4">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xl font-bold text-sky-400">r/Slovakia</h3>
-                            <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded">Slovensko</span>
-                        </div>
-                        <p class="text-sm text-slate-300 leading-relaxed">
-                            Okamžitý prístup k najpopulárnejším témam, správam a diskusiám na slovenskom Reddite za posledných 24 hodín.
-                        </p>
+                <div id="col-slovakia" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-bold text-sky-400">r/Slovakia</h3>
+                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
                     </div>
-                    <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="w-full py-3 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-lg text-center text-sm transition shadow-lg flex items-center justify-center gap-2">
-                        <span>Otvoriť Top r/Slovakia za 24h</span> <span>↗</span>
-                    </a>
+                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
                 </div>
 
                 <!-- r/Gunners -->
-                <div class="bg-slate-900/80 border border-slate-700 rounded-xl p-6 flex flex-col justify-between gap-4">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <h3 class="text-xl font-bold text-sky-400">r/Gunners</h3>
-                            <span class="text-xs bg-slate-800 text-slate-400 px-2.5 py-1 rounded">Arsenal FC</span>
-                        </div>
-                        <p class="text-sm text-slate-300 leading-relaxed">
-                            Okamžitý prístup k zápasom, rozborom a novinkám fanúšikov Arsenalu za posledných 24 hodín.
-                        </p>
+                <div id="col-gunners" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-bold text-sky-400">r/Gunners</h3>
+                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
                     </div>
-                    <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="w-full py-3 px-4 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-lg text-center text-sm transition shadow-lg flex items-center justify-center gap-2">
-                        <span>Otvoriť Top r/Gunners za 24h</span> <span>↗</span>
-                    </a>
+                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
                 </div>
-
             </div>
         </section>
 
@@ -161,6 +150,73 @@
         }
         setInterval(updateDateTime, 1000);
         updateDateTime();
+
+        // --- STABILNÉ NAČÍTANIE CEZ RSS S ČISTÝM VZHĽADOM ---
+        async function loadReddit(subreddit, elementId) {
+            var container = document.getElementById(elementId);
+            try {
+                var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
+                var res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl));
+                var data = await res.json();
+                
+                if (!data || !Array.isArray(data.items)) throw new Error("Chyba");
+
+                container.innerHTML = data.items.slice(0, 5).map(function(item) {
+                    // Vyťahujeme čistý názov a čas publikovania
+                    var title = item.title;
+                    var link = item.link;
+                    var pubDate = new Date(item.pubDate);
+                    var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
+
+                    return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
+                        '<div class="space-y-1.5 flex-1 min-w-0">' +
+                            '<h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition line-clamp-2">' + title + '</h4>' +
+                            '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
+                        '</div>' +
+                        '<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded bg-sky-950/60 border border-sky-500/30 text-sky-300 font-bold text-xs shrink-0">' +
+                            '<span>reddit</span>' +
+                        '</div>' +
+                    '</a>';
+                }).join('');
+            } catch (err) {
+                container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
+            }
+        }
+
+        loadReddit('Slovakia', 'list-slovakia');
+        loadReddit('Gunners', 'list-gunners');
+
+        // --- PREPÍNANIE ZÁLOŽIEK ---
+        function showSub(target) {
+            var colSsl = document.getElementById('col-slovakia');
+            var colGun = document.getElementById('col-gunners');
+            var grid = document.getElementById('reddit-grid');
+            
+            var btnAll = document.getElementById('tab-all');
+            var btnSsl = document.getElementById('tab-slovakia');
+            var btnGun = document.getElementById('tab-gunners');
+
+            [btnAll, btnSsl, btnGun].forEach(function(b) {
+                b.className = "px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700";
+            });
+
+            if (target === 'all') {
+                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "block";
+                btnAll.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
+            } else if (target === 'slovakia') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "none";
+                btnSsl.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
+            } else if (target === 'gunners') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "none";
+                colGun.style.display = "block";
+                btnGun.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
+            }
+        }
     </script>
 </body>
 </html>
