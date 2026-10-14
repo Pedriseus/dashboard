@@ -88,7 +88,7 @@
                         </span>
                         <span class="font-bold text-slate-300">18 b</span>
                     </div>
-                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
+                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1 rounded shadow-sm">
                         <span class="font-bold text-white flex items-center gap-2">
                             <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" class="w-4 h-4 object-contain" alt="ARS"> 2. Arsenal
                         </span>
@@ -115,7 +115,7 @@
                 </div>
             </div>
 
-            <!-- 3. Stred 2: Zápasy Arsenalu s novými farbami (PL bordová, UCL zlatá, EFL modrá) -->
+            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360x245px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-1 flex justify-between items-center px-1">
                     <span>⚽ ZÁPASY ARSENALU</span>
@@ -160,7 +160,7 @@
                 </div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Deadline (Presne 360x245px) -->
+            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Dynamický Deadline (Presne 360x245px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-1 flex justify-between items-center px-1">
                     <span>🎮 FPL Mini-liga (#28856)</span>
@@ -195,10 +195,10 @@
                         <span class="font-bold text-slate-300">375 b</span>
                     </div>
                 </div>
-                <!-- Deadline pod FPL tabuľkou -->
+                <!-- Dynamický Deadline naživo z FPL API -->
                 <div class="mt-1 pt-1 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
                     <span>⏳ Najbližší deadline:</span>
-                    <a href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">So 17.10. o 11:30 ↗</a>
+                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
                 </div>
             </div>
 
@@ -310,7 +310,7 @@
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed (Opravené priame načítavanie) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -329,224 +329,4 @@
                 <!-- r/Slovakia -->
                 <div id="col-slovakia" class="space-y-3">
                     <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
-                        <h3 class="font-bold text-red-400 text-lg">r/Slovakia</h3>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
-                    </div>
-                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Slovakia...</div>
-                </div>
-
-                <!-- r/Gunners -->
-                <div id="col-gunners" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
-                        <h3 class="font-bold text-red-400 text-lg flex items-center gap-2">🔴⚪ r/Gunners</h3>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
-                    </div>
-                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Gunners...</div>
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- SKRIPT 1: DÁTUM A ČAS -->
-    <script>
-        function updateDateTime() {
-            try {
-                var now = new Date();
-                var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-                document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-            } catch (e) {}
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-    </script>
-
-    <!-- SKRIPT 2: POČASIE -->
-    <script>
-        var weatherIcons = {
-            0: { text: "Jasno", icon: "☀️" },
-            1: { text: "Prevažne jasno", icon: "🌤️" },
-            2: { text: "Polooblačno", icon: "⛅" },
-            3: { text: "Zamračené", icon: "☁️" },
-            45: { text: "Hmla", icon: "🌫️" },
-            48: { text: "Hmla", icon: "🌫️" },
-            51: { text: "Mrholenie", icon: "🌦️" },
-            53: { text: "Mrholenie", icon: "🌦️" },
-            61: { text: "Slabý dážď", icon: "🌧️" },
-            63: { text: "Mierny dážď", icon: "🌧️" },
-            65: { text: "Silný dážď", icon: "⛈️" },
-            71: { text: "Sneženie", icon: "❄️" },
-            80: { text: "Prehánky", icon: "🌦️" },
-            95: { text: "Búrka", icon: "⚡" }
-        };
-
-        function updateLiveWeather() {
-            var url = "https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2";
-            fetch(url)
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    var cur = Math.round(data.current.temperature_2m);
-                    var app = Math.round(data.current.apparent_temperature);
-                    var curRainMm = data.current.precipitation || 0;
-                    var maxT = Math.round(data.daily.temperature_2m_max[0]);
-                    var minT = Math.round(data.daily.temperature_2m_min[0]);
-                    var rainProb = data.daily.precipitation_probability_max[0];
-                    var rainSumMm = (data.daily.precipitation_sum && data.daily.precipitation_sum[0] !== undefined) ? data.daily.precipitation_sum[0].toFixed(1) : "0.0";
-                    var wind = Math.round(data.current.wind_speed_10m);
-                    var wInfo = weatherIcons[data.current.weather_code] || { text: "Polooblačno", icon: "⛅" };
-
-                    document.getElementById('w-icon').textContent = wInfo.icon;
-                    document.getElementById('w-temp').textContent = cur + " °C";
-                    document.getElementById('w-desc').textContent = wInfo.text + " • pocitovo " + app + " °C";
-                    document.getElementById('w-max').textContent = maxT + " °C";
-                    document.getElementById('w-min').textContent = minT + " °C";
-                    document.getElementById('w-rain').textContent = rainProb + " %";
-                    document.getElementById('w-rain-mm').textContent = "(" + rainSumMm + " mm)";
-                    document.getElementById('w-wind').textContent = wind + " km/h";
-
-                    document.getElementById('aladin-rain-summary').innerHTML =
-                        '🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">' + rainSumMm + ' mm</strong> (max. pravdepodobnosť <strong class="text-red-400">' + rainProb + ' %</strong>)';
-
-                    var nowIso = new Date().toISOString().slice(0, 13);
-                    var currentIdx = 0;
-                    if (data.hourly && data.hourly.time) {
-                        for (var i = 0; i < data.hourly.time.length; i++) {
-                            if (data.hourly.time[i].startsWith(nowIso)) {
-                                currentIdx = i;
-                                break;
-                            }
-                        }
-                    }
-
-                    var offsets = [2, 4, 6, 8];
-                    offsets.forEach(function(offset, index) {
-                        var targetIdx = currentIdx + offset;
-                        var slotNum = index + 1;
-                        if (data.hourly && data.hourly.time && data.hourly.time[targetIdx]) {
-                            var tDate = new Date(data.hourly.time[targetIdx]);
-                            var timeStr = tDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-                            var t = Math.round(data.hourly.temperature_2m[targetIdx]);
-                            var code = data.hourly.weather_code[targetIdx];
-                            var hMm = (data.hourly.precipitation && data.hourly.precipitation[targetIdx] !== undefined) ? data.hourly.precipitation[targetIdx].toFixed(1) : "0.0";
-                            var hProb = (data.hourly.precipitation_probability && data.hourly.precipitation_probability[targetIdx] !== undefined) ? data.hourly.precipitation_probability[targetIdx] : 0;
-                            var ic = (weatherIcons[code] && weatherIcons[code].icon) ? weatherIcons[code].icon : "⛅";
-
-                            document.getElementById('h-' + slotNum + '-time').textContent = timeStr;
-                            document.getElementById('h-' + slotNum + '-temp').textContent = t + " °C";
-                            document.getElementById('h-' + slotNum + '-icon').textContent = ic;
-                            document.getElementById('h-' + slotNum + '-rain').textContent = "💧 " + hMm + " mm (" + hProb + "%)";
-                        }
-                    });
-
-                    var nowAdvice = "";
-                    if (app >= 23) {
-                        nowAdvice = "Je teplo – ak ideš von hneď teraz, stačí ti krátke tričko a ľahké oblečenie.";
-                    } else if (app >= 17) {
-                        nowAdvice = "Vonku je príjemne – teraz ti stačí tričko a tenká mikina.";
-                    } else if (app >= 11) {
-                        nowAdvice = "Ak ideš von práve teraz, daj si dlhé nohavice a mikinu alebo prechodnú bundu.";
-                    } else if (app >= 5) {
-                        nowAdvice = "Momentálne je chladno – určite si obleč teplejšiu bundu.";
-                    } else {
-                        nowAdvice = "Vonku je zima – teraz si daj zimnú bundu a teplú vrstvu.";
-                    }
-                    if (curRainMm > 0 || [51,53,61,63,65,80,95].indexOf(data.current.weather_code) !== -1) {
-                        nowAdvice += " Práve prší, nezabudni dáždnik!";
-                    }
-
-                    document.getElementById('w-tip-now').innerHTML = '<strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz (' + cur + ' °C):</strong> ' + nowAdvice;
-
-                    var dayAdvice = "Ráno a večer (" + minT + " °C) sa zíde teplejšia bunda, cez deň pri maxime " + maxT + " °C ";
-                    if (maxT >= 22) dayAdvice += "bude stačiť krátke tričko.";
-                    else if (maxT >= 15) dayAdvice += "postačí mikina alebo ľahká bunda.";
-                    else dayAdvice += "bude treba teplejšiu bundu.";
-                    if (rainProb >= 40 || parseFloat(rainSumMm) >= 1.0) {
-                        dayAdvice += " Očakávaj aj zrážky (" + rainSumMm + " mm).";
-                    }
-
-                    document.getElementById('w-tip-day').innerHTML = '<strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> ' + dayAdvice;
-                })
-                .catch(function() {});
-        }
-        updateLiveWeather();
-    </script>
-
-    <!-- SKRIPT 3: REDDIT (PRIAMY NAČÍTACÍ SKRIPT BEZ VÝPADKOV) -->
-    <script>
-        function loadReddit(subreddit, elementId) {
-            var container = document.getElementById(elementId);
-            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
-            
-            fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(rssUrl))
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    var parser = new DOMParser();
-                    var xml = parser.parseFromString(data.contents, "text/xml");
-                    var entries = xml.querySelectorAll("entry");
-
-                    if (!entries || entries.length === 0) throw new Error("Chyba");
-
-                    var html = "";
-                    for (var i = 0; i < Math.min(5, entries.length); i++) {
-                        var title = entries[i].querySelector("title").textContent;
-                        var linkEl = entries[i].querySelector("link");
-                        var link = linkEl ? linkEl.getAttribute("href") : "#";
-                        var updated = entries[i].querySelector("updated") ? entries[i].querySelector("updated").textContent : new Date();
-                        
-                        var pubDate = new Date(updated);
-                        var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
-
-                        html += '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
-                            '<div class="space-y-1.5 flex-1 min-w-0">' +
-                                '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + title + '</h4>' +
-                                '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
-                            '</div>' +
-                            '<div class="flex flex-col items-center justify-center min-w-[58px] py-1.5 px-2 rounded bg-red-950/60 border border-red-500/40 text-amber-300 font-bold text-xs shrink-0">' +
-                                '<span>TOP #' + (i + 1) + '</span>' +
-                            '</div>' +
-                        '</a>';
-                    }
-                    container.innerHTML = html;
-                })
-                .catch(function() {
-                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
-                });
-        }
-
-        loadReddit('Slovakia', 'list-slovakia');
-        loadReddit('Gunners', 'list-gunners');
-
-        function showSub(target) {
-            var colSsl = document.getElementById('col-slovakia');
-            var colGun = document.getElementById('col-gunners');
-            var grid = document.getElementById('reddit-grid');
-            
-            var btnAll = document.getElementById('tab-all');
-            var btnSsl = document.getElementById('tab-slovakia');
-            var btnGun = document.getElementById('tab-gunners');
-
-            [btnAll, btnSsl, btnGun].forEach(function(b) {
-                b.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive";
-            });
-
-            if (target === 'all') {
-                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "block";
-                btnAll.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
-            } else if (target === 'slovakia') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "none";
-                btnSsl.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
-            } else if (target === 'gunners') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "none";
-                colGun.style.display = "block";
-                btnGun.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
-            }
-        }
-    </script>
-</body>
-</html>
+                        <h3 class="font
