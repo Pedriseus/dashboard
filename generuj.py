@@ -49,7 +49,7 @@ for sub in subreddits:
     </div>
     '''
 
-# Načítame šablónu index.html a nahradíme placeholder
+# Načítame index.html a nahradíme miesto pre príspevky
 with open("index.html", "r", encoding="utf-8") as f:
     template = f.read()
 
@@ -58,4 +58,4 @@ final_html = template.replace("<!-- REDDIT_DATA_PLACEHOLDER -->", html_subs)
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(final_html)
 
-print("index.html úspešne aktualizovaný o dáta z Redditu!")
+print("index.html úspešne aktualizovaný o reálne dáta z Redditu!")
