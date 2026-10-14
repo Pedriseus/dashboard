@@ -3,25 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard</title>
+    <title>Môj Denný Dashboard | Arsenal Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
-        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 1rem; }
+        body { 
+            background-color: #080d1a; 
+            background-image: radial-gradient(circle at top right, #2a0810 0%, #080d1a 55%);
+            color: #f8fafc; 
+            font-family: system-ui, -apple-system, sans-serif; 
+        }
+        .card { 
+            background-color: #111827; 
+            border: 1px solid #28354a; 
+            border-top: 3px solid #EF0107;
+            border-radius: 1rem; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .arsenal-header {
+            background: linear-gradient(135deg, #990005 0%, #EF0107 55%, #111827 100%);
+            border: 1px solid #ff3b41;
+            border-bottom: 4px solid #ffffff;
+            border-radius: 1rem;
+        }
+        .gold-text { color: #d4af37; }
+        .arsenal-btn-active {
+            background-color: #EF0107;
+            color: #ffffff;
+            font-weight: 700;
+            border: 1px solid #ff4d52;
+        }
+        .arsenal-btn-inactive {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+        }
+        .arsenal-btn-inactive:hover {
+            border-color: #d4af37;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body class="min-h-screen p-6 md:p-10">
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- HLAVIČKA -->
-        <header class="card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 id="greeting" class="text-2xl md:text-3xl font-bold text-white">Dobrý deň! 👋</h1>
-                <p id="current-date" class="text-slate-400 text-lg mt-1">Streda, 14. októbra 2026</p>
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU -->
+        <header class="arsenal-header p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
+            <div class="flex items-center gap-4">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 drop-shadow-lg" onerror="this.style.display='none'">
+                <div>
+                    <div class="text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
+                    <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white">Dobrý deň! 👋</h1>
+                    <p id="current-date" class="text-red-100 text-base md:text-lg mt-0.5">Streda, 14. októbra 2026</p>
+                </div>
             </div>
             <div class="text-right">
-                <div id="current-time" class="text-4xl font-extrabold text-sky-400 tracking-tight">--:--</div>
+                <div id="current-time" class="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow">--:--</div>
             </div>
         </header>
 
@@ -31,283 +68,88 @@
             <!-- POČASIE DNES + TIP NA OBLIEKANIE (5 stĺpcov) -->
             <section class="card p-6 lg:col-span-5 flex flex-col justify-between">
                 <div>
-                    <h2 class="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
                         🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
                     </h2>
                     <div id="weather-box" class="flex items-center justify-between py-2 text-slate-300">
                         <div class="flex items-center gap-4">
                             <span id="w-icon" class="text-5xl">⛅</span>
                             <div>
-                                <div id="w-temp" class="text-4xl font-bold text-white">16 °C</div>
+                                <div id="w-temp" class="text-4xl font-extrabold text-white">16 °C</div>
                                 <div id="w-desc" class="text-slate-400 text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
                             </div>
                         </div>
-                        <div class="text-right text-sm space-y-1.5 text-slate-300">
-                            <div>🔼 Max: <strong id="w-max" class="text-white">18 °C</strong> / 🔽 Min: <strong id="w-min" class="text-white">9 °C</strong></div>
-                            <div>💧 Zrážky: <strong id="w-rain" class="text-sky-400">10 %</strong></div>
-                            <div>💨 Vietor: <strong id="w-wind" class="text-white">12 km/h</strong></div>
+                        <div class="text-right text-sm space-y-1 text-slate-300">
+                            <div>🔼 Max: <strong id="w-max" class="text-white">16 °C</strong> / 🔽 Min: <strong id="w-min" class="text-white">7 °C</strong></div>
+                            <div>💧 Zrážky: <strong id="w-rain" class="text-red-400">35 %</strong> <span id="w-rain-mm" class="text-xs text-slate-400">(0.0 mm)</span></div>
+                            <div>💨 Vietor: <strong id="w-wind" class="text-white">7 km/h</strong></div>
                         </div>
                     </div>
 
-                    <!-- TIP NA OBLIEKANIE -->
-                    <div class="mt-4 p-3 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs sm:text-sm text-sky-200 flex items-center gap-3">
-                        <span id="w-tip-icon" class="text-xl">🧥</span>
-                        <div id="w-tip-text">
-                            <strong class="text-white">Tip na obliekanie:</strong> Ráno a večer (9 °C) sa zíde teplejšia bunda alebo sveter, cez deň pri 18 °C postačí pohodlná mikina alebo prechodná bunda.
+                    <!-- DVOJITÝ TIP NA OBLIEKANIE: PRÁVE TERAZ + POČAS DŇA -->
+                    <div class="mt-4 p-3.5 rounded-lg bg-slate-900/90 border border-red-500/30 text-xs sm:text-sm space-y-2.5">
+                        <div class="flex items-start gap-2.5">
+                            <span id="w-tip-icon" class="text-xl shrink-0">🧥</span>
+                            <div id="w-tip-now" class="text-slate-200 leading-relaxed">
+                                <strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz (16 °C):</strong> Na von si daj mikinu alebo ľahkú prechodnú bundu a dlhé nohavice.
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-800 pt-2 flex items-start gap-2.5">
+                            <span class="text-lg shrink-0">📅</span>
+                            <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
+                                <strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> Ráno a večer (7 °C) sa zíde teplejšia bunda, cez deň pri maxime 16 °C postačí mikina.
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-4 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between">
+                <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
                     <span>Dáta: Stanica Bratislava + numerický model</span>
-                    <button onclick="updateLiveWeather()" class="text-sky-400 hover:underline">↻ Obnoviť</button>
+                    <button onclick="updateLiveWeather()" class="text-red-400 hover:underline font-medium">↻ Obnoviť</button>
                 </div>
             </section>
 
-            <!-- SHMÚ ALADIN METEOGRAM & RADAR (7 stĺpcov) -->
+            <!-- SHMÚ ALADIN METEOGRAM & ZRÁŽKY (7 stĺpcov) -->
             <section class="card p-6 lg:col-span-7 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                        <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                            📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
-                        </h2>
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Teplota a zrážky)</span>
+                            </h2>
+                            <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
+                                🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">0.0 mm</strong> (pravdepodobnosť <strong class="text-red-400">35 %</strong>)
+                            </p>
+                        </div>
                         <div class="flex gap-2">
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-sky-400 hover:bg-slate-700 transition">
-                                SHMÚ ALADIN ↗
+                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-red-600/20 border border-red-500/40 text-red-300 hover:bg-red-600 hover:text-white transition font-semibold">
+                                Meteogram ALADIN ↗
                             </a>
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-emerald-400 hover:bg-slate-700 transition">
-                                Radar zrážok SHMÚ ↗
+                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-amber-300 hover:bg-slate-700 transition font-semibold">
+                                Radar SHMÚ ↗
                             </a>
                         </div>
                     </div>
 
-                    <!-- Hodinový prehľad dňa -->
-                    <div id="hourly-forecast" class="grid grid-cols-4 gap-3 text-center py-2">
-                        <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700/50">
+                    <!-- Hodinový prehľad dňa + zrážky v mm -->
+                    <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div class="text-xs text-slate-400">Ráno (08:00)</div>
                             <div id="h-08-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-08-temp" class="font-bold text-white">10 °C</div>
+                            <div id="h-08-temp" class="font-bold text-white text-lg">8 °C</div>
+                            <div id="h-08-rain" class="text-xs text-sky-400 mt-1">💧 0.0 mm (10%)</div>
                         </div>
-                        <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700/50">
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div class="text-xs text-slate-400">Obed (12:00)</div>
-                            <div id="h-12-icon" class="text-2xl my-1">🌤️</div>
-                            <div id="h-12-temp" class="font-bold text-white">16 °C</div>
+                            <div id="h-12-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-12-temp" class="font-bold text-white text-lg">12 °C</div>
+                            <div id="h-12-rain" class="text-xs text-sky-400 mt-1">💧 0.0 mm (15%)</div>
                         </div>
-                        <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700/50">
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div class="text-xs text-slate-400">Poobede (16:00)</div>
                             <div id="h-16-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-16-temp" class="font-bold text-white">17 °C</div>
+                            <div id="h-16-temp" class="font-bold text-white text-lg">16 °C</div>
+                            <div id="h-16-rain" class="text-xs text-sky-400 mt-1">💧 0.0 mm (20%)</div>
                         </div>
-                        <div class="p-3 rounded-lg bg-slate-800/60 border border-slate-700/50">
-                            <div class="text-xs text-slate-400">Večer (20:00)</div>
-                            <div id="h-20-icon" class="text-2xl my-1">🌙</div>
-                            <div id="h-20-temp" class="font-bold text-white">12 °C</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-4 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between">
-                    <span>Rozlíšenie: 2 km (Stredná Európa)</span>
-                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-slate-400 hover:text-sky-400">opendata.shmu.sk ↗</a>
-                </div>
-            </section>
-
-        </div>
-
-        <!-- SPODNÝ RIADOK: Reddit Feed -->
-        <section class="card p-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <div>
-                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
-                    </h2>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold">Všetky vedľa seba</button>
-                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Slovakia</button>
-                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Gunners</button>
-                </div>
-            </div>
-            
-            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- r/Slovakia -->
-                <div id="col-slovakia" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <h3 class="font-bold text-sky-400">r/Slovakia</h3>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
-                    </div>
-                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
-                </div>
-
-                <!-- r/Gunners -->
-                <div id="col-gunners" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <h3 class="font-bold text-sky-400">r/Gunners</h3>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
-                    </div>
-                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
-                </div>
-            </div>
-        </section>
-
-    </div>
-
-    <!-- SKRIPT 1: DÁTUM A ČAS (úplne samostatný) -->
-    <script>
-        function updateDateTime() {
-            try {
-                var now = new Date();
-                var hour = now.getHours();
-                var greet = "Dobrý deň! 👋";
-                if (hour < 10) greet = "Dobré ráno! ☕";
-                else if (hour >= 18) greet = "Dobrý večer! 🌙";
-                document.getElementById('greeting').textContent = greet;
-
-                var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-                document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-            } catch (e) {}
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-    </script>
-
-    <!-- SKRIPT 2: POČASIE (úplne samostatný) -->
-    <script>
-        var weatherIcons = {
-            0: { text: "Jasno", icon: "☀️" },
-            1: { text: "Prevažne jasno", icon: "🌤️" },
-            2: { text: "Polooblačno", icon: "⛅" },
-            3: { text: "Zamračené", icon: "☁️" },
-            45: { text: "Hmla", icon: "🌫️" },
-            48: { text: "Hmla", icon: "🌫️" },
-            51: { text: "Mrholenie", icon: "🌦️" },
-            53: { text: "Mrholenie", icon: "🌦️" },
-            61: { text: "Slabý dážď", icon: "🌧️" },
-            63: { text: "Mierny dážď", icon: "🌧️" },
-            65: { text: "Silný dážď", icon: "⛈️" },
-            71: { text: "Sneženie", icon: "❄️" },
-            80: { text: "Prehánky", icon: "🌦️" },
-            95: { text: "Búrka", icon: "⚡" }
-        };
-
-        function updateLiveWeather() {
-            var url = "https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=1";
-            fetch(url)
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    var cur = Math.round(data.current.temperature_2m);
-                    var app = Math.round(data.current.apparent_temperature);
-                    var maxT = Math.round(data.daily.temperature_2m_max[0]);
-                    var minT = Math.round(data.daily.temperature_2m_min[0]);
-                    var rain = data.daily.precipitation_probability_max[0];
-                    var wind = Math.round(data.current.wind_speed_10m);
-                    var wInfo = weatherIcons[data.current.weather_code] || { text: "Polooblačno", icon: "⛅" };
-
-                    document.getElementById('w-icon').textContent = wInfo.icon;
-                    document.getElementById('w-temp').textContent = cur + " °C";
-                    document.getElementById('w-desc').textContent = wInfo.text + " • pocitovo " + app + " °C";
-                    document.getElementById('w-max').textContent = maxT + " °C";
-                    document.getElementById('w-min').textContent = minT + " °C";
-                    document.getElementById('w-rain').textContent = rain + " %";
-                    document.getElementById('w-wind').textContent = wind + " km/h";
-
-                    var hours = [
-                        { idx: 8, id: '08' },
-                        { idx: 12, id: '12' },
-                        { idx: 16, id: '16' },
-                        { idx: 20, id: '20' }
-                    ];
-                    hours.forEach(function(h) {
-                        if (data.hourly && data.hourly.temperature_2m) {
-                            var t = Math.round(data.hourly.temperature_2m[h.idx]);
-                            var code = data.hourly.weather_code[h.idx];
-                            var ic = (weatherIcons[code] && weatherIcons[code].icon) ? weatherIcons[code].icon : "⛅";
-                            document.getElementById('h-' + h.id + '-temp').textContent = t + " °C";
-                            document.getElementById('h-' + h.id + '-icon').textContent = ic;
-                        }
-                    });
-
-                    var tip = "Ráno a večer (" + minT + " °C) sa zíde teplejšia bunda alebo sveter, cez deň pri " + maxT + " °C ";
-                    if (maxT >= 22) tip += "stačí krátke tričko a ľahké oblečenie.";
-                    else if (maxT >= 15) tip += "postačí pohodlná mikina alebo prechodná bunda.";
-                    else if (maxT >= 8) tip += "si daj teplejšiu bundu a dlhé nohavice.";
-                    else tip += "si určite vezmi zimnú bundu a vrstvené oblečenie.";
-                    if (rain >= 40) tip += " Pribaľ si aj dáždnik (zrážky " + rain + " %).";
-
-                    document.getElementById('w-tip-text').innerHTML = '<strong class="text-white">Tip na obliekanie:</strong> ' + tip;
-                })
-                .catch(function() {});
-        }
-        updateLiveWeather();
-    </script>
-
-    <!-- SKRIPT 3: REDDIT (tvoj overený kód, ktorý fungoval) -->
-    <script>
-        function loadReddit(subreddit, elementId) {
-            var container = document.getElementById(elementId);
-            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
-            
-            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (!data || !Array.isArray(data.items)) throw new Error("Chyba");
-
-                    container.innerHTML = data.items.slice(0, 5).map(function(item, idx) {
-                        var title = item.title;
-                        var link = item.link;
-                        var pubDate = new Date(item.pubDate);
-                        var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
-
-                        return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
-                            '<div class="space-y-1.5 flex-1 min-w-0">' +
-                                '<h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition line-clamp-2">' + title + '</h4>' +
-                                '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
-                            '</div>' +
-                            '<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded bg-sky-950/60 border border-sky-500/30 text-sky-300 font-bold text-xs shrink-0">' +
-                                '<span>TOP #' + (idx + 1) + '</span>' +
-                            '</div>' +
-                        '</a>';
-                    }).join('');
-                })
-                .catch(function() {
-                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
-                });
-        }
-
-        loadReddit('Slovakia', 'list-slovakia');
-        loadReddit('Gunners', 'list-gunners');
-
-        function showSub(target) {
-            var colSsl = document.getElementById('col-slovakia');
-            var colGun = document.getElementById('col-gunners');
-            var grid = document.getElementById('reddit-grid');
-            
-            var btnAll = document.getElementById('tab-all');
-            var btnSsl = document.getElementById('tab-slovakia');
-            var btnGun = document.getElementById('tab-gunners');
-
-            [btnAll, btnSsl, btnGun].forEach(function(b) {
-                b.className = "px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700";
-            });
-
-            if (target === 'all') {
-                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "block";
-                btnAll.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
-            } else if (target === 'slovakia') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "none";
-                btnSsl.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
-            } else if (target === 'gunners') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "none";
-                colGun.style.display = "block";
-                btnGun.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
-            }
-        }
-    </script>
-</body>
-</html>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div class="text-xs text-slate-400">Večer (20:00)
