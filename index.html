@@ -14,7 +14,7 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- HLAVIČKA -->
+        <!-- HLAVIČKA: Dátum a Čas -->
         <header class="card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 id="greeting" class="text-2xl md:text-3xl font-bold text-white">Dobrý deň! 👋</h1>
@@ -25,150 +25,146 @@
             </div>
         </header>
 
-        <!-- HORNÝ RIADOK: Počasie + Kalendár -->
+        <!-- HORNÝ RIADOK: Počasie + Google Kalendár -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- POČASIE -->
+            <!-- POČASIE (5 stĺpcov) -->
             <section class="card p-6 lg:col-span-5 flex flex-col justify-between">
                 <div>
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2 mb-4">
                         🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
                     </h2>
-                    <div class="flex items-center justify-between py-2 text-slate-300">
-                        <div class="flex items-center gap-4">
-                            <span class="text-5xl">⛅</span>
-                            <div>
-                                <div class="text-4xl font-bold text-white">16 °C</div>
-                                <div class="text-slate-400 text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
-                            </div>
-                        </div>
-                        <div class="text-right text-sm space-y-1.5 text-slate-300">
-                            <div>🔼 Max: <strong class="text-white">18 °C</strong> / 🔽 Min: <strong class="text-white">9 °C</strong></div>
-                            <div>💧 Zrážky: <strong class="text-sky-400">10 %</strong></div>
-                            <div>💨 Vietor: <strong class="text-white">12 km/h</strong></div>
-                        </div>
+                    <div id="weather-content" class="text-slate-300 py-2">
+                        Načítavam aktuálne počasie...
                     </div>
-
-                    <!-- TIP NA OBLIEKANIE -->
-                    <div class="mt-4 p-3 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs sm:text-sm text-sky-200 flex items-center gap-3">
-                        <span class="text-xl">🧥</span>
-                        <div>
-                            <strong class="text-white">Tip na obliekanie:</strong> Ráno a večer sa zíde teplejšia bunda alebo sveter, cez obed pri 18 °C postačí pohodlná mikina.
-                        </div>
-                    </div>
+                    <!-- Dynamický tip na obliekanie podľa reálneho počasia -->
+                    <div id="clothing-tip" class="mt-4"></div>
                 </div>
-
                 <div class="mt-4 pt-4 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between">
-                    <span>Zdroj: Open-Meteo</span>
-                    <a href="https://www.imeteo.sk/predpoved/bratislava" target="_blank" class="text-sky-400 hover:underline">Detailná predpoveď ↗</a>
+                    <span>Zdroj: Open-Meteo (naživo)</span>
+                    <button onclick="fetchWeather()" class="text-sky-400 hover:underline">↻ Obnoviť</button>
                 </div>
             </section>
 
-            <!-- KALENDÁR -->
+            <!-- GOOGLE KALENDÁR A UDALOSTI (7 stĺpcov) -->
             <section class="card p-6 lg:col-span-7">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
                         📅 Môj Google Kalendár
                     </h2>
-                    <a href="https://calendar.google.com" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-sky-400 hover:bg-slate-700 transition">
-                        Otvoriť ↗
-                    </a>
+                    <div class="flex gap-2">
+                        <button id="btn-view-list" onclick="toggleCalendarView('list')" class="px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition">
+                            Prehľad udalostí
+                        </button>
+                        <button id="btn-view-embed" onclick="toggleCalendarView('embed')" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                            Živý Google Kalendár
+                        </button>
+                        <a href="https://calendar.google.com" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-sky-400 hover:bg-slate-700 transition">
+                            Otvoriť ↗
+                        </a>
+                    </div>
                 </div>
 
-                <div class="space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border bg-sky-950/40 border-sky-500/50 gap-2">
-                        <div>
-                            <div class="font-semibold text-white text-sm">🚆 Vlak Bratislava hl.st. → Praha hl.n. (rj 276)</div>
-                            <div class="text-xs text-slate-400 mt-0.5">České dráhy • 2 osoby (kód: KXU5TB)</div>
-                        </div>
-                        <span class="text-xs px-2.5 py-1 rounded-md bg-sky-500 text-slate-950 font-bold">16. 10. 2026 (o 2 dni)</span>
-                    </div>
+                <div id="calendar-list-view" class="space-y-2.5"></div>
 
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border bg-slate-800/60 border-slate-700/60 gap-2">
-                        <div>
-                            <div class="font-semibold text-white text-sm">🚆 Vlak Praha hl.n. → Bratislava hl.st.</div>
-                            <div class="text-xs text-slate-400 mt-0.5">České dráhy • 2 osoby (kód: ZJR0TD)</div>
-                        </div>
-                        <span class="text-xs px-2.5 py-1 rounded-md bg-slate-700 text-slate-200 font-medium">18. 10. 2026 (o 4 dni)</span>
+                <div id="calendar-embed-view" class="hidden">
+                    <div class="rounded-lg overflow-hidden border border-slate-700 bg-white">
+                        <iframe 
+                            src="https://calendar.google.com/calendar/embed?src=peterladi14%40gmail.com&ctz=Europe%2FBratislava&mode=AGENDA&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0" 
+                            style="border: 0" 
+                            width="100%" 
+                            height="220" 
+                            frameborder="0" 
+                            scrolling="no">
+                        </iframe>
                     </div>
                 </div>
             </section>
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed (Slovakia & Gunners s upvotami) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed (Reálne Top za 24h s počtom upvotov) -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                        🔥 Top príspevky na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
                     </h2>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold">Všetky vedľa seba</button>
-                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Slovakia</button>
-                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Gunners</button>
-                </div>
+                <div id="subreddit-tabs" class="flex flex-wrap gap-2"></div>
             </div>
             
-            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <!-- r/Slovakia -->
-                <div id="col-slovakia" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <h3 class="font-bold text-sky-400">r/Slovakia</h3>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
-                    </div>
-                    <div class="space-y-2.5 text-sm">
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Aké sú vaše obľúbené skryté miesta na Slovensku na víkendový výlet?</h4>
-                                <div class="text-xs text-slate-400">💬 142 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>845</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Nová cyklotrasa na Záhorí je konečne kompletná</h4>
-                                <div class="text-xs text-slate-400">💬 89 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>620</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Pezinská Baba dnes ráno</h4>
-                                <div class="text-xs text-slate-400">💬 45 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>412</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
+            <div id="reddit-content" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                Načítavam príspevky...
+            </div>
+        </section>
 
-                <!-- r/Gunners -->
-                <div id="col-gunners" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <h3 class="font-bold text-sky-400">r/Gunners</h3>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
-                    </div>
-                    <div class="space-y-2.5 text-sm">
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Bukayo Saka named in Premier League Team of the Week</h4>
-                                <div class="text-xs text-slate-400">💬 310 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>2.4k</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Mikel Arteta post-match press conference analysis</h4>
-                                <div class="text-xs text-slate-400">💬 185 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px
+    </div>
+
+    <script>
+        // ==========================================
+        // 🛠️ NASTAVENIA
+        // ==========================================
+        const SUBREDDITS = ['Slovakia', 'Gunners'];
+
+        const CALENDAR_EVENTS = [
+            {
+                title: "🚆 Vlak Bratislava hl.st. → Praha hl.n. (rj 276)",
+                date: "2026-10-16",
+                note: "České dráhy • 2 osoby (kód: KXU5TB)"
+            },
+            {
+                title: "🚆 Vlak Praha hl.n. → Bratislava hl.st.",
+                date: "2026-10-18",
+                note: "České dráhy • 2 osoby (kód: ZJR0TD)"
+            }
+        ];
+
+        const LAT = 48.1486;
+        const LON = 17.1077;
+
+        // ==========================================
+        // 1. DÁTUM A ČAS
+        // ==========================================
+        function updateDateTime() {
+            const now = new Date();
+            const hour = now.getHours();
+            
+            let greet = "Dobrý deň! 👋";
+            if (hour < 10) greet = "Dobré ráno! ☕";
+            else if (hour >= 18) greet = "Dobrý večer! 🌙";
+            document.getElementById('greeting').textContent = greet;
+
+            const formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+        }
+        setInterval(updateDateTime, 1000);
+        updateDateTime();
+
+        // ==========================================
+        // 2. POČASIE + DYNAMICKÝ TIP NA OBLIEKANIE
+        // ==========================================
+        const weatherCodes = {
+            0: { text: "Jasno", icon: "☀️" },
+            1: { text: "Prevažne jasno", icon: "🌤️" },
+            2: { text: "Polooblačno", icon: "⛅" },
+            3: { text: "Zamračené", icon: "☁️" },
+            45: { text: "Hmla", icon: "🌫️" },
+            48: { text: "Namŕzajúca hmla", icon: "🌫️" },
+            51: { text: "Slabé mrholenie", icon: "🌦️" },
+            53: { text: "Mrholenie", icon: "🌦️" },
+            61: { text: "Slabý dážď", icon: "🌧️" },
+            63: { text: "Mierny dážď", icon: "🌧️" },
+            65: { text: "Silný dážď", icon: "⛈️" },
+            71: { text: "Slabé sneženie", icon: "🌨️" },
+            73: { text: "Sneženie", icon: "❄️" },
+            80: { text: "Prehánky", icon: "🌦️" },
+            95: { text: "Búrka", icon: "⚡" }
+        };
+
+        function getClothingRecommendation(maxTemp, minTemp, rainProb, windSpeed) {
+            let parts = [];
+            let icon = "🧥";
+
+            if (maxTemp >= 24
