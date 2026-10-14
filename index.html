@@ -47,7 +47,7 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- HLAVIČKA V ŠTÝLE ARSENALU S WIDGETMI V KRUHOCH -->
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU S ROVNAKÝMI TABUĽKAMI -->
         <header class="arsenal-header p-5 md:p-6 flex flex-col xl:flex-row justify-between items-center gap-6 shadow-xl">
             
             <!-- 1. Vľavo: Logo a pozdrav -->
@@ -61,7 +61,7 @@
             </div>
 
             <!-- 2. Stred (Kruh 1): Top 5 Premier League Tabuľka -->
-            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[320px]">
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-[350px] shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🏆 PREMIER LEAGUE (TOP 5)</span>
                     <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
@@ -84,7 +84,7 @@
                     <!-- 3. Brighton -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg" class="w-4 h-4 object-contain" alt="BHA" onerror="this.src='https://resources.premierleague.com/premierleague/badges/70/t36.png'"> 3. Brighton
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg" class="w-4 h-4 object-contain" alt="BHA"> 3. Brighton
                         </span>
                         <span class="font-bold text-slate-300">13 b</span>
                     </div>
@@ -105,10 +105,10 @@
                 </div>
             </div>
 
-            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu (Všetky súťaže + textové logá súťaží) -->
-            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[360px]">
+            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu (Rovnaká šírka) -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-[350px] shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
-                    <span>⚽ BUDÚCE ZÁPASY ARSENALU</span>
+                    <span>⚽ ZÁPASY ARSENALU</span>
                     <span class="text-[10px] text-slate-300">VŠETKY SÚŤAŽE</span>
                 </div>
                 <div class="space-y-1.5 text-xs">
@@ -196,49 +196,4 @@
                         </div>
                         <div class="border-t border-slate-800 pt-2 flex items-start gap-2.5">
                             <span class="text-lg shrink-0">📅</span>
-                            <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
-                                <strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> Načítavam predpoveď...
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
-                    <span>Dáta: Stanica Bratislava + numerický model</span>
-                    <button onclick="updateLiveWeather()" class="text-red-400 hover:underline font-medium">↻ Obnoviť</button>
-                </div>
-            </section>
-
-            <!-- SHMÚ ALADIN METEOGRAM & ZRÁŽKY (7 stĺpcov) -->
-            <section class="card p-6 lg:col-span-7 flex flex-col justify-between">
-                <div>
-                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                        <div>
-                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Teplota a zrážky)</span>
-                            </h2>
-                            <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
-                                🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">0.0 mm</strong>
-                            </p>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-red-600/20 border border-red-500/40 text-red-300 hover:bg-red-600 hover:text-white transition font-semibold">
-                                Meteogram ALADIN ↗
-                            </a>
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-amber-300 hover:bg-slate-700 transition font-semibold">
-                                Radar SHMÚ ↗
-                            </a>
-                        </div>
-                    </div>
-
-                    <!-- Hodinový prehľad dňa + zrážky v mm -->
-                    <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
-                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
-                            <div class="text-xs text-slate-400">Ráno (08:00)</div>
-                            <div id="h-08-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-08-temp" class="font-bold text-white text-lg">-- °C</div>
-                            <div id="h-08-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
-                            <div class="text-xs text-slate-400">Obed (12:00)</div>
-                            <div id="h-12-icon" class="text-2
+                            <div id="w-tip
