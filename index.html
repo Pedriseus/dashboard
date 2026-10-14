@@ -1,4 +1,140 @@
-<script>
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Môj Denný Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0f172a; color: #f8fafc; font-family: system-ui, -apple-system, sans-serif; }
+        .card { background-color: #1e293b; border: 1px solid #334155; border-radius: 1rem; }
+    </style>
+</head>
+<body class="min-h-screen p-6 md:p-10">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- HLAVIČKA -->
+        <header class="card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h1 id="greeting" class="text-2xl md:text-3xl font-bold text-white">Dobrý deň! 👋</h1>
+                <p id="current-date" class="text-slate-400 text-lg mt-1">Načítavam dátum...</p>
+            </div>
+            <div class="text-right">
+                <div id="current-time" class="text-4xl font-extrabold text-sky-400 tracking-tight">--:--</div>
+            </div>
+        </header>
+
+        <!-- HORNÝ RIADOK: Počasie + Kalendár -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- POČASIE -->
+            <section class="card p-6 lg:col-span-5 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+                        🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
+                    </h2>
+                    <div class="flex items-center justify-between py-2 text-slate-300">
+                        <div class="flex items-center gap-4">
+                            <span class="text-5xl">⛅</span>
+                            <div>
+                                <div class="text-4xl font-bold text-white">16 °C</div>
+                                <div class="text-slate-400 text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm space-y-1.5 text-slate-300">
+                            <div>🔼 Max: <strong class="text-white">18 °C</strong> / 🔽 Min: <strong class="text-white">9 °C</strong></div>
+                            <div>💧 Zrážky: <strong class="text-sky-400">10 %</strong></div>
+                            <div>💨 Vietor: <strong class="text-white">12 km/h</strong></div>
+                        </div>
+                    </div>
+
+                    <!-- TIP NA OBLIEKANIE -->
+                    <div class="mt-4 p-3 rounded-lg bg-slate-800/80 border border-slate-700/80 text-xs sm:text-sm text-sky-200 flex items-center gap-3">
+                        <span class="text-xl">🧥</span>
+                        <div>
+                            <strong class="text-white">Tip na obliekanie:</strong> Ráno a večer sa zíde teplejšia bunda alebo sveter, cez obed pri 18 °C postačí pohodlná mikina.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between">
+                    <span>Zdroj: Open-Meteo</span>
+                    <a href="https://www.imeteo.sk/predpoved/bratislava" target="_blank" class="text-sky-400 hover:underline">Detailná predpoveď ↗</a>
+                </div>
+            </section>
+
+            <!-- KALENDÁR -->
+            <section class="card p-6 lg:col-span-7">
+                <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        📅 Môj Google Kalendár
+                    </h2>
+                    <a href="https://calendar.google.com" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-sky-400 hover:bg-slate-700 transition">
+                        Otvoriť ↗
+                    </a>
+                </div>
+
+                <div class="space-y-3">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border bg-sky-950/40 border-sky-500/50 gap-2">
+                        <div>
+                            <div class="font-semibold text-white text-sm">🚆 Vlak Bratislava hl.st. → Praha hl.n. (rj 276)</div>
+                            <div class="text-xs text-slate-400 mt-0.5">České dráhy • 2 osoby (kód: KXU5TB)</div>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-sky-500 text-slate-950 font-bold">16. 10. 2026 (o 2 dni)</span>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border bg-slate-800/60 border-slate-700/60 gap-2">
+                        <div>
+                            <div class="font-semibold text-white text-sm">🚆 Vlak Praha hl.n. → Bratislava hl.st.</div>
+                            <div class="text-xs text-slate-400 mt-0.5">České dráhy • 2 osoby (kód: ZJR0TD)</div>
+                        </div>
+                        <span class="text-xs px-2.5 py-1 rounded-md bg-slate-700 text-slate-200 font-medium">18. 10. 2026 (o 4 dni)</span>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
+        <section class="card p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-semibold text-white flex items-center gap-2">
+                        🔥 Top príspevky na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                    </h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold">Všetky vedľa seba</button>
+                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Slovakia</button>
+                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Gunners</button>
+                </div>
+            </div>
+            
+            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- r/Slovakia -->
+                <div id="col-slovakia" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-bold text-sky-400">r/Slovakia</h3>
+                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
+                </div>
+
+                <!-- r/Gunners -->
+                <div id="col-gunners" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-bold text-sky-400">r/Gunners</h3>
+                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
         // --- DÁTUM A ČAS ---
         function updateDateTime() {
             var now = new Date();
@@ -15,7 +151,7 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // --- STABILNÉ NAČÍTANIE ČISTÝCH POSTOV ---
+        // --- NAČÍTANIE PRÍSPEVKOV ---
         async function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
             try {
@@ -31,7 +167,6 @@
                     var pubDate = new Date(item.pubDate);
                     var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
 
-                    // Celá karta je teraz čistá a moderná, bez zbytočného textu vpravo
                     return '<a href="' + link + '" target="_blank" class="block p-3.5 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-center gap-4">' +
                         '<div class="space-y-1 flex-1 min-w-0">' +
                             '<h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition line-clamp-2">' + title + '</h4>' +
@@ -80,3 +215,5 @@
             }
         }
     </script>
+</body>
+</html>
