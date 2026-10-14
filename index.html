@@ -105,7 +105,7 @@
                 </div>
             </div>
 
-            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu (Rovnaká šírka) -->
+            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu + oficiálne logá súťaží -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-[350px] shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>⚽ ZÁPASY ARSENALU</span>
@@ -115,7 +115,7 @@
                     <!-- 1. Nottingham (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-purple-900 text-purple-200 border border-purple-500/40">PL</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo_%282016%29.svg" class="w-4 h-4 object-contain bg-purple-900/60 rounded p-0.5" alt="PL" title="Premier League">
                             So 17.10. • <strong class="text-white">Nottingham (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -123,7 +123,7 @@
                     <!-- 2. Bayern (UCL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-blue-900 text-blue-200 border border-blue-500/40">UCL</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fbf/UEFA_Champions_League_logo_2.svg" class="w-4 h-4 object-contain bg-blue-950/80 rounded p-0.5" alt="UCL" title="Champions League">
                             St 21.10. • <strong class="text-white">Bayern (UCL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -131,7 +131,7 @@
                     <!-- 3. Everton (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-purple-900 text-purple-200 border border-purple-500/40">PL</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo_%282016%29.svg" class="w-4 h-4 object-contain bg-purple-900/60 rounded p-0.5" alt="PL" title="Premier League">
                             So 24.10. • <strong class="text-white">Everton (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
@@ -139,7 +139,7 @@
                     <!-- 4. Fleetwood (EFL Cup) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-amber-900 text-amber-200 border border-amber-500/40">EFL</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/en/9/93/EFL_Cup_%28Carabao_Cup%29_logo.svg" class="w-4 h-4 object-contain bg-amber-950/80 rounded p-0.5" alt="EFL" title="EFL Cup">
                             Ut 27.10. • <strong class="text-white">Fleetwood (EFL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -147,7 +147,7 @@
                     <!-- 5. Liverpool (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-extrabold px-1.5 py-0.5 rounded bg-purple-900 text-purple-200 border border-purple-500/40">PL</span>
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo_%282016%29.svg" class="w-4 h-4 object-contain bg-purple-900/60 rounded p-0.5" alt="PL" title="Premier League">
                             Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -196,4 +196,121 @@
                         </div>
                         <div class="border-t border-slate-800 pt-2 flex items-start gap-2.5">
                             <span class="text-lg shrink-0">📅</span>
-                            <div id="w-tip
+                            <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
+                                <strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> Načítavam predpoveď...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+                    <span>Dáta: Stanica Bratislava + numerický model</span>
+                    <button onclick="updateLiveWeather()" class="text-red-400 hover:underline font-medium">↻ Obnoviť</button>
+                </div>
+            </section>
+
+            <!-- SHMÚ ALADIN METEOGRAM & ZRÁŽKY (7 stĺpcov) -->
+            <section class="card p-6 lg:col-span-7 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Teplota a zrážky)</span>
+                            </h2>
+                            <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
+                                🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">0.0 mm</strong>
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-red-600/20 border border-red-500/40 text-red-300 hover:bg-red-600 hover:text-white transition font-semibold">
+                                Meteogram ALADIN ↗
+                            </a>
+                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-amber-300 hover:bg-slate-700 transition font-semibold">
+                                Radar SHMÚ ↗
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Hodinový prehľad dňa + zrážky v mm -->
+                    <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div class="text-xs text-slate-400">Ráno (08:00)</div>
+                            <div id="h-08-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-08-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-08-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div class="text-xs text-slate-400">Obed (12:00)</div>
+                            <div id="h-12-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-12-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-12-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div class="text-xs text-slate-400">Poobede (16:00)</div>
+                            <div id="h-16-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-16-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-16-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div class="text-xs text-slate-400">Večer (20:00)</div>
+                            <div id="h-20-icon" class="text-2xl my-1">🌙</div>
+                            <div id="h-20-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-20-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+                    <span>Rozlíšenie: 2 km (Stredná Európa / ALADIN doména)</span>
+                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-slate-400 hover:text-red-400">opendata.shmu.sk ↗</a>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
+        <section class="card p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                    </h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showSub('all')" id="tab-all" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active">Všetky vedľa seba</button>
+                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive">r/Slovakia</button>
+                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive">r/Gunners</button>
+                </div>
+            </div>
+            
+            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- r/Slovakia -->
+                <div id="col-slovakia" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
+                        <h3 class="font-bold text-red-400 text-lg">r/Slovakia</h3>
+                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Slovakia...</div>
+                </div>
+
+                <!-- r/Gunners -->
+                <div id="col-gunners" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
+                        <h3 class="font-bold text-red-400 text-lg flex items-center gap-2">🔴⚪ r/Gunners</h3>
+                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Gunners...</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- SKRIPT 1: DÁTUM A ČAS -->
+    <script>
+        function updateDateTime() {
+            try {
+                var now = new Date();
+                var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+                document.getElementById('current-
