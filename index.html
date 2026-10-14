@@ -115,7 +115,7 @@
                 </div>
             </div>
 
-            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360x245px) -->
+            <!-- 3. Stred 2: Zápasy Arsenalu s novými farbami (PL bordová, UCL zlatá, EFL modrá) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-1 flex justify-between items-center px-1">
                     <span>⚽ ZÁPASY ARSENALU</span>
@@ -124,35 +124,35 @@
                 <div class="space-y-1 text-xs">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#680017] text-white shadow">PL</span>
                             So 17.10. • <strong class="text-white">Nottingham (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-700 text-white shadow">UCL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-black shadow">UCL</span>
                             St 21.10. • <strong class="text-white">Bayern (UCL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#680017] text-white shadow">PL</span>
                             So 24.10. • <strong class="text-white">Everton (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-600 text-white shadow">EFL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-600 text-white shadow">EFL</span>
                             Ut 27.10. • <strong class="text-white">Fleetwood (EFL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#680017] text-white shadow">PL</span>
                             Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -178,7 +178,7 @@
                         <span class="font-bold text-slate-300">397 b</span>
                     </div>
                     <!-- 3. Ødeargod (Ty) -->
-                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
+                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1 rounded shadow-sm">
                         <span class="font-bold text-white flex items-center gap-1.5">
                             <span>⭐</span> 3. Ødeargod
                         </span>
@@ -310,7 +310,7 @@
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed -->
+        <!-- SPODNÝ RIADOK: Reddit Feed (Opravené priame načítavanie) -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -472,10 +472,81 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT -->
+    <!-- SKRIPT 3: REDDIT (PRIAMY NAČÍTACÍ SKRIPT BEZ VÝPADKOV) -->
     <script>
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
             var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
             
-            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rss
+            fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(rssUrl))
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    var parser = new DOMParser();
+                    var xml = parser.parseFromString(data.contents, "text/xml");
+                    var entries = xml.querySelectorAll("entry");
+
+                    if (!entries || entries.length === 0) throw new Error("Chyba");
+
+                    var html = "";
+                    for (var i = 0; i < Math.min(5, entries.length); i++) {
+                        var title = entries[i].querySelector("title").textContent;
+                        var linkEl = entries[i].querySelector("link");
+                        var link = linkEl ? linkEl.getAttribute("href") : "#";
+                        var updated = entries[i].querySelector("updated") ? entries[i].querySelector("updated").textContent : new Date();
+                        
+                        var pubDate = new Date(updated);
+                        var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
+
+                        html += '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
+                            '<div class="space-y-1.5 flex-1 min-w-0">' +
+                                '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + title + '</h4>' +
+                                '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
+                            '</div>' +
+                            '<div class="flex flex-col items-center justify-center min-w-[58px] py-1.5 px-2 rounded bg-red-950/60 border border-red-500/40 text-amber-300 font-bold text-xs shrink-0">' +
+                                '<span>TOP #' + (i + 1) + '</span>' +
+                            '</div>' +
+                        '</a>';
+                    }
+                    container.innerHTML = html;
+                })
+                .catch(function() {
+                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
+                });
+        }
+
+        loadReddit('Slovakia', 'list-slovakia');
+        loadReddit('Gunners', 'list-gunners');
+
+        function showSub(target) {
+            var colSsl = document.getElementById('col-slovakia');
+            var colGun = document.getElementById('col-gunners');
+            var grid = document.getElementById('reddit-grid');
+            
+            var btnAll = document.getElementById('tab-all');
+            var btnSsl = document.getElementById('tab-slovakia');
+            var btnGun = document.getElementById('tab-gunners');
+
+            [btnAll, btnSsl, btnGun].forEach(function(b) {
+                b.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive";
+            });
+
+            if (target === 'all') {
+                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "block";
+                btnAll.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            } else if (target === 'slovakia') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "none";
+                btnSsl.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            } else if (target === 'gunners') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "none";
+                colGun.style.display = "block";
+                btnGun.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            }
+        }
+    </script>
+</body>
+</html>
