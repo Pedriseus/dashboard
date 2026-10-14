@@ -47,16 +47,17 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- HLAVIČKA V ŠTÝLE ARSENALU S DOKONALE ROVNAKÝMI TABUĽKAMI -->
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU S HODINAMI POD DÁTUMOM -->
         <header class="arsenal-header p-5 md:p-6 flex flex-col xl:flex-row justify-between items-center gap-6 shadow-xl">
             
-            <!-- 1. Vľavo: Logo a pozdrav -->
+            <!-- 1. Vľavo: Logo, pozdrav, dátum a pod ním hodiny -->
             <div class="flex items-center gap-4 shrink-0">
                 <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 drop-shadow-lg" onerror="this.style.display='none'">
                 <div>
                     <div class="text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
                     <h1 id="greeting" class="text-xl md:text-2xl font-extrabold text-white">Dobrý deň! 👋</h1>
                     <p id="current-date" class="text-red-100 text-sm mt-0.5">Načítavam dátum...</p>
+                    <div id="current-time" class="text-2xl md:text-3xl font-black text-amber-300 tracking-tight drop-shadow mt-1">--:--</div>
                 </div>
             </div>
 
@@ -100,7 +101,7 @@
                 </div>
             </div>
 
-            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu + grafické logá súťaží (Pevná šírka 360px) -->
+            <!-- 3. Vpravo (Kruh 2): Budúce zápasy Arsenalu (Pevná šírka 360px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-[360px] shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>⚽ ZÁPASY ARSENALU</span>
@@ -110,7 +111,7 @@
                     <!-- 1. Nottingham (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/elements/photos/badges/100/t1.png" class="w-4 h-4 object-contain bg-purple-950/80 rounded p-0.5 shadow" alt="PL" title="Premier League">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
                             So 17.10. • <strong class="text-white">Nottingham (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -118,7 +119,7 @@
                     <!-- 2. Bayern (UCL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/6/67/Champions_League_The_Ball_icon.svg" class="w-4 h-4 object-contain bg-blue-950/80 rounded p-0.5 shadow" alt="UCL" title="Champions League">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-700 text-white shadow">UCL</span>
                             St 21.10. • <strong class="text-white">Bayern (UCL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -126,7 +127,7 @@
                     <!-- 3. Everton (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/elements/photos/badges/100/t1.png" class="w-4 h-4 object-contain bg-purple-950/80 rounded p-0.5 shadow" alt="PL" title="Premier League">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
                             So 24.10. • <strong class="text-white">Everton (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
@@ -134,7 +135,7 @@
                     <!-- 4. Fleetwood (EFL Cup) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/9/93/EFL_Cup_%28Carabao_Cup%29_logo.svg" class="w-4 h-4 object-contain bg-amber-950/80 rounded p-0.5 shadow" alt="EFL" title="EFL Cup">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-600 text-white shadow">EFL</span>
                             Ut 27.10. • <strong class="text-white">Fleetwood (EFL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -142,17 +143,12 @@
                     <!-- 5. Liverpool (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/elements/photos/badges/100/t1.png" class="w-4 h-4 object-contain bg-purple-950/80 rounded p-0.5 shadow" alt="PL" title="Premier League">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
                             Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- 4. Úplne vpravo: Hodiny -->
-            <div class="text-right shrink-0">
-                <div id="current-time" class="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow">--:--</div>
             </div>
 
         </header>
@@ -350,9 +346,4 @@
                     var wInfo = weatherIcons[data.current.weather_code] || { text: "Polooblačno", icon: "⛅" };
 
                     document.getElementById('w-icon').textContent = wInfo.icon;
-                    document.getElementById('w-temp').textContent = cur + " °C";
-                    document.getElementById('w-desc').textContent = wInfo.text + " • pocitovo " + app + " °C";
-                    document.getElementById('w-max').textContent = maxT + " °C";
-                    document.getElementById('w-min').textContent = minT + " °C";
-                    document.getElementById('w-rain').textContent = rainProb + " %";
-                    document.getElementById('w-rain-mm').textContent = "(" + rainSumMm + " mm)";
+                    document.
