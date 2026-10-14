@@ -101,211 +101,122 @@
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                        🔥 Top príspevky na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
                     </h2>
                 </div>
-                <div id="subreddit-tabs" class="flex flex-wrap gap-2"></div>
+                <div class="flex gap-2">
+                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold">Všetky vedľa seba</button>
+                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Slovakia</button>
+                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Gunners</button>
+                </div>
             </div>
             
-            <div id="reddit-content" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                Načítavam príspevky...
+            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- r/Slovakia -->
+                <div id="col-slovakia" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-bold text-sky-400">r/Slovakia</h3>
+                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
+                </div>
+
+                <!-- r/Gunners -->
+                <div id="col-gunners" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                        <h3 class="font-bold text-sky-400">r/Gunners</h3>
+                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
+                </div>
             </div>
         </section>
 
     </div>
 
     <script>
-        // ==========================================
-        // 🛠️ TVOJE NASTAVENIA
-        // ==========================================
-
-        const SUBREDDITS = ['Slovakia', 'Gunners'];
-
-        // --- 1. DÁTUM A ČAS ---
+        // --- DÁTUM A ČAS ---
         function updateDateTime() {
             var now = new Date();
             var hour = now.getHours();
-            
-            let greet = "Dobrý deň! 👋";
+            var greet = "Dobrý deň! 👋";
             if (hour < 10) greet = "Dobré ráno! ☕";
             else if (hour >= 18) greet = "Dobrý večer! 🌙";
             document.getElementById('greeting').textContent = greet;
 
-            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-            const formattedDate = now.toLocaleDateString('sk-SK', dateOptions);
+            var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
             document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-
-            const timeOptions = { hour: '2-digit', minute: '2-digit' };
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', timeOptions);
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
         }
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // --- 2. REDDIT (SŤAHOVANIE S UPVOTMI A KOMENTÁRAMI) ---
-        let selectedFilter = 'ALL';
-
-        function renderTabs() {
-            const tabsContainer = document.getElementById('subreddit-tabs');
-            const allBtnClass = selectedFilter === 'ALL'
-                ? "bg-sky-500 text-slate-950 font-semibold"
-                : "bg-slate-800 text-slate-300 hover:bg-slate-700";
-
-            let html = `<button onclick="setRedditFilter('ALL')" class="px-3 py-1.5 rounded-lg text-sm transition ${allBtnClass}">Všetky vedľa seba</button>`;
-
-            html += SUBREDDITS.map(sub => {
-                const isActive = sub === selectedFilter;
-                const classes = isActive 
-                    ? "bg-sky-500 text-slate-950 font-semibold" 
-                    : "bg-slate-800 text-slate-300 hover:bg-slate-700";
-                return `<button onclick="setRedditFilter('${sub}')" class="px-3 py-1.5 rounded-lg text-sm transition ${classes}">r/${sub}</button>`;
-            }).join('');
-
-            tabsContainer.innerHTML = html;
-        }
-
-        function setRedditFilter(filter) {
-            selectedFilter = filter;
-            renderTabs();
-            loadRedditView();
-        }
-
-        function formatTimeAgo(timestampSec) {
-            const diffHours = Math.max(1, Math.floor((Date.now() / 1000 - timestampSec) / 3600));
-            return `pred ${diffHours} h`;
-        }
-
-        function parseRedditJsonData(rawData, limit) {
-            if (!rawData || !rawData.data || !Array.isArray(rawData.data.children)) {
-                throw new Error("Neplatný JSON formát");
-            }
-            return rawData.data.children
-                .map(c => c.data)
-                .filter(p => !p.stickied)
-                .sort((a, b) => b.ups - a.ups)
-                .slice(0, limit)
-                .map(p => ({
-                    title: p.title,
-                    url: `https://www.reddit.com${p.permalink}`,
-                    timeAgo: formatTimeAgo(p.created_utc),
-                    comments: p.num_comments,
-                    score: p.ups
-                }));
-        }
-
-        async function fetchWithTimeout(url, timeoutMs = 3500) {
-            const controller = new AbortController();
-            const timer = setTimeout(() => controller.abort(), timeoutMs);
+        // --- STABILNÉ NAČÍTANIE CEZ RSS S ČISTÝM VZHĽADOM ---
+        async function loadReddit(subreddit, elementId) {
+            var container = document.getElementById(elementId);
             try {
-                const response = await fetch(url, { signal: controller.signal, credentials: 'omit' });
-                clearTimeout(timer);
-                return response;
+                var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
+                var res = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl));
+                var data = await res.json();
+                
+                if (!data || !Array.isArray(data.items)) throw new Error("Chyba");
+
+                container.innerHTML = data.items.slice(0, 5).map(function(item) {
+                    // Vyťahujeme čistý názov a čas publikovania
+                    var title = item.title;
+                    var link = item.link;
+                    var pubDate = new Date(item.pubDate);
+                    var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
+
+                    return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
+                        '<div class="space-y-1.5 flex-1 min-w-0">' +
+                            '<h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition line-clamp-2">' + title + '</h4>' +
+                            '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
+                        '</div>' +
+                        '<div class="flex flex-col items-center justify-center min-w-[54px] py-1.5 px-2 rounded bg-sky-950/60 border border-sky-500/30 text-sky-300 font-bold text-xs shrink-0">' +
+                            '<span>reddit</span>' +
+                        '</div>' +
+                    '</a>';
+                }).join('');
             } catch (err) {
-                clearTimeout(timer);
-                throw err;
+                container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
             }
         }
 
-        async function fetchSubredditTop24h(subreddit, limit = 5) {
-            const redditJsonUrl = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=15&raw_json=1`;
-            const apiRedditUrl = `https://api.reddit.com/r/${subreddit}/top.json?t=day&limit=15&raw_json=1`;
+        loadReddit('Slovakia', 'list-slovakia');
+        loadReddit('Gunners', 'list-gunners');
 
-            try {
-                const res = await fetchWithTimeout(apiRedditUrl, 2500);
-                if (res.ok) return parseRedditJsonData(await res.json(), limit);
-            } catch (e) {}
+        // --- PREPÍNANIE ZÁLOŽIEK ---
+        function showSub(target) {
+            var colSsl = document.getElementById('col-slovakia');
+            var colGun = document.getElementById('col-gunners');
+            var grid = document.getElementById('reddit-grid');
+            
+            var btnAll = document.getElementById('tab-all');
+            var btnSsl = document.getElementById('tab-slovakia');
+            var btnGun = document.getElementById('tab-gunners');
 
-            try {
-                const res = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(redditJsonUrl)}`, 4000);
-                if (res.ok) return parseRedditJsonData(await res.json(), limit);
-            } catch (e) {}
-
-            try {
-                const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(redditJsonUrl)}`, 3500);
-                if (res.ok) {
-                    const wrapper = await res.json();
-                    if (wrapper && wrapper.contents) {
-                        return parseRedditJsonData(JSON.parse(wrapper.contents), limit);
-                    }
-                }
-            } catch (e) {}
-
-            const rssUrl = `https://www.reddit.com/r/${subreddit}/top/.rss?t=day`;
-            const rssRes = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`, 4500);
-            if (!rssRes.ok) throw new Error("Všetky zdroje sú nedostupné");
-            const rssData = await rssRes.json();
-            if (!rssData || !Array.isArray(rssData.items)) throw new Error("Prázdny RSS feed");
-
-            return rssData.items.slice(0, limit).map((item, idx) => {
-                const pubSec = Math.floor(new Date(item.pubDate + " UTC").getTime() / 1000);
-                return {
-                    title: item.title,
-                    url: item.link,
-                    timeAgo: isNaN(pubSec) ? "dnes" : formatTimeAgo(pubSec),
-                    comments: "💬",
-                    score: "TOP"
-                };
+            [btnAll, btnSsl, btnGun].forEach(function(b) {
+                b.className = "px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700";
             });
-        }
 
-        function renderPostCard(p) {
-            return `
-                <a href="${p.url}" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                    <div class="space-y-1.5 flex-1 min-w-0">
-                        <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition line-clamp-2">${p.title}</h4>
-                        <div class="text-xs text-slate-400 flex items-center gap-3">
-                            <span>🕒 ${p.timeAgo}</span>
-                            <span>💬 ${p.comments} komentárov</span>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                        <span>▲</span>
-                        <span>${p.score}</span>
-                    </div>
-                </a>
-            `;
-        }
-
-        async function loadRedditView() {
-            const container = document.getElementById('reddit-content');
-
-            if (selectedFilter === 'ALL') {
-                container.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
-                container.innerHTML = SUBREDDITS.map(sub => `
-                    <div id="col-${sub}" class="space-y-3">
-                        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                            <h3 class="font-bold text-sky-400">r/${sub}</h3>
-                            <span class="text-xs text-slate-400">Top 24h</span>
-                        </div>
-                        <div class="posts-list space-y-2.5 text-sm text-slate-400">Sťahujem r/${sub}...</div>
-                    </div>
-                `).join('');
-
-                SUBREDDITS.forEach(async (sub) => {
-                    const listEl = document.querySelector(`#col-${sub} .posts-list`);
-                    try {
-                        const posts = await fetchSubredditTop24h(sub, 5);
-                        listEl.innerHTML = posts.length 
-                            ? posts.map(renderPostCard).join('') 
-                            : `<p class="text-slate-400">Žiadne príspevky za 24h.</p>`;
-                    } catch (e) {
-                        listEl.innerHTML = `<p class="text-amber-300 text-xs">Chyba pripojenia pre r/${sub}.</p>`;
-                    }
-                });
-
-            } else {
-                container.className = "grid grid-cols-1 gap-3";
-                container.innerHTML = `<p class="text-slate-400">Sťahujem top príspevky z r/${selectedFilter}...</p>`;
-                try {
-                    const posts = await fetchSubredditTop24h(selectedFilter, 10);
-                    container.innerHTML = posts.map(renderPostCard).join('');
-                } catch (e) {
-                    container.innerHTML = `<p class="text-amber-300 text-sm">Chyba pripojenia pre r/${selectedFilter}.</p>`;
-                }
+            if (target === 'all') {
+                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "block";
+                btnAll.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
+            } else if (target === 'slovakia') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "none";
+                btnSsl.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
+            } else if (target === 'gunners') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "none";
+                colGun.style.display = "block";
+                btnGun.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
             }
         }
-
-        renderTabs();
-        loadRedditView();
     </script>
 </body>
 </html>
