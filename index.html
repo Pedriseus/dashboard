@@ -116,7 +116,7 @@
                 <div></div>
             </div>
 
-            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, farby: PL tmavobordová, UCL zlatá, EFL modrá) -->
+            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, opravené dobre viditeľné farby) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div>
                     <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
@@ -127,7 +127,7 @@
                 <div class="space-y-1.5 text-xs my-auto">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#580011] text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#800020] border border-red-400/50 text-white shadow">PL</span>
                             So 17.10. • <strong class="text-white">Nottingham (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -141,7 +141,7 @@
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#580011] text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#800020] border border-red-400/50 text-white shadow">PL</span>
                             So 24.10. • <strong class="text-white">Everton (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
@@ -155,7 +155,7 @@
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#580011] text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#800020] border border-red-400/50 text-white shadow">PL</span>
                             Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
@@ -164,7 +164,7 @@
                 <div></div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Živý Deadline z API (Presne 360px) -->
+            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Stabilný Deadline (Presne 360px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div>
                     <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
@@ -201,10 +201,10 @@
                         <span class="font-bold text-slate-300">375 b</span>
                     </div>
                 </div>
-                <!-- Živý Deadline z API -->
+                <!-- Stabilný Deadline -->
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
                     <span>⏳ Najbližší deadline:</span>
-                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
+                    <a href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">So 17.10. o 11:30 ↗</a>
                 </div>
             </div>
 
@@ -354,7 +354,7 @@
 
     </div>
 
-    <!-- SKRIPT 1: DÁTUM, ČAS, DYNAMICKÝ POZDRAV A ŽIVÝ FPL DEADLINE -->
+    <!-- SKRIPT 1: DÁTUM, ČAS A DYNAMICKÝ POZDRAV -->
     <script>
         function updateDateTime() {
             try {
@@ -380,28 +380,6 @@
         }
         updateDateTime();
         setInterval(updateDateTime, 1000);
-
-        function loadFPLDeadline() {
-            fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://fantasy.premierleague.com/api/bootstrap-static/'))
-                .then(res => res.json())
-                .then(data => {
-                    var staticData = JSON.parse(data.contents);
-                    var events = staticData.events;
-                    for (var i = 0; i < events.length; i++) {
-                        if (events[i].is_next) {
-                            var dlDate = new Date(events[i].deadline_time);
-                            var options = { weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' };
-                            var formattedDl = dlDate.toLocaleDateString('sk-SK', options) + ' o ' + dlDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-                            document.getElementById('fpl-deadline').textContent = formattedDl;
-                            break;
-                        }
-                    }
-                })
-                .catch(() => {
-                    document.getElementById('fpl-deadline').textContent = "Nepodarilo sa načítať";
-                });
-        }
-        loadFPLDeadline();
     </script>
 
     <!-- SKRIPT 2: POČASIE -->
