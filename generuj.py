@@ -9,7 +9,7 @@ for sub in subreddits:
     url = f"https://www.reddit.com/r/{sub}/top.json?t=day&limit=5&raw_json=1"
     req = urllib.request.Request(
         url, 
-        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) DashboardBot/1.0'}
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) RealDashboard/2.0'}
     )
     
     posts_html = ""
@@ -37,7 +37,13 @@ for sub in subreddits:
                 </a>
                 '''
     except Exception as e:
-        posts_html = f'<p class="text-amber-300 text-sm">Nepodarilo sa načítať r/{sub}: {e}</p>'
+        # Žiadne výmysly – ak to zlyhá, vypíše sa reálna chyba s dôvodom
+        posts_html = f'''
+        <div class="p-4 rounded-lg bg-amber-950/40 border border-amber-600/40 text-amber-200 text-sm">
+            <strong>Reddit zablokoval požiadavku (CORS/Bot limit):</strong> {e}<br>
+            <a href="https://www.reddit.com/r/{sub}/top/?t=day" target="_blank" class="text-sky-400 underline mt-2 inline-block">Klikni sem pre otvorenie r/{sub} priamo ↗</a>
+        </div>
+        '''
 
     html_subs += f'''
     <div class="space-y-3">
@@ -49,7 +55,6 @@ for sub in subreddits:
     </div>
     '''
 
-# Načítame index.html a nahradíme miesto pre príspevky
 with open("index.html", "r", encoding="utf-8") as f:
     template = f.read()
 
@@ -58,4 +63,4 @@ final_html = template.replace("<!-- REDDIT_DATA_PLACEHOLDER -->", html_subs)
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(final_html)
 
-print("index.html úspešne aktualizovaný o reálne dáta z Redditu!")
+print("generuj.py prebehol.")
