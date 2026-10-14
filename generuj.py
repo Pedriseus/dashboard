@@ -6,15 +6,16 @@ subreddits = ['Slovakia', 'Gunners']
 html_subs = ""
 
 for sub in subreddits:
+    # Použijeme oficiálny JSON endpoint s dobrou User-Agent hlavičkou
     url = f"https://www.reddit.com/r/{sub}/top.json?t=day&limit=5&raw_json=1"
     req = urllib.request.Request(
         url, 
-        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) RealDashboard/2.0'}
+        headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) DashboardBot/3.0'}
     )
     
     posts_html = ""
     try:
-        with urllib.request.urlopen(req) as response:
+        with urllib.request.urlopen(req, timeout=10) as response:
             data = json.loads(response.read().decode('utf-8'))
             for child in data['data']['children']:
                 p = child['data']
@@ -37,11 +38,10 @@ for sub in subreddits:
                 </a>
                 '''
     except Exception as e:
-        # Žiadne výmysly – ak to zlyhá, vypíše sa reálna chyba s dôvodom
         posts_html = f'''
-        <div class="p-4 rounded-lg bg-amber-950/40 border border-amber-600/40 text-amber-200 text-sm">
-            <strong>Reddit zablokoval požiadavku (CORS/Bot limit):</strong> {e}<br>
-            <a href="https://www.reddit.com/r/{sub}/top/?t=day" target="_blank" class="text-sky-400 underline mt-2 inline-block">Klikni sem pre otvorenie r/{sub} priamo ↗</a>
+        <div class="p-4 rounded-lg bg-red-950/40 border border-red-600/40 text-red-200 text-sm">
+            Chyba sťahovania: {e}<br>
+            <a href="https://www.reddit.com/r/{sub}/top/?t=day" target="_blank" class="text-sky-400 underline mt-2 inline-block">Otvoriť r/{sub} priamo ↗</a>
         </div>
         '''
 
@@ -58,9 +58,10 @@ for sub in subreddits:
 with open("index.html", "r", encoding="utf-8") as f:
     template = f.read()
 
+# Ak v index.html ešte nemáš placeholder, uistite sa, že tam je <!-- REDDIT_DATA_PLACEHOLDER -->
 final_html = template.replace("<!-- REDDIT_DATA_PLACEHOLDER -->", html_subs)
 
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(final_html)
 
-print("generuj.py prebehol.")
+print("index.html bol úspešne vygenerovaný pythonom!")
