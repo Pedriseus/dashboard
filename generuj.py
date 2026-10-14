@@ -15,7 +15,6 @@ try:
         data = json.loads(response.read().decode('utf-8'))
         standings = data['standings']['results'][:5] # Top 5 tímov
         
-        # Nájdeme index a body tvojho tímu Ødeargod
         my_team_idx = -1
         my_team_points = 0
         for idx, team in enumerate(standings):
@@ -31,13 +30,10 @@ try:
             
             diff_text = ""
             if not is_my_team and my_team_idx != -1:
-                diff = total_points - my_team_points
                 if idx < my_team_idx + 1:
-                    # Sú pred tebou (strata -> červená, napr. -9 b)
                     missing = total_points - my_team_points
                     diff_text = f'<span class="text-[10px] font-bold text-red-400 ml-1">(-{missing})</span>'
                 else:
-                    # Sú za tebou (náskok -> zelená, napr. +4 b)
                     ahead = my_team_points - total_points
                     diff_text = f'<span class="text-[10px] font-bold text-emerald-400 ml-1">(+{ahead})</span>'
 
@@ -45,7 +41,7 @@ try:
                 fpl_html += f'''
                 <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
                     <span class="font-bold text-white flex items-center gap-1.5">
-                        <span>⭐</span> {idx}. {team_name}
+                        <span>⭐</span> {idx}. {team_name} {diff_text}
                     </span>
                     <span class="font-black gold-text">{total_points} b</span>
                 </div>
@@ -96,4 +92,4 @@ final_html = template.replace("<!-- FPL_DATA_PLACEHOLDER -->", fpl_html)
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(final_html)
 
-print("FPL Mini-liga s rozdielmi bodov úspešne aktualizovaná!")
+print("FPL Mini-liga a deadline úspešne aktualizované!")
