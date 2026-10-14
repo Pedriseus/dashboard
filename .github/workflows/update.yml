@@ -10,22 +10,22 @@ permissions:
 
 jobs:
   build:
-     runs-on: ubuntu-latest
-     steps:
-       - name: Stiahnuť repozitár
-         uses: actions/checkout@v4
+    runs-on: ubuntu-latest
+    steps:
+      - name: Stiahnuť repozitár
+        uses: actions/checkout@v4
 
-       - name: Nastaviť Python
-         uses: actions/setup-python@v5
-         with:
-           python-version: '3.10'
+      - name: Nastaviť Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
 
-       - name: Spustiť skript na sťahovanie z Redditu
-         run: python generuj.py
+      - name: Spustiť skript na sťahovanie z Redditu
+        run: python generuj.py
 
-       - name: Uložiť zmeny na GitHub
-         uses: stefanzweifel/git-auto-commit-action@v5
-         with:
-           commit_message: "Automatická aktualizácia top postov z Redditu"
-           commit_user_name: "Dashboard Bot"
-           commit_user_email: "bot@actions.local"
+      - name: Uložiť zmeny na GitHub
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Automatická aktualizácia top postov z Redditu"
+          commit_user_name: "Dashboard Bot"
+          commit_user_email: "bot@actions.local"
