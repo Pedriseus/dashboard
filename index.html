@@ -168,7 +168,7 @@
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed -->
+        <!-- SPODNÝ RIADOK: Reddit Feed (Stabilný priamy RSS parser) -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -190,7 +190,7 @@
                         <h3 class="font-bold text-red-400 text-lg">r/Slovakia</h3>
                         <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
                     </div>
-                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
+                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Slovakia...</div>
                 </div>
 
                 <!-- r/Gunners -->
@@ -199,7 +199,7 @@
                         <h3 class="font-bold text-red-400 text-lg flex items-center gap-2">🔴⚪ r/Gunners</h3>
                         <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
                     </div>
-                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam...</div>
+                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Gunners...</div>
                 </div>
             </div>
         </section>
@@ -332,10 +332,11 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT -->
+    <!-- SKRIPT 3: REDDIT (Stabilné priame RSS načítanie s poistkou proti zlyhaniu) -->
     <script>
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
+            // Použijeme priamy RSS feed z Redditu spracovaný cez bleskový api.rss2json.com
             var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
             
             fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
@@ -347,4 +348,62 @@
                         var title = item.title;
                         var link = item.link;
                         var pubDate = new Date(item.pubDate);
-                        var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 *
+                        var hoursAgo = Math.ah ? Math.ah : Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
+
+                        return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-red-500/50 transition flex justify-between items-start gap-3">' +
+                            '<div class="space-y-1.5 flex-1 min-w-0">' +
+                                '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + title + '</h4>' +
+                                '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
+                            '</div>' +
+                            '<div class="flex flex-col items-center justify-center min-w-[58px] py-1.5 px-2 rounded bg-red-950/60 border border-red-500/40 text-amber-300 font-bold text-xs shrink-0">' +
+                                '<span>TOP #' + (idx + 1) + '</span>' +
+                            '</div>' +
+                        '</a>';
+                    }).join('');
+                })
+                .catch(function() {
+                    // Záložná poistka pre prípad, ak by RSS zlyhalo: vykreslí priame odkazy na zoznamy
+                    container.innerHTML = 
+                        '<div class="p-4 rounded-lg bg-slate-900/90 border border-red-500/30 text-center space-y-2">' +
+                            '<p class="text-xs text-slate-300">Živé načítanie je dočasne obmedzené ochranou Redditu.</p>' +
+                            '<a href="https://www.reddit.com/r/' + subreddit + '/top/?t=day" target="_blank" class="inline-block px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-lg hover:bg-red-500 transition">Otvoriť Top r/' + subreddit + ' priamo ↗</a>' +
+                        '</div>';
+                });
+        }
+
+        loadReddit('Slovakia', 'list-slovakia');
+        loadReddit('Gunners', 'list-gunners');
+
+        function showSub(target) {
+            var colSsl = document.getElementById('col-slovakia');
+            var colGun = document.getElementById('col-gunners');
+            var grid = document.getElementById('reddit-grid');
+            
+            var btnAll = document.getElementById('tab-all');
+            var btnSsl = document.getElementById('tab-slovakia');
+            var btnGun = document.getElementById('tab-gunners');
+
+            [btnAll, btnSsl, btnGun].forEach(function(b) {
+                b.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive";
+            });
+
+            if (target === 'all') {
+                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "block";
+                btnAll.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            } else if (target === 'slovakia') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "none";
+                btnSsl.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            } else if (target === 'gunners') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "none";
+                colGun.style.display = "block";
+                btnGun.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            }
+        }
+    </script>
+</body>
+</html>
