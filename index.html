@@ -1,99 +1,502 @@
-import urllib.request
-import json
-import datetime
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Môj Denný Dashboard | Arsenal Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background-color: #080d1a; 
+            background-image: radial-gradient(circle at top right, #2a0810 0%, #080d1a 55%);
+            color: #f8fafc; 
+            font-family: system-ui, -apple-system, sans-serif; 
+        }
+        .card { 
+            background-color: #111827; 
+            border: 1px solid #28354a; 
+            border-top: 3px solid #EF0107;
+            border-radius: 1rem; 
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .arsenal-header {
+            background: linear-gradient(135deg, #990005 0%, #EF0107 55%, #111827 100%);
+            border: 1px solid #ff3b41;
+            border-bottom: 4px solid #ffffff;
+            border-radius: 1rem;
+        }
+        .gold-text { color: #d4af37; }
+        .arsenal-btn-active {
+            background-color: #EF0107;
+            color: #ffffff;
+            font-weight: 700;
+            border: 1px solid #ff4d52;
+        }
+        .arsenal-btn-inactive {
+            background-color: #1e293b;
+            color: #cbd5e1;
+            border: 1px solid #334155;
+        }
+        .arsenal-btn-inactive:hover {
+            border-color: #d4af37;
+            color: #ffffff;
+        }
+        /* Pevná identická šírka pre všetky 3 tabuľky v hlavičke */
+        .header-table-box {
+            width: 100%;
+            max-width: 360px;
+            min-width: 360px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6 md:p-10">
 
-# 1. Stiahneme poradie mini-ligy 28856
-league_url = "https://fantasy.premierleague.com/api/leagues-classic/28856/standings/"
-req_league = urllib.request.Request(
-    league_url, 
-    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) FPLBot/1.0'}
-)
-
-fpl_html = ""
-try:
-    with urllib.request.urlopen(req_league, timeout=10) as response:
-        data = json.loads(response.read().decode('utf-8'))
-        standings = data['standings']['results'][:5] # Top 5 tímov
+    <div class="max-w-[95rem] mx-auto space-y-6">
         
-        # Nájdeme index a body tvojho tímu Ødeargod
-        my_team_idx = -1
-        my_team_points = 0
-        for idx, team in enumerate(standings):
-            if team['entry_name'] == "Ødeargod":
-                my_team_idx = idx
-                my_team_points = team['total']
-                break
-        
-        for idx, team in enumerate(standings, 1):
-            team_name = team['entry_name']
-            total_points = team['total']
-            is_my_team = team_name == "Ødeargod"
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU S TROMI IDENTICKÝMI TABUĽKAMI -->
+        <header class="arsenal-header p-5 md:p-6 flex flex-col 2xl:flex-row justify-between items-center gap-6 shadow-xl">
             
-            diff_text = ""
-            if not is_my_team and my_team_idx != -1:
-                diff = total_points - my_team_points
-                if idx < my_team_idx + 1:
-                    # Sú pred tebou (strata -> červená, napr. -9 b)
-                    missing = total_points - my_team_points
-                    diff_text = f'<span class="text-[10px] font-bold text-red-400 ml-1">(-{missing})</span>'
-                else:
-                    # Sú za tebou (náskok -> zelená, napr. +4 b)
-                    ahead = my_team_points - total_points
-                    diff_text = f'<span class="text-[10px] font-bold text-emerald-400 ml-1">(+{ahead})</span>'
-
-            if is_my_team:
-                fpl_html += f'''
-                <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
-                    <span class="font-bold text-white flex items-center gap-1.5">
-                        <span>⭐</span> {idx}. {team_name}
-                    </span>
-                    <span class="font-black gold-text">{total_points} b</span>
+            <!-- 1. Vľavo: Logo, pozdrav, dátum a čas zarovnaný pod ním -->
+            <div class="flex items-center gap-4 shrink-0">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 drop-shadow-lg" onerror="this.style.display='none'">
+                <div>
+                    <div class="text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
+                    <h1 id="greeting" class="text-xl md:text-2xl font-extrabold text-white">Dobrý deň! 👋</h1>
+                    <p id="current-date" class="text-red-100 text-sm mt-0.5">Načítavam dátum...</p>
+                    <div class="mt-1.5">
+                        <div id="current-time" class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow">--:--</div>
+                    </div>
                 </div>
-                '''
-            else:
-                fpl_html += f'''
-                <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                    <span class="text-slate-200">{idx}. {team_name} {diff_text}</span>
-                    <span class="font-bold text-slate-300">{total_points} b</span>
+            </div>
+
+            <!-- 2. Stred 1: Top 5 Premier League Tabuľka (Fixná šírka 360px) -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 header-table-box shrink-0">
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>🏆 PREMIER LEAGUE (TOP 5)</span>
+                    <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
                 </div>
-                '''
-except Exception as e:
-    fpl_html = f'<div class="text-xs text-amber-300 p-2">FPL dáta nedostupné</div>'
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
+                        <span class="font-medium text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" class="w-4 h-4 object-contain" alt="MCI"> 1. Man City
+                        </span>
+                        <span class="font-bold text-slate-300">18 b</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
+                        <span class="font-bold text-white flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" class="w-4 h-4 object-contain" alt="ARS"> 2. Arsenal
+                        </span>
+                        <span class="font-black gold-text">15 b</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200 flex items-center gap-2">
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t36.png" class="w-4 h-4 object-contain" alt="BHA"> 3. Brighton
+                        </span>
+                        <span class="font-bold text-slate-300">13 b</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg" class="w-4 h-4 object-contain" alt="BRE"> 4. Brentford
+                        </span>
+                        <span class="font-bold text-slate-300">10 b</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/7/7c/Everton_FC_logo.svg" class="w-4 h-4 object-contain" alt="EVE"> 5. Everton
+                        </span>
+                        <span class="font-bold text-slate-300">10 b</span>
+                    </div>
+                </div>
+            </div>
 
-# 2. Stiahneme najbližší deadline
-static_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
-req_static = urllib.request.Request(
-    static_url, 
-    headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) FPLBot/1.0'}
-)
+            <!-- 3. Stred 2: Zápasy Arsenalu (Fixná šírka 360px) -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 header-table-box shrink-0">
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>⚽ ZÁPASY ARSENALU</span>
+                    <span class="text-[10px] text-slate-300">VŠETKY SÚŤAŽE</span>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
+                            So 17.10. • <strong class="text-white">Nottingham (PL)</strong>
+                        </span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-700 text-white shadow">UCL</span>
+                            St 21.10. • <strong class="text-white">Bayern (UCL)</strong>
+                        </span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
+                            So 24.10. • <strong class="text-white">Everton (PL)</strong>
+                        </span>
+                        <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-600 text-white shadow">EFL</span>
+                            Ut 27.10. • <strong class="text-white">Fleetwood (EFL)</strong>
+                        </span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-purple-700 text-white shadow">PL</span>
+                            Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong>
+                        </span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                </div>
+            </div>
 
-deadline_str = "Neznámy"
-try:
-    with urllib.request.urlopen(req_static, timeout=10) as response:
-        static_data = json.loads(response.read().decode('utf-8'))
-        for event in static_data['events']:
-            if event['is_next']:
-                dl_utc = datetime.datetime.strptime(event['deadline_time'], "%Y-%m-%dT%H:%M:%SZ")
-                dl_sk = dl_utc + datetime.timedelta(hours=2)
-                deadline_str = dl_sk.strftime("%d. %m. o %H:%M")
-                break
-except Exception:
-    pass
+            <!-- 4. Vpravo: FPL Mini-liga (Fixná šírka 360px, aktualizovaná z Pythonu) -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 header-table-box shrink-0">
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>🎮 FPL Mini-liga (#28856)</span>
+                    <a href="https://fantasy.premierleague.com/en/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline">FPL ↗</a>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <!-- FPL_DATA_PLACEHOLDER -->
+                </div>
+            </div>
 
-fpl_html += f'''
-<div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
-    <span>⏳ Najbližší deadline:</span>
-    <span class="font-bold text-white">{deadline_str}</span>
-</div>
-'''
+        </header>
 
-# 3. Zápis do index.html
-with open("index.html", "r", encoding="utf-8") as f:
-    template = f.read()
+        <!-- HORNÝ RIADOK: Aktuálne počasie + SHMÚ ALADIN -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- POČASIE DNES -->
+            <section class="card p-6 lg:col-span-5 flex flex-col justify-between">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
+                        🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
+                    </h2>
+                    <div id="weather-box" class="flex items-center justify-between py-2 text-slate-300">
+                        <div class="flex items-center gap-4">
+                            <span id="w-icon" class="text-5xl">⛅</span>
+                            <div>
+                                <div id="w-temp" class="text-4xl font-extrabold text-white">16 °C</div>
+                                <div id="w-desc" class="text-slate-400 text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm space-y-1 text-slate-300">
+                            <div>🔼 Max: <strong id="w-max" class="text-white">16 °C</strong> / 🔽 Min: <strong id="w-min" class="text-white">7 °C</strong></div>
+                            <div>💧 Zrážky: <strong id="w-rain" class="text-red-400">35 %</strong> <span id="w-rain-mm" class="text-xs text-slate-400">(0.0 mm)</span></div>
+                            <div>💨 Vietor: <strong id="w-wind" class="text-white">7 km/h</strong></div>
+                        </div>
+                    </div>
 
-final_html = template.replace("<!-- FPL_DATA_PLACEHOLDER -->", fpl_html)
+                    <div class="mt-4 p-3.5 rounded-lg bg-slate-900/90 border border-red-500/30 text-xs sm:text-sm space-y-2.5">
+                        <div class="flex items-start gap-2.5">
+                            <span id="w-tip-icon" class="text-xl shrink-0">🧥</span>
+                            <div id="w-tip-now" class="text-slate-200 leading-relaxed">
+                                <strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz:</strong> Načítavam odporúčanie...
+                            </div>
+                        </div>
+                        <div class="border-t border-slate-800 pt-2 flex items-start gap-2.5">
+                            <span class="text-lg shrink-0">📅</span>
+                            <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
+                                <strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> Načítavam predpoveď...
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(final_html)
+                <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+                    <span>Dáta: Stanica Bratislava + numerický model</span>
+                    <button onclick="updateLiveWeather()" class="text-red-400 hover:underline font-medium">↻ Obnoviť</button>
+                </div>
+            </section>
 
-print("FPL Mini-liga s rozdielmi bodov úspešne aktualizovaná!")
+            <!-- SHMÚ ALADIN METEOGRAM -->
+            <section class="card p-6 lg:col-span-7 flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                        <div>
+                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Najbližšie hodiny)</span>
+                            </h2>
+                            <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
+                                🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">0.0 mm</strong>
+                            </p>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-red-600/20 border border-red-500/40 text-red-300 hover:bg-red-600 hover:text-white transition font-semibold">
+                                Meteogram ALADIN ↗
+                            </a>
+                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-amber-300 hover:bg-slate-700 transition font-semibold">
+                                Radar SHMÚ ↗
+                            </a>
+                        </div>
+                    </div>
+
+                    <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div id="h-1-time" class="text-xs text-slate-400">+1 hod</div>
+                            <div id="h-1-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-1-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-1-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div id="h-2-time" class="text-xs text-slate-400">+3 hod</div>
+                            <div id="h-2-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-2-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-2-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div id="h-3-time" class="text-xs text-slate-400">+6 hod</div>
+                            <div id="h-3-icon" class="text-2xl my-1">⛅</div>
+                            <div id="h-3-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-3-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
+                            <div id="h-4-time" class="text-xs text-slate-400">+9 hod</div>
+                            <div id="h-4-icon" class="text-2xl my-1">🌙</div>
+                            <div id="h-4-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-4-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
+                    <span>Rozlíšenie: 2 km (Stredná Európa / ALADIN doména)</span>
+                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-slate-400 hover:text-red-400">opendata.shmu.sk ↗</a>
+                </div>
+            </section>
+
+        </div>
+
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
+        <section class="card p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                    </h2>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="showSub('all')" id="tab-all" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active">Všetky vedľa seba</button>
+                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive">r/Slovakia</button>
+                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive">r/Gunners</button>
+                </div>
+            </div>
+            
+            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div id="col-slovakia" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
+                        <h3 class="font-bold text-red-400 text-lg">r/Slovakia</h3>
+                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Slovakia...</div>
+                </div>
+
+                <div id="col-gunners" class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
+                        <h3 class="font-bold text-red-400 text-lg flex items-center gap-2">🔴⚪ r/Gunners</h3>
+                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
+                    </div>
+                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Gunners...</div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- SKRIPT: DÁTUM A ČAS -->
+    <script>
+        function updateDateTime() {
+            try {
+                var now = new Date();
+                var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+                document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {}
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+
+    <!-- SKRIPT: POČASIE -->
+    <script>
+        var weatherIcons = {
+            0: { text: "Jasno", icon: "☀️" },
+            1: { text: "Prevažne jasno", icon: "🌤️" },
+            2: { text: "Polooblačno", icon: "⛅" },
+            3: { text: "Zamračené", icon: "☁️" },
+            45: { text: "Hmla", icon: "🌫️" },
+            48: { text: "Hmla", icon: "🌫️" },
+            51: { text: "Mrholenie", icon: "🌦️" },
+            53: { text: "Mrholenie", icon: "🌦️" },
+            61: { text: "Slabý dážď", icon: "🌧️" },
+            63: { text: "Mierny dážď", icon: "🌧️" },
+            65: { text: "Silný dážď", icon: "⛈️" },
+            71: { text: "Sneženie", icon: "❄️" },
+            80: { text: "Prehánky", icon: "🌦️" },
+            95: { text: "Búrka", icon: "⚡" }
+        };
+
+        function updateLiveWeather() {
+            var url = "https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2";
+            fetch(url)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    var cur = Math.round(data.current.temperature_2m);
+                    var app = Math.round(data.current.apparent_temperature);
+                    var curRainMm = data.current.precipitation || 0;
+                    var maxT = Math.round(data.daily.temperature_2m_max[0]);
+                    var minT = Math.round(data.daily.temperature_2m_min[0]);
+                    var rainProb = data.daily.precipitation_probability_max[0];
+                    var rainSumMm = (data.daily.precipitation_sum && data.daily.precipitation_sum[0] !== undefined) ? data.daily.precipitation_sum[0].toFixed(1) : "0.0";
+                    var wind = Math.round(data.current.wind_speed_10m);
+                    var wInfo = weatherIcons[data.current.weather_code] || { text: "Polooblačno", icon: "⛅" };
+
+                    document.getElementById('w-icon').textContent = wInfo.icon;
+                    document.getElementById('w-temp').textContent = cur + " °C";
+                    document.getElementById('w-desc').textContent = wInfo.text + " • pocitovo " + app + " °C";
+                    document.getElementById('w-max').textContent = maxT + " °C";
+                    document.getElementById('w-min').textContent = minT + " °C";
+                    document.getElementById('w-rain').textContent = rainProb + " %";
+                    document.getElementById('w-rain-mm').textContent = "(" + rainSumMm + " mm)";
+                    document.getElementById('w-wind').textContent = wind + " km/h";
+
+                    document.getElementById('aladin-rain-summary').innerHTML =
+                        '🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">' + rainSumMm + ' mm</strong> (max. pravdepodobnosť <strong class="text-red-400">' + rainProb + ' %</strong>)';
+
+                    var nowIso = new Date().toISOString().slice(0, 13);
+                    var currentIdx = 0;
+                    if (data.hourly && data.hourly.time) {
+                        for (var i = 0; i < data.hourly.time.length; i++) {
+                            if (data.hourly.time[i].startsWith(nowIso)) {
+                                currentIdx = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    var offsets = [2, 4, 6, 8];
+                    offsets.forEach(function(offset, index) {
+                        var targetIdx = currentIdx + offset;
+                        var slotNum = index + 1;
+                        if (data.hourly && data.hourly.time && data.hourly.time[targetIdx]) {
+                            var tDate = new Date(data.hourly.time[targetIdx]);
+                            var timeStr = tDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+                            var t = Math.round(data.hourly.temperature_2m[targetIdx]);
+                            var code = data.hourly.weather_code[targetIdx];
+                            var hMm = (data.hourly.precipitation && data.hourly.precipitation[targetIdx] !== undefined) ? data.hourly.precipitation[targetIdx].toFixed(1) : "0.0";
+                            var hProb = (data.hourly.precipitation_probability && data.hourly.precipitation_probability[targetIdx] !== undefined) ? data.hourly.precipitation_probability[targetIdx] : 0;
+                            var ic = (weatherIcons[code] && weatherIcons[code].icon) ? weatherIcons[code].icon : "⛅";
+
+                            document.getElementById('h-' + slotNum + '-time').textContent = timeStr;
+                            document.getElementById('h-' + slotNum + '-temp').textContent = t + " °C";
+                            document.getElementById('h-' + slotNum + '-icon').textContent = ic;
+                            document.getElementById('h-' + slotNum + '-rain').textContent = "💧 " + hMm + " mm (" + hProb + "%)";
+                        }
+                    });
+
+                    var nowAdvice = "";
+                    if (app >= 23) {
+                        nowAdvice = "Je teplo – ak ideš von hneď teraz, stačí ti krátke tričko a ľahké oblečenie.";
+                    } else if (app >= 17) {
+                        nowAdvice = "Vonku je príjemne – teraz ti stačí tričko a tenká mikina.";
+                    } else if (app >= 11) {
+                        nowAdvice = "Ak ideš von práve teraz, daj si dlhé nohavice a mikinu alebo prechodnú bundu.";
+                    } else if (app >= 5) {
+                        nowAdvice = "Momentálne je chladno – určite si obleč teplejšiu bundu.";
+                    } else {
+                        nowAdvice = "Vonku je zima – teraz si daj zimnú bundu a teplú vrstvu.";
+                    }
+                    if (curRainMm > 0 || [51,53,61,63,65,80,95].indexOf(data.current.weather_code) !== -1) {
+                        nowAdvice += " Práve prší, nezabudni dáždnik!";
+                    }
+
+                    document.getElementById('w-tip-now').innerHTML = '<strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz (' + cur + ' °C):</strong> ' + nowAdvice;
+
+                    var dayAdvice = "Ráno a večer (" + minT + " °C) sa zíde teplejšia bunda, cez deň pri maxime " + maxT + " °C ";
+                    if (maxT >= 22) dayAdvice += "bude stačiť krátke tričko.";
+                    else if (maxT >= 15) dayAdvice += "postačí mikina alebo ľahká bunda.";
+                    else dayAdvice += "bude treba teplejšiu bundu.";
+                    if (rainProb >= 40 || parseFloat(rainSumMm) >= 1.0) {
+                        dayAdvice += " Očakávaj aj zrážky (" + rainSumMm + " mm).";
+                    }
+
+                    document.getElementById('w-tip-day').innerHTML = '<strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> ' + dayAdvice;
+                })
+                .catch(function() {});
+        }
+        updateLiveWeather();
+    </script>
+
+    <!-- SKRIPT: REDDIT -->
+    <script>
+        function loadReddit(subreddit, elementId) {
+            var container = document.getElementById(elementId);
+            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
+            
+            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (!data || !Array.isArray(data.items)) throw new Error("Chyba");
+
+                    container.innerHTML = data.items.slice(0, 5).map(function(item, idx) {
+                        var title = item.title;
+                        var link = item.link;
+                        var pubDate = new Date(item.pubDate);
+                        var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
+
+                        return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
+                            '<div class="space-y-1.5 flex-1 min-w-0">' +
+                                '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + title + '</h4>' +
+                                '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
+                            '</div>' +
+                            '<div class="flex flex-col items-center justify-center min-w-[58px] py-1.5 px-2 rounded bg-red-950/60 border border-red-500/40 text-amber-300 font-bold text-xs shrink-0">' +
+                                '<span>TOP #' + (idx + 1) + '</span>' +
+                            '</div>' +
+                        '</a>';
+                    }).join('');
+                })
+                .catch(function() {
+                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
+                });
+        }
+
+        loadReddit('Slovakia', 'list-slovakia');
+        loadReddit('Gunners', 'list-gunners');
+
+        function showSub(target) {
+            var colSsl = document.getElementById('col-slovakia');
+            var colGun = document.getElementById('col-gunners');
+            var grid = document.getElementById('reddit-grid');
+            
+            var btnAll = document.getElementById('tab-all');
+            var btnSsl = document.getElementById('tab-slovakia');
+            var btnGun = document.getElementById('tab-gunners');
+
+            [btnAll, btnSsl, btnGun].forEach(function(b) {
+                b.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive";
+            });
+
+            if (target === 'all') {
+                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "block";
+                btnAll.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            } else if (target === 'slovakia') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "block";
+                colGun.style.display = "none";
+                btnSsl.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            } else if (target === 'gunners') {
+                grid.className = "grid grid-cols-1 gap-6";
+                colSsl.style.display = "none";
+                colGun.style.display = "block";
+                btnGun.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
+            }
+        }
+    </script>
+</body>
+</html>
