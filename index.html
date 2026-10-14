@@ -60,7 +60,7 @@
                 </div>
             </div>
 
-            <!-- 2. Stred (Kruh 1): Top 5 Premier League Tabuľka (Zvýraznený len Arsenal so žltými bodmi) -->
+            <!-- 2. Stred (Kruh 1): Top 5 Premier League Tabuľka (Opravené logo Brightonu) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[320px]">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🏆 PREMIER LEAGUE (TOP 5)</span>
@@ -84,7 +84,7 @@
                     <!-- 3. Brighton -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/thumb/f/fd/Brighton_%26_Hove_Albion_logo.svg/1200px-Brighton_%26_Hove_Albion_logo.svg.png" class="w-4 h-4 object-contain" alt="BHA"> 3. Brighton
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg" class="w-4 h-4 object-contain" alt="BHA" onerror="this.src='https://resources.premierleague.com/premierleague/badges/70/t36.png'"> 3. Brighton
                         </span>
                         <span class="font-bold text-slate-300">13 b</span>
                     </div>
@@ -105,31 +105,51 @@
                 </div>
             </div>
 
-            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu (Všetky súťaže) -->
-            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[340px]">
+            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu + logá súťaží -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[360px]">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>⚽ BUDÚCE ZÁPASY ARSENALU</span>
-                    <span class="text-[10px] text-slate-300">NAJBLIŽŠÍCH 5</span>
+                    <span class="text-[10px] text-slate-300">VŠETKY SÚŤAŽE</span>
                 </div>
                 <div class="space-y-1.5 text-xs">
+                    <!-- 1. Nottingham (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                        <span class="text-slate-200">So 17.10. • <strong class="text-white">Nottingham (PL)</strong></span>
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo_%282016%29.svg" class="w-4 h-4 object-contain" alt="PL" title="Premier League"> 
+                            So 17.10. • <strong class="text-white">Nottingham</strong>
+                        </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
+                    <!-- 2. Bayern (UCL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                        <span class="text-slate-200">St 21.10. • <strong class="text-white">Bayern (UCL)</strong></span>
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fbf/UEFA_Champions_League_logo_2.svg" class="w-4 h-4 object-contain" alt="UCL" title="Champions League"> 
+                            St 21.10. • <strong class="text-white">Bayern</strong>
+                        </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
+                    <!-- 3. Everton (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                        <span class="text-slate-200">So 24.10. • <strong class="text-white">Everton (PL)</strong></span>
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo_%282016%29.svg" class="w-4 h-4 object-contain" alt="PL" title="Premier League"> 
+                            So 24.10. • <strong class="text-white">Everton</strong>
+                        </span>
                         <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
                     </div>
+                    <!-- 4. Fleetwood (EFL Cup) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                        <span class="text-slate-200">Ut 27.10. • <strong class="text-white">Fleetwood (EFL)</strong></span>
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/9/93/EFL_Cup_%28Carabao_Cup%29_logo.svg" class="w-4 h-4 object-contain" alt="EFL" title="EFL Cup"> 
+                            Ut 27.10. • <strong class="text-white">Fleetwood</strong>
+                        </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
+                    <!-- 5. Liverpool (PL) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                        <span class="text-slate-200">Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong></span>
+                        <span class="text-slate-200 flex items-center gap-2">
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/f2/Premier_League_Logo_%282016%29.svg" class="w-4 h-4 object-contain" alt="PL" title="Premier League"> 
+                            Ne 01.11. • <strong class="text-white">Liverpool</strong>
+                        </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                 </div>
