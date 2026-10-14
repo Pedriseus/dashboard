@@ -15,11 +15,32 @@ try:
         data = json.loads(response.read().decode('utf-8'))
         standings = data['standings']['results'][:5] # Top 5 tímov
         
+        # Nájdeme index a body tvojho tímu Ødeargod
+        my_team_idx = -1
+        my_team_points = 0
+        for idx, team in enumerate(standings):
+            if team['entry_name'] == "Ødeargod":
+                my_team_idx = idx
+                my_team_points = team['total']
+                break
+        
         for idx, team in enumerate(standings, 1):
             team_name = team['entry_name']
             total_points = team['total']
             is_my_team = team_name == "Ødeargod"
             
+            diff_text = ""
+            if not is_my_team and my_team_idx != -1:
+                diff = total_points - my_team_points
+                if idx < my_team_idx + 1:
+                    # Sú pred tebou (strata -> červená, napr. -9 b)
+                    missing = total_points - my_team_points
+                    diff_text = f'<span class="text-[10px] font-bold text-red-400 ml-1">(-{missing})</span>'
+                else:
+                    # Sú za tebou (náskok -> zelená, napr. +4 b)
+                    ahead = my_team_points - total_points
+                    diff_text = f'<span class="text-[10px] font-bold text-emerald-400 ml-1">(+{ahead})</span>'
+
             if is_my_team:
                 fpl_html += f'''
                 <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
@@ -32,14 +53,14 @@ try:
             else:
                 fpl_html += f'''
                 <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                    <span class="text-slate-200">{idx}. {team_name}</span>
+                    <span class="text-slate-200">{idx}. {team_name} {diff_text}</span>
                     <span class="font-bold text-slate-300">{total_points} b</span>
                 </div>
                 '''
 except Exception as e:
     fpl_html = f'<div class="text-xs text-amber-300 p-2">FPL dáta nedostupné</div>'
 
-# 2. Stiahneme informácie o FPL hre vrátane najbližšieho deadline
+# 2. Stiahneme najbližší deadline
 static_url = "https://fantasy.premierleague.com/api/bootstrap-static/"
 req_static = urllib.request.Request(
     static_url, 
@@ -53,14 +74,12 @@ try:
         for event in static_data['events']:
             if event['is_next']:
                 dl_utc = datetime.datetime.strptime(event['deadline_time'], "%Y-%m-%dT%H:%M:%SZ")
-                # Prevod na slovenský čas (+2 hodiny, príp. zohľadnenie)
                 dl_sk = dl_utc + datetime.timedelta(hours=2)
                 deadline_str = dl_sk.strftime("%d. %m. o %H:%M")
                 break
 except Exception:
     pass
 
-# Pridáme riadok s deadline na spodok FPL tabuľky
 fpl_html += f'''
 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
     <span>⏳ Najbližší deadline:</span>
@@ -68,7 +87,7 @@ fpl_html += f'''
 </div>
 '''
 
-# 3. Vloženie do index.html
+# 3. Zápis do index.html
 with open("index.html", "r", encoding="utf-8") as f:
     template = f.read()
 
@@ -77,4 +96,4 @@ final_html = template.replace("<!-- FPL_DATA_PLACEHOLDER -->", fpl_html)
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(final_html)
 
-print("FPL Mini-liga a deadline úspešne aktualizované!")
+print("FPL Mini-liga s rozdielmi bodov úspešne aktualizovaná!")
