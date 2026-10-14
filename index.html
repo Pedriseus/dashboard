@@ -47,19 +47,89 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- HLAVIČKA V ŠTÝLE ARSENALU -->
-        <header class="arsenal-header p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-xl">
-            <div class="flex items-center gap-4">
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU S WIDGETMI V KRUHOCH -->
+        <header class="arsenal-header p-5 md:p-6 flex flex-col xl:flex-row justify-between items-center gap-6 shadow-xl">
+            
+            <!-- 1. Vľavo: Logo a pozdrav -->
+            <div class="flex items-center gap-4 shrink-0">
                 <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 drop-shadow-lg" onerror="this.style.display='none'">
                 <div>
                     <div class="text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
-                    <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white">Dobrý deň! 👋</h1>
-                    <p id="current-date" class="text-red-100 text-base md:text-lg mt-0.5">Načítavam dátum...</p>
+                    <h1 id="greeting" class="text-xl md:text-2xl font-extrabold text-white">Dobrý deň! 👋</h1>
+                    <p id="current-date" class="text-red-100 text-sm mt-0.5">Načítavam dátum...</p>
                 </div>
             </div>
-            <div class="text-right">
+
+            <!-- 2. Stred (Kruh 1): Top 5 Premier League Tabuľka -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[310px]">
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>🏆 Premier League (Top 5)</span>
+                    <span class="text-[10px] text-slate-300">Sezóna 26/27</span>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <!-- 1. Man City -->
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200">1. Man City</span>
+                        <span class="font-bold text-amber-300">18 b</span>
+                    </div>
+                    <!-- 2. Arsenal -->
+                    <div class="flex justify-between items-center bg-red-600/30 border border-red-500/50 px-2.5 py-1 rounded">
+                        <span class="font-bold text-white flex items-center gap-1"><span>🔴</span> 2. Arsenal</span>
+                        <span class="font-bold text-amber-300">15 b</span>
+                    </div>
+                    <!-- 3. Brighton -->
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200">3. Brighton</span>
+                        <span class="font-bold text-slate-300">13 b</span>
+                    </div>
+                    <!-- 4. Brentford -->
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200">4. Brentford</span>
+                        <span class="font-bold text-slate-300">10 b</span>
+                    </div>
+                    <!-- 5. Everton -->
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="font-medium text-slate-200">5. Everton</span>
+                        <span class="font-bold text-slate-300">10 b</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Stred/Vpravo (Kruh 2): Budúce zápasy Arsenalu -->
+            <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 w-full xl:w-auto min-w-[310px]">
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>⚽ Budúce zápasy Arsenalu</span>
+                    <span class="text-[10px] text-slate-300">Najbližších 5</span>
+                </div>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="text-slate-200">So 17.10. • <strong class="text-white">Nottingham</strong></span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="text-slate-200">So 24.10. • <strong class="text-white">Everton</strong></span>
+                        <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="text-slate-200">So 31.10. • <strong class="text-white">Liverpool</strong></span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="text-slate-200">So 07.11. • <strong class="text-white">Hull City</strong></span>
+                        <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
+                    </div>
+                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
+                        <span class="text-slate-200">So 21.11. • <strong class="text-white">Newcastle</strong></span>
+                        <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Úplne vpravo: Hodiny -->
+            <div class="text-right shrink-0">
                 <div id="current-time" class="text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow">--:--</div>
             </div>
+
         </header>
 
         <!-- HORNÝ RIADOK: Aktuálne počasie + SHMÚ ALADIN / Radar -->
@@ -168,7 +238,7 @@
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed (Stabilný priamy RSS parser) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
@@ -211,12 +281,6 @@
         function updateDateTime() {
             try {
                 var now = new Date();
-                var hour = now.getHours();
-                var greet = "Dobrý deň! 👋";
-                if (hour < 10) greet = "Dobré ráno! ☕";
-                else if (hour >= 18) greet = "Dobrý večer! 🌙";
-                document.getElementById('greeting').textContent = greet;
-
                 var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
                 document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
                 document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
@@ -292,29 +356,21 @@
                     });
 
                     var nowAdvice = "";
-                    var tipIcon = "🧥";
                     if (app >= 23) {
-                        tipIcon = "👕";
                         nowAdvice = "Je teplo – ak ideš von hneď teraz, stačí ti krátke tričko a ľahké oblečenie.";
                     } else if (app >= 17) {
-                        tipIcon = "👕";
                         nowAdvice = "Vonku je príjemne – teraz ti stačí tričko a tenká mikina.";
                     } else if (app >= 11) {
-                        tipIcon = "🧥";
                         nowAdvice = "Ak ideš von práve teraz, daj si dlhé nohavice a mikinu alebo prechodnú bundu.";
                     } else if (app >= 5) {
-                        tipIcon = "🧥";
                         nowAdvice = "Momentálne je chladno – určite si obleč teplejšiu bundu.";
                     } else {
-                        tipIcon = "🧣";
                         nowAdvice = "Vonku je zima – teraz si daj zimnú bundu a teplú vrstvu.";
                     }
                     if (curRainMm > 0 || [51,53,61,63,65,80,95].indexOf(data.current.weather_code) !== -1) {
-                        tipIcon = "☔";
                         nowAdvice += " Práve prší, nezabudni dáždnik!";
                     }
 
-                    document.getElementById('w-tip-icon').textContent = tipIcon;
                     document.getElementById('w-tip-now').innerHTML = '<strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz (' + cur + ' °C):</strong> ' + nowAdvice;
 
                     var dayAdvice = "Ráno a večer (" + minT + " °C) sa zíde teplejšia bunda, cez deň pri maxime " + maxT + " °C ";
@@ -332,11 +388,10 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT (Stabilné priame RSS načítanie s poistkou proti zlyhaniu) -->
+    <!-- SKRIPT 3: REDDIT -->
     <script>
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
-            // Použijeme priamy RSS feed z Redditu spracovaný cez bleskový api.rss2json.com
             var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
             
             fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
@@ -348,9 +403,9 @@
                         var title = item.title;
                         var link = item.link;
                         var pubDate = new Date(item.pubDate);
-                        var hoursAgo = Math.ah ? Math.ah : Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
+                        var hoursAgo = Math.max(1, Math.floor((Date.now() - pubDate.getTime()) / (1000 * 60 * 60)));
 
-                        return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-red-500/50 transition flex justify-between items-start gap-3">' +
+                        return '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
                             '<div class="space-y-1.5 flex-1 min-w-0">' +
                                 '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + title + '</h4>' +
                                 '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
@@ -362,12 +417,7 @@
                     }).join('');
                 })
                 .catch(function() {
-                    // Záložná poistka pre prípad, ak by RSS zlyhalo: vykreslí priame odkazy na zoznamy
-                    container.innerHTML = 
-                        '<div class="p-4 rounded-lg bg-slate-900/90 border border-red-500/30 text-center space-y-2">' +
-                            '<p class="text-xs text-slate-300">Živé načítanie je dočasne obmedzené ochranou Redditu.</p>' +
-                            '<a href="https://www.reddit.com/r/' + subreddit + '/top/?t=day" target="_blank" class="inline-block px-4 py-2 bg-red-600 text-white font-bold text-xs rounded-lg hover:bg-red-500 transition">Otvoriť Top r/' + subreddit + ' priamo ↗</a>' +
-                        '</div>';
+                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
                 });
         }
 
