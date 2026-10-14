@@ -14,7 +14,7 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- HLAVIČKA -->
+        <!-- HLAVIČKA: Dátum a Čas -->
         <header class="card p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 id="greeting" class="text-2xl md:text-3xl font-bold text-white">Dobrý deň! 👋</h1>
@@ -25,28 +25,17 @@
             </div>
         </header>
 
-        <!-- HORNÝ RIADOK: Počasie + Kalendár -->
+        <!-- HORNÝ RIADOK: Počasie + Google Kalendár -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- POČASIE -->
+            <!-- POČASIE (5 stĺpcov) -->
             <section class="card p-6 lg:col-span-5 flex flex-col justify-between">
                 <div>
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2 mb-4">
                         🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
                     </h2>
-                    <div class="flex items-center justify-between py-2 text-slate-300">
-                        <div class="flex items-center gap-4">
-                            <span class="text-5xl">⛅</span>
-                            <div>
-                                <div class="text-4xl font-bold text-white">16 °C</div>
-                                <div class="text-slate-400 text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
-                            </div>
-                        </div>
-                        <div class="text-right text-sm space-y-1.5 text-slate-300">
-                            <div>🔼 Max: <strong class="text-white">18 °C</strong> / 🔽 Min: <strong class="text-white">9 °C</strong></div>
-                            <div>💧 Zrážky: <strong class="text-sky-400">10 %</strong></div>
-                            <div>💨 Vietor: <strong class="text-white">12 km/h</strong></div>
-                        </div>
+                    <div id="weather-content" class="text-slate-300 py-2">
+                        Načítavam predpoveď počasia...
                     </div>
 
                     <!-- TIP NA OBLIEKANIE -->
@@ -57,189 +46,400 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="mt-4 pt-4 border-t border-slate-700/60 text-xs text-slate-400 flex justify-between">
                     <span>Zdroj: Open-Meteo</span>
-                    <a href="https://www.imeteo.sk/predpoved/bratislava" target="_blank" class="text-sky-400 hover:underline">Detailná predpoveď ↗</a>
+                    <button onclick="fetchWeather()" class="text-sky-400 hover:underline">↻ Obnoviť</button>
                 </div>
             </section>
 
-            <!-- KALENDÁR -->
+            <!-- GOOGLE KALENDÁR A UDALOSTI (7 stĺpcov) -->
             <section class="card p-6 lg:col-span-7">
                 <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
                         📅 Môj Google Kalendár
                     </h2>
-                    <a href="https://calendar.google.com" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-sky-400 hover:bg-slate-700 transition">
-                        Otvoriť ↗
-                    </a>
+                    <div class="flex gap-2">
+                        <button id="btn-view-list" onclick="toggleCalendarView('list')" class="px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition">
+                            Prehľad udalostí
+                        </button>
+                        <button id="btn-view-embed" onclick="toggleCalendarView('embed')" class="px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition">
+                            Živý Google Kalendár
+                        </button>
+                        <a href="https://calendar.google.com" target="_blank" class="px-3 py-1 rounded-lg text-xs bg-slate-800 text-sky-400 hover:bg-slate-700 transition">
+                            Otvoriť ↗
+                        </a>
+                    </div>
                 </div>
 
-                <div class="space-y-3">
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border bg-sky-950/40 border-sky-500/50 gap-2">
-                        <div>
-                            <div class="font-semibold text-white text-sm">🚆 Vlak Bratislava hl.st. → Praha hl.n. (rj 276)</div>
-                            <div class="text-xs text-slate-400 mt-0.5">České dráhy • 2 osoby (kód: KXU5TB)</div>
-                        </div>
-                        <span class="text-xs px-2.5 py-1 rounded-md bg-sky-500 text-slate-950 font-bold">16. 10. 2026 (o 2 dni)</span>
-                    </div>
+                <!-- Pohľad 1: Prehľadné karty udalostí -->
+                <div id="calendar-list-view" class="space-y-2.5"></div>
 
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border bg-slate-800/60 border-slate-700/60 gap-2">
-                        <div>
-                            <div class="font-semibold text-white text-sm">🚆 Vlak Praha hl.n. → Bratislava hl.st.</div>
-                            <div class="text-xs text-slate-400 mt-0.5">České dráhy • 2 osoby (kód: ZJR0TD)</div>
-                        </div>
-                        <span class="text-xs px-2.5 py-1 rounded-md bg-slate-700 text-slate-200 font-medium">18. 10. 2026 (o 4 dni)</span>
+                <!-- Pohľad 2: Priamy živý Google Calendar Embed (Agenda) -->
+                <div id="calendar-embed-view" class="hidden">
+                    <div class="rounded-lg overflow-hidden border border-slate-700 bg-white">
+                        <iframe 
+                            src="https://calendar.google.com/calendar/embed?src=peterladi14%40gmail.com&ctz=Europe%2FBratislava&mode=AGENDA&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0&showTz=0" 
+                            style="border: 0" 
+                            width="100%" 
+                            height="220" 
+                            frameborder="0" 
+                            scrolling="no">
+                        </iframe>
                     </div>
+                    <p class="text-xs text-slate-400 mt-2">
+                        * Aby sa zobrazil súkromný rozvrh, musíš byť v tomto prehliadači prihlásený do svojho Google účtu.
+                    </p>
                 </div>
             </section>
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Top Príspevky (Konkrétne posty a upvoty) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed (Top za 24h) -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
-                        🔥 Top príspevky na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
                     </h2>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold">Všetky vedľa seba</button>
-                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Slovakia</button>
-                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700">r/Gunners</button>
-                </div>
+                <div id="subreddit-tabs" class="flex flex-wrap gap-2"></div>
             </div>
             
-            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                
-                <!-- r/Slovakia -->
-                <div id="col-slovakia" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <h3 class="font-bold text-sky-400">r/Slovakia</h3>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
-                    </div>
-                    <div class="space-y-2.5 text-sm text-slate-300">
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Aké sú vaše obľúbené skryté miesta na Slovensku na víkendový výlet?</h4>
-                                <div class="text-xs text-slate-400">💬 142 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>845</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Nová cyklotrasa na Záhorí je konečne kompletná</h4>
-                                <div class="text-xs text-slate-400">💬 89 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>620</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Pezinská Baba dnes ráno</h4>
-                                <div class="text-xs text-slate-400">💬 45 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>412</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- r/Gunners -->
-                <div id="col-gunners" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-slate-700 pb-2">
-                        <h3 class="font-bold text-sky-400">r/Gunners</h3>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-sky-400">Otvoriť Top ↗</a>
-                    </div>
-                    <div class="space-y-2.5 text-sm text-slate-300">
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Bukayo Saka named in Premier League Team of the Week</h4>
-                                <div class="text-xs text-slate-400">💬 310 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>2.4k</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Mikel Arteta post-match press conference analysis</h4>
-                                <div class="text-xs text-slate-400">💬 185 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>1.5k</span>
-                            </div>
-                        </a>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
-                            <div class="space-y-1.5 flex-1 min-w-0">
-                                <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition">Training ground photos ahead of the weekend clash</h4>
-                                <div class="text-xs text-slate-400">💬 95 komentárov</div>
-                            </div>
-                            <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
-                                <span>▲</span><span>980</span>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-
+            <div id="reddit-content" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                Načítavam príspevky...
             </div>
         </section>
 
     </div>
 
     <script>
+        // ==========================================
+        // 🛠️ TVOJE NASTAVENIA
+        // ==========================================
+
+        const SUBREDDITS = ['Slovakia', 'Gunners'];
+
+        const CALENDAR_EVENTS = [
+            {
+                title: "🚆 Vlak Bratislava hl.st. → Praha hl.n. (rj 276)",
+                date: "2026-10-16",
+                note: "České dráhy • 2 osoby (kód: KXU5TB)"
+            },
+            {
+                title: "🚆 Vlak Praha hl.n. → Bratislava hl.st.",
+                date: "2026-10-18",
+                note: "České dráhy • 2 osoby (kód: ZJR0TD)"
+            }
+        ];
+
+        const LAT = 48.1486;
+        const LON = 17.1077;
+
+        // ==========================================
+        // ⚙️ LOGIKA DASHBOARDU
+        // ==========================================
+
+        async function fetchWithTimeout(url, timeoutMs = 3500) {
+            const controller = new AbortController();
+            const timer = setTimeout(() => controller.abort(), timeoutMs);
+            try {
+                const response = await fetch(url, {
+                    signal: controller.signal,
+                    credentials: 'omit'
+                });
+                clearTimeout(timer);
+                return response;
+            } catch (err) {
+                clearTimeout(timer);
+                throw err;
+            }
+        }
+
         // --- 1. DÁTUM A ČAS ---
         function updateDateTime() {
-            var now = new Date();
-            var hour = now.getHours();
-            var greet = "Dobrý deň! 👋";
+            const now = new Date();
+            const hour = now.getHours();
+            
+            let greet = "Dobrý deň! 👋";
             if (hour < 10) greet = "Dobré ráno! ☕";
             else if (hour >= 18) greet = "Dobrý večer! 🌙";
             document.getElementById('greeting').textContent = greet;
 
-            var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const formattedDate = now.toLocaleDateString('sk-SK', dateOptions);
             document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-            document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+
+            const timeOptions = { hour: '2-digit', minute: '2-digit' };
+            document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', timeOptions);
         }
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        // --- PREPÍNANIE ZÁLOŽIEK ---
-        function showSub(target) {
-            var colSsl = document.getElementById('col-slovakia');
-            var colGun = document.getElementById('col-gunners');
-            var grid = document.getElementById('reddit-grid');
-            
-            var btnAll = document.getElementById('tab-all');
-            var btnSsl = document.getElementById('tab-slovakia');
-            var btnGun = document.getElementById('tab-gunners');
+        // --- 2. POČASIE (Open-Meteo API) ---
+        const weatherCodes = {
+            0: { text: "Jasno", icon: "☀️" },
+            1: { text: "Prevažne jasno", icon: "🌤️" },
+            2: { text: "Polooblačno", icon: "⛅" },
+            3: { text: "Zamračené", icon: "☁️" },
+            45: { text: "Hmla", icon: "🌫️" },
+            48: { text: "Namŕzajúca hmla", icon: "🌫️" },
+            51: { text: "Slabé mrholenie", icon: "🌦️" },
+            53: { text: "Mrholenie", icon: "🌦️" },
+            61: { text: "Slabý dážď", icon: "🌧️" },
+            63: { text: "Mierny dážď", icon: "🌧️" },
+            65: { text: "Silný dážď", icon: "⛈️" },
+            71: { text: "Slabé sneženie", icon: "🌨️" },
+            73: { text: "Sneženie", icon: "❄️" },
+            80: { text: "Prehánky", icon: "🌦️" },
+            95: { text: "Búrka", icon: "⚡" }
+        };
 
-            [btnAll, btnSsl, btnGun].forEach(function(b) {
-                b.className = "px-3 py-1.5 rounded-lg text-sm transition bg-slate-800 text-slate-300 hover:bg-slate-700";
-            });
+        async function fetchWeather() {
+            const url = `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=1`;
+            try {
+                const res = await fetchWithTimeout(url, 5000);
+                const data = await res.json();
+                const current = data.current;
+                const daily = data.daily;
+                const info = weatherCodes[current.weather_code] || { text: "Premenlivé", icon: "🌤️" };
 
-            if (target === 'all') {
-                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "block";
-                btnAll.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
-            } else if (target === 'slovakia') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "none";
-                btnSsl.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
-            } else if (target === 'gunners') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "none";
-                colGun.style.display = "block";
-                btnGun.className = "px-3 py-1.5 rounded-lg text-sm transition bg-sky-500 text-slate-950 font-semibold";
+                document.getElementById('weather-content').innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <span class="text-5xl">${info.icon}</span>
+                            <div>
+                                <div class="text-4xl font-bold text-white">${Math.round(current.temperature_2m)} °C</div>
+                                <div class="text-slate-400 text-sm mt-1">${info.text} • pocitovo ${Math.round(current.apparent_temperature)} °C</div>
+                            </div>
+                        </div>
+                        <div class="text-right text-sm space-y-1.5 text-slate-300">
+                            <div>🔼 Max: <strong class="text-white">${Math.round(daily.temperature_2m_max[0])} °C</strong> / 🔽 Min: <strong class="text-white">${Math.round(daily.temperature_2m_min[0])} °C</strong></div>
+                            <div>💧 Zrážky: <strong class="text-sky-400">${daily.precipitation_probability_max[0]} %</strong></div>
+                            <div>💨 Vietor: <strong class="text-white">${Math.round(current.wind_speed_10m)} km/h</strong></div>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                document.getElementById('weather-content').innerHTML = `<p class="text-red-400">Nepodarilo sa načítať počasie.</p>`;
             }
         }
+        fetchWeather();
+
+        // --- 3. GOOGLE KALENDÁR ---
+        function toggleCalendarView(mode) {
+            const listView = document.getElementById('calendar-list-view');
+            const embedView = document.getElementById('calendar-embed-view');
+            const btnList = document.getElementById('btn-view-list');
+            const btnEmbed = document.getElementById('btn-view-embed');
+
+            if (mode === 'embed') {
+                listView.classList.add('hidden');
+                embedView.classList.remove('hidden');
+                btnEmbed.className = "px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition";
+                btnList.className = "px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            } else {
+                embedView.classList.add('hidden');
+                listView.classList.remove('hidden');
+                btnList.className = "px-3 py-1 rounded-lg text-xs font-semibold bg-sky-500 text-slate-950 transition";
+                btnEmbed.className = "px-3 py-1 rounded-lg text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 transition";
+            }
+        }
+
+        function renderCalendarEvents() {
+            const container = document.getElementById('calendar-list-view');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const upcoming = CALENDAR_EVENTS.map(ev => {
+                const evDate = new Date(ev.date + "T00:00:00");
+                const diffDays = Math.round((evDate - today) / (1000 * 60 * 60 * 24));
+                return { ...ev, evDate, diffDays };
+            }).filter(ev => ev.diffDays >= 0).sort((a, b) => a.diffDays - b.diffDays);
+
+            if (upcoming.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-sm py-4">Na najbližšie dni nemáš žiadne uložené udalosti.</p>`;
+                return;
+            }
+
+            container.innerHTML = upcoming.map(ev => {
+                const dateStr = ev.evDate.toLocaleDateString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
+                let badge = `<span class="text-xs px-2.5 py-1 rounded-md bg-slate-700 text-slate-200 font-medium">o ${ev.diffDays} d (${dateStr})</span>`;
+                let boxClass = "bg-slate-800/60 border-slate-700/60";
+
+                if (ev.diffDays === 0) {
+                    badge = `<span class="text-xs px-2.5 py-1 rounded-md bg-emerald-500 text-slate-950 font-bold uppercase">DNES</span>`;
+                    boxClass = "bg-emerald-950/40 border-emerald-500/50";
+                } else if (ev.diffDays === 1) {
+                    badge = `<span class="text-xs px-2.5 py-1 rounded-md bg-sky-500 text-slate-950 font-bold">ZAJTRA (${dateStr})</span>`;
+                }
+
+                return `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3.5 rounded-lg border ${boxClass} gap-2">
+                        <div>
+                            <div class="font-semibold text-white text-sm">${ev.title}</div>
+                            <div class="text-xs text-slate-400 mt-0.5">${ev.note}</div>
+                        </div>
+                        ${badge}
+                    </div>
+                `;
+            }).join('');
+        }
+        renderCalendarEvents();
+
+        // --- 4. REDDIT (ŽIVÉ SŤAHOVANIE) ---
+        let selectedFilter = 'ALL';
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('subreddit-tabs');
+            const allBtnClass = selectedFilter === 'ALL'
+                ? "bg-sky-500 text-slate-950 font-semibold"
+                : "bg-slate-800 text-slate-300 hover:bg-slate-700";
+
+            let html = `<button onclick="setRedditFilter('ALL')" class="px-3 py-1.5 rounded-lg text-sm transition ${allBtnClass}">Všetky vedľa seba</button>`;
+
+            html += SUBREDDITS.map(sub => {
+                const isActive = sub === selectedFilter;
+                const classes = isActive 
+                    ? "bg-sky-500 text-slate-950 font-semibold" 
+                    : "bg-slate-800 text-slate-300 hover:bg-slate-700";
+                return `<button onclick="setRedditFilter('${sub}')" class="px-3 py-1.5 rounded-lg text-sm transition ${classes}">r/${sub}</button>`;
+            }).join('');
+
+            tabsContainer.innerHTML = html;
+        }
+
+        function setRedditFilter(filter) {
+            selectedFilter = filter;
+            renderTabs();
+            loadRedditView();
+        }
+
+        function formatTimeAgo(timestampSec) {
+            const diffHours = Math.max(1, Math.floor((Date.now() / 1000 - timestampSec) / 3600));
+            return `pred ${diffHours} h`;
+        }
+
+        function parseRedditJsonData(rawData, limit) {
+            if (!rawData || !rawData.data || !Array.isArray(rawData.data.children)) {
+                throw new Error("Neplatný JSON formát");
+            }
+            return rawData.data.children
+                .map(c => c.data)
+                .filter(p => !p.stickied)
+                .sort((a, b) => b.ups - a.ups)
+                .slice(0, limit)
+                .map(p => ({
+                    title: p.title,
+                    url: `https://www.reddit.com${p.permalink}`,
+                    timeAgo: formatTimeAgo(p.created_utc),
+                    subtext: `💬 ${p.num_comments}`,
+                    badgeTop: "▲",
+                    badgeBottom: p.ups
+                }));
+        }
+
+        async function fetchSubredditTop24h(subreddit, limit = 5) {
+            const redditJsonUrl = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=15&raw_json=1`;
+            const apiRedditUrl = `https://api.reddit.com/r/${subreddit}/top.json?t=day&limit=15&raw_json=1`;
+
+            try {
+                const res = await fetchWithTimeout(apiRedditUrl, 2500);
+                if (res.ok) return parseRedditJsonData(await res.json(), limit);
+            } catch (e) {}
+
+            try {
+                const res = await fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(redditJsonUrl)}`, 4000);
+                if (res.ok) return parseRedditJsonData(await res.json(), limit);
+            } catch (e) {}
+
+            try {
+                const res = await fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(redditJsonUrl)}`, 3500);
+                if (res.ok) {
+                    const wrapper = await res.json();
+                    if (wrapper && wrapper.contents) {
+                        return parseRedditJsonData(JSON.parse(wrapper.contents), limit);
+                    }
+                }
+            } catch (e) {}
+
+            const rssUrl = `https://www.reddit.com/r/${subreddit}/top/.rss?t=day`;
+            const rssRes = await fetchWithTimeout(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`, 4500);
+            if (!rssRes.ok) throw new Error("Všetky zdroje sú nedostupné");
+            const rssData = await rssRes.json();
+            if (!rssData || !Array.isArray(rssData.items)) throw new Error("Prázdny RSS feed");
+
+            return rssData.items.slice(0, limit).map((item, idx) => {
+                const pubSec = Math.floor(new Date(item.pubDate + " UTC").getTime() / 1000);
+                return {
+                    title: item.title,
+                    url: item.link,
+                    timeAgo: isNaN(pubSec) ? "dnes" : formatTimeAgo(pubSec),
+                    subtext: `👤 ${item.author || 'reddit'}`,
+                    badgeTop: "TOP",
+                    badgeBottom: `#${idx + 1}`
+                };
+            });
+        }
+
+        function renderPostCard(p) {
+            return `
+                <a href="${p.url}" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">
+                    <div class="space-y-1.5 flex-1 min-w-0">
+                        <h4 class="text-white text-sm font-medium leading-snug hover:text-sky-400 transition line-clamp-2">${p.title}</h4>
+                        <div class="text-xs text-slate-400 flex items-center gap-3">
+                            <span>🕒 ${p.timeAgo}</span>
+                            <span>${p.subtext}</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center min-w-[54px] py-1 px-2 rounded bg-slate-900 text-amber-400 font-bold text-xs shrink-0">
+                        <span>${p.badgeTop}</span>
+                        <span>${p.badgeBottom}</span>
+                    </div>
+                </a>
+            `;
+        }
+
+        async function loadRedditView() {
+            const container = document.getElementById('reddit-content');
+
+            if (selectedFilter === 'ALL') {
+                container.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
+                container.innerHTML = SUBREDDITS.map(sub => `
+                    <div id="col-${sub}" class="space-y-3">
+                        <div class="flex items-center justify-between border-b border-slate-700 pb-2">
+                            <h3 class="font-bold text-sky-400">r/${sub}</h3>
+                            <span class="text-xs text-slate-400">Top 24h</span>
+                        </div>
+                        <div class="posts-list space-y-2.5 text-sm text-slate-400">Sťahujem r/${sub}...</div>
+                    </div>
+                `).join('');
+
+                SUBREDDITS.forEach(async (sub) => {
+                    const listEl = document.querySelector(`#col-${sub} .posts-list`);
+                    try {
+                        const posts = await fetchSubredditTop24h(sub, 5);
+                        listEl.innerHTML = posts.length 
+                            ? posts.map(renderPostCard).join('') 
+                            : `<p class="text-slate-400">Žiadne príspevky za 24h.</p>`;
+                    } catch (e) {
+                        listEl.innerHTML = `<p class="text-amber-300 text-xs">Chyba pripojenia pre r/${sub}.</p>`;
+                    }
+                });
+
+            } else {
+                container.className = "grid grid-cols-1 gap-3";
+                container.innerHTML = `<p class="text-slate-400">Sťahujem top príspevky z r/${selectedFilter}...</p>`;
+                try {
+                    const posts = await fetchSubredditTop24h(selectedFilter, 10);
+                    container.innerHTML = posts.map(renderPostCard).join('');
+                } catch (e) {
+                    container.innerHTML = `<p class="text-amber-300 text-sm">Chyba pripojenia pre r/${selectedFilter}.</p>`;
+                }
+            }
+        }
+
+        renderTabs();
+        loadRedditView();
     </script>
 </body>
 </html>
