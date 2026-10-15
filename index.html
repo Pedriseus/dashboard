@@ -41,7 +41,7 @@
             border-color: #d4af37;
             color: #ffffff;
         }
-        /* ABSOLÚTNE ROVNAKÁ ŠÍRKA A DĹŽKA PRE HLAVIČKU */
+        /* ROVNAKÁ ŠÍRKA A VÝŠKA PRE VŠETKY TRI TABUĽKY V HLAVIČKE */
         .exact-box {
             width: 360px !important;
             min-width: 360px !important;
@@ -60,12 +60,12 @@
         <!-- HLAVIČKA V ŠTÝLE ARSENALU S TROMI ROVNAKÝMI TABUĽKAMI -->
         <header class="arsenal-header p-5 md:p-6 flex flex-col 2xl:flex-row justify-between items-stretch gap-6 shadow-xl">
             
-            <!-- 1. Vľavo: Logo, dynamický pozdrav, dátum a čas -->
+            <!-- 1. Vľavo: Logo, pozdrav, dátum a čas presne zarovnaný pod textom -->
             <div class="flex items-center gap-4 shrink-0">
                 <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 drop-shadow-lg" onerror="this.style.display='none'">
                 <div>
                     <div class="text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
-                    <h1 id="greeting" class="text-xl md:text-2xl font-extrabold text-white">Načítavam...</h1>
+                    <h1 id="greeting" class="text-xl md:text-2xl font-extrabold text-white">Dobrý deň! 👋</h1>
                     <p id="current-date" class="text-red-100 text-sm mt-0.5">Načítavam dátum...</p>
                     <div class="mt-1.5 text-left pl-0.5">
                         <div id="current-time" class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow">--:--</div>
@@ -75,11 +75,9 @@
 
             <!-- 2. Stred 1: Top 5 Premier League Tabuľka (Presne 360px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
-                <div>
-                    <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
-                        <span>🏆 PREMIER LEAGUE (TOP 5)</span>
-                        <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
-                    </div>
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>🏆 PREMIER LEAGUE (TOP 5)</span>
+                    <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
                 </div>
                 <div class="space-y-1.5 text-xs my-auto">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
@@ -113,98 +111,95 @@
                         <span class="font-bold text-slate-300">10 b</span>
                     </div>
                 </div>
-                <div></div>
+                <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between items-center px-1">
+                    <span>📊 Stav súťaže:</span>
+                    <span class="text-slate-200 font-semibold">Po 7. kole</span>
+                </div>
             </div>
 
-            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, dobre viditeľné farby) -->
+            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, PL=jasná bordová, UCL=zlatá, EFL=modrá) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
-                <div>
-                    <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
-                        <span>⚽ ZÁPASY ARSENALU</span>
-                        <span class="text-[10px] text-slate-300">VŠETKY SÚŤAŽE</span>
-                    </div>
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>⚽ ZÁPASY ARSENALU</span>
+                    <span class="text-[10px] text-slate-300">VŠETKY SÚŤAŽE</span>
                 </div>
                 <div class="space-y-1.5 text-xs my-auto">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#800020] border border-red-400/50 text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#9e0b22] border border-rose-400/60 text-white shadow-sm">PL</span>
                             So 17.10. • <strong class="text-white">Nottingham (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-black shadow">UCL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-amber-400 text-slate-950 shadow-sm">UCL</span>
                             St 21.10. • <strong class="text-white">Bayern (UCL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#800020] border border-red-400/50 text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#9e0b22] border border-rose-400/60 text-white shadow-sm">PL</span>
                             So 24.10. • <strong class="text-white">Everton (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-600 text-white shadow">EFL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-blue-600 border border-blue-400/40 text-white shadow-sm">EFL</span>
                             Ut 27.10. • <strong class="text-white">Fleetwood (EFL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200 flex items-center gap-2">
-                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#800020] border border-red-400/50 text-white shadow">PL</span>
+                            <span class="text-[10px] font-black px-1.5 py-0.5 rounded bg-[#9e0b22] border border-rose-400/60 text-white shadow-sm">PL</span>
                             Ne 01.11. • <strong class="text-white">Liverpool (PL)</strong>
                         </span>
                         <span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>
                     </div>
                 </div>
-                <div></div>
+                <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between items-center px-1">
+                    <span>🏟️ Najbližšie:</span>
+                    <span class="text-white font-semibold">City Ground (Nottingham)</span>
+                </div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Stabilný Deadline (Presne 360px) -->
+            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Deadline (Presne 360px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
-                <div>
-                    <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
-                        <span>🎮 FPL Mini-liga (#28856)</span>
-                        <a href="https://fantasy.premierleague.com/en/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline">FPL ↗</a>
-                    </div>
+                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
+                    <span>🎮 FPL Mini-liga (#28856)</span>
+                    <a href="https://fantasy.premierleague.com/en/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline">FPL ↗</a>
                 </div>
                 <div class="space-y-1.5 text-xs my-auto">
-                    <!-- 1. miesto (strata na teba: -23 b) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="text-slate-200">1. The Invincibles <span class="text-[10px] font-bold text-red-400 ml-1">(-23)</span></span>
                         <span class="font-bold text-slate-300">411 b</span>
                     </div>
-                    <!-- 2. miesto (strata na teba: -9 b) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="text-slate-200">2. Fc ThisSeason <span class="text-[10px] font-bold text-red-400 ml-1">(-9)</span></span>
                         <span class="font-bold text-slate-300">397 b</span>
                     </div>
-                    <!-- 3. Ødeargod (Ty) -->
                     <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
                         <span class="font-bold text-white flex items-center gap-1.5">
                             <span>⭐</span> 3. Ødeargod
                         </span>
                         <span class="font-black gold-text">388 b</span>
                     </div>
-                    <!-- 4. miesto (náskok pred tebou: +4 b) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="text-slate-200">4. Australobooster <span class="text-[10px] font-bold text-emerald-400 ml-1">(+4)</span></span>
                         <span class="font-bold text-slate-300">384 b</span>
                     </div>
-                    <!-- 5. miesto (náskok pred tebou: +13 b) -->
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="text-slate-200">5. CFC Academy <span class="text-[10px] font-bold text-emerald-400 ml-1">(+13)</span></span>
                         <span class="font-bold text-slate-300">375 b</span>
                     </div>
                 </div>
-                <!-- Stabilný Deadline -->
+                <!-- Deadline pod FPL tabuľkou -->
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
                     <span>⏳ Najbližší deadline:</span>
-                    <a href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">So 17.10. o 11:30 ↗</a>
+                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">So 17.10. o 11:30 ↗</a>
                 </div>
             </div>
 
@@ -354,19 +349,16 @@
 
     </div>
 
-    <!-- SKRIPT 1: DÁTUM, ČAS A DYNAMICKÝ POZDRAV -->
+    <!-- SKRIPT 1: DÁTUM, ČAS, POZDRAV A FPL DEADLINE -->
     <script>
         function updateDateTime() {
             try {
                 var now = new Date();
                 var hours = now.getHours();
-                
                 var greetingText = "Dobrý deň! 👋";
                 if (hours >= 5 && hours < 9) {
                     greetingText = "Dobré ráno! ☕";
-                } else if (hours >= 9 && hours < 18) {
-                    greetingText = "Dobrý deň! 👋";
-                } else {
+                } else if (hours >= 18 || hours < 5) {
                     greetingText = "Dobrý večer! 🌙";
                 }
                 document.getElementById('greeting').textContent = greetingText;
@@ -378,9 +370,52 @@
         }
         updateDateTime();
         setInterval(updateDateTime, 1000);
+
+        // Živé načítanie FPL deadlinu s tichou poistkou (ak API zlyhá, ostane pekne So 17.10. o 11:30 ↗)
+        function loadFPLDeadline() {
+            var targetUrl = 'https://fantasy.premierleague.com/api/bootstrap-static/';
+            var proxies = [
+                'https://corsproxy.io/?' + encodeURIComponent(targetUrl),
+                'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl)
+            ];
+
+            function tryNextProxy(idx) {
+                if (idx >= proxies.length) return;
+                fetch(proxies[idx])
+                    .then(function(res) {
+                        if (!res.ok) throw new Error("Status " + res.status);
+                        return res.json();
+                    })
+                    .then(function(data) {
+                        if (!data || !Array.isArray(data.events)) throw new Error("Invalid format");
+                        var nextEvent = null;
+                        for (var i = 0; i < data.events.length; i++) {
+                            if (data.events[i].is_next) {
+                                nextEvent = data.events[i];
+                                break;
+                            }
+                        }
+                        if (nextEvent && nextEvent.deadline_time) {
+                            var dl = new Date(nextEvent.deadline_time);
+                            var days = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
+                            var dayName = days[dl.getDay()];
+                            var d = dl.getDate();
+                            var m = dl.getMonth() + 1;
+                            var hh = String(dl.getHours()).padStart(2, '0');
+                            var mm = String(dl.getMinutes()).padStart(2, '0');
+                            document.getElementById('fpl-deadline').textContent = dayName + ' ' + d + '.' + m + '. o ' + hh + ':' + mm + ' ↗';
+                        }
+                    })
+                    .catch(function() {
+                        tryNextProxy(idx + 1);
+                    });
+            }
+            tryNextProxy(0);
+        }
+        loadFPLDeadline();
     </script>
 
-    <!-- SKRIPT 2: POČASIE (S proxy pre obídenie CORS) -->
+    <!-- SKRIPT 2: POČASIE (Priame volanie Open-Meteo ako v stable.html) -->
     <script>
         var weatherIcons = {
             0: { text: "Jasno", icon: "☀️" },
@@ -400,13 +435,10 @@
         };
 
         function updateLiveWeather() {
-            var rawUrl = "https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2";
-            var proxyUrl = "https://api.allorigins.win/get?url=" + encodeURIComponent(rawUrl);
-
-            fetch(proxyUrl)
+            var url = "https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2";
+            fetch(url)
                 .then(function(res) { return res.json(); })
-                .then(function(response) {
-                    var data = JSON.parse(response.contents);
+                .then(function(data) {
                     var cur = Math.round(data.current.temperature_2m);
                     var app = Math.round(data.current.apparent_temperature);
                     var curRainMm = data.current.precipitation || 0;
@@ -493,45 +525,84 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT (Cez stabilnú proxy) -->
+    <!-- SKRIPT 3: REDDIT (3-stupňová záloha pre 100% načítanie) -->
     <script>
+        function renderRedditItems(items, container) {
+            container.innerHTML = items.slice(0, 5).map(function(item, idx) {
+                var hoursAgo = Math.max(1, Math.floor((Date.now() - item.dateMs) / (1000 * 60 * 60)));
+                return '<a href="' + item.link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
+                    '<div class="space-y-1.5 flex-1 min-w-0">' +
+                        '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + item.title + '</h4>' +
+                        '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
+                    '</div>' +
+                    '<div class="flex flex-col items-center justify-center min-w-[58px] py-1.5 px-2 rounded bg-red-950/60 border border-red-500/40 text-amber-300 font-bold text-xs shrink-0">' +
+                        '<span>TOP #' + (idx + 1) + '</span>' +
+                    '</div>' +
+                '</a>';
+            }).join('');
+        }
+
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
-            var jsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5';
-            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(jsonUrl);
-            
-            fetch(proxyUrl)
-                .then(function(res) { return res.json(); })
-                .then(function(response) {
-                    var data = JSON.parse(response.contents);
-                    var posts = data && data.data && data.data.children;
-                    if (!posts || posts.length === 0) {
-                        container.innerHTML = '<p class="text-amber-300 text-xs">Žiadne príspevky.</p>';
-                        return;
-                    }
+            var redditJsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
+            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
 
-                    var html = "";
-                    for (var i = 0; i < posts.length; i++) {
-                        var post = posts[i].data;
-                        var title = post.title;
-                        var link = 'https://www.reddit.com' + post.permalink;
-                        var createdUtc = post.created_utc * 1000;
-                        var hoursAgo = Math.max(1, Math.floor((Date.now() - createdUtc) / (1000 * 60 * 60)));
-
-                        html += '<a href="' + link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
-                            '<div class="space-y-1.5 flex-1 min-w-0">' +
-                                '<h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + title + '</h4>' +
-                                '<div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div>' +
-                            '</div>' +
-                            '<div class="flex flex-col items-center justify-center min-w-[58px] py-1.5 px-2 rounded bg-red-950/60 border border-red-500/40 text-amber-300 font-bold text-xs shrink-0">' +
-                                '<span>TOP #' + (i + 1) + '</span>' +
-                            '</div>' +
-                        '</a>';
-                    }
-                    container.innerHTML = html;
+            // 1. pokus: Priame Reddit JSON API
+            fetch(redditJsonUrl)
+                .then(function(res) {
+                    if (!res.ok) throw new Error("Direct JSON blocked");
+                    return res.json();
+                })
+                .then(function(data) {
+                    var children = data && data.data && data.data.children;
+                    if (!children || !children.length) throw new Error("Empty");
+                    var parsed = children.map(function(c) {
+                        return {
+                            title: c.data.title,
+                            link: 'https://www.reddit.com' + c.data.permalink,
+                            dateMs: c.data.created_utc * 1000
+                        };
+                    });
+                    renderRedditItems(parsed, container);
                 })
                 .catch(function() {
-                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
+                    // 2. pokus: Cez Corsproxy.io
+                    fetch('https://corsproxy.io/?' + encodeURIComponent(redditJsonUrl))
+                        .then(function(res) {
+                            if (!res.ok) throw new Error("Corsproxy failed");
+                            return res.json();
+                        })
+                        .then(function(data) {
+                            var children = data && data.data && data.data.children;
+                            if (!children || !children.length) throw new Error("Empty");
+                            var parsed = children.map(function(c) {
+                                return {
+                                    title: c.data.title,
+                                    link: 'https://www.reddit.com' + c.data.permalink,
+                                    dateMs: c.data.created_utc * 1000
+                                };
+                            });
+                            renderRedditItems(parsed, container);
+                        })
+                        .catch(function() {
+                            // 3. pokus: Pôvodný rss2json
+                            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
+                                .then(function(res) { return res.json(); })
+                                .then(function(data) {
+                                    if (!data || !Array.isArray(data.items) || !data.items.length) throw new Error("RSS failed");
+                                    var parsed = data.items.map(function(item) {
+                                        return {
+                                            title: item.title,
+                                            link: item.link,
+                                            dateMs: new Date(item.pubDate).getTime()
+                                        };
+                                    });
+                                    renderRedditItems(parsed, container);
+                                })
+                                .catch(function() {
+                                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky (skontroluj AdBlock / ochranu prehliadača).</p>';
+                                });
+                        });
                 });
         }
 
