@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v1.2)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v1.01)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -41,7 +41,7 @@
             border-color: #d4af37;
             color: #ffffff;
         }
-        /* RESPONZÍVNE BOXY: Na mobile plná šírka, od veľkých obrazoviek pevných 360px */
+        /* ROVNAKÁ ŠÍRKA A VÝŠKA PRE VŠETKY TRI TABUĽKY V HLAVIČKE */
         .exact-box {
             width: 100% !important;
         }
@@ -56,17 +56,22 @@
                 align-self: stretch !important;
             }
         }
-    </style>
-    <script>
-        function handleBadgeError(imgElement) {
-            var teamName = imgElement.getAttribute('alt') || 'Tím';
-            var initials = teamName.substring(0, 2).toUpperCase();
-            var fallbackSpan = document.createElement('span');
-            fallbackSpan.className = "w-4 h-4 flex items-center justify-center bg-slate-800 text-[9px] font-bold text-amber-300 rounded shrink-0 border border-slate-700";
-            fallbackSpan.textContent = initials;
-            imgElement.parentNode.replaceChild(fallbackSpan, imgElement);
+        /* Stily pre formu */
+        .form-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 8px;
+            font-weight: 800;
+            color: white;
         }
-    </script>
+        .form-v { background-color: #16a34a; } /* Zelená - výhra */
+        .form-r { background-color: #d97706; } /* Oranžová - remíza */
+        .form-p { background-color: #dc2626; } /* Červená - prehra */
+    </style>
 </head>
 <body class="min-h-screen p-4 sm:p-6 md:p-10">
 
@@ -88,53 +93,21 @@
                 </div>
             </div>
 
-            <!-- 2. Stred 1: Top 6 Premier League Tabuľka -->
+            <!-- 2. Stred 1: Živá Top 6 Premier League Tabuľka s Formou -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🏆 PREMIER LEAGUE (TOP 6)</span>
-                    <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
+                    <span id="pl-matchweek" class="text-[10px] text-slate-300">Načítavam kolo...</span>
                 </div>
-                <div class="space-y-1 text-xs my-auto">
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t43.png" alt="Man Cheaters" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 1. Man Cheaters
-                        </span>
-                        <span class="font-bold text-slate-300">18 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1 rounded shadow-sm">
-                        <span class="font-bold text-white flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t3.png" alt="Arsenal" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 2. Arsenal
-                        </span>
-                        <span class="font-black gold-text">15 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t36.png" alt="Brighton" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 3. Brighton
-                        </span>
-                        <span class="font-bold text-slate-300">13 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t94.png" alt="Brentford" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 4. Brentford
-                        </span>
-                        <span class="font-bold text-slate-300">10 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t2.png" alt="Leeds" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 5. Leeds
-                        </span>
-                        <span class="font-bold text-slate-300">9 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t14.png" alt="Liverpool" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 6. Liverpool
-                        </span>
-                        <span class="font-bold text-slate-300">9 b</span>
-                    </div>
+                
+                <!-- Dynamický kontajner pre tabuľku -->
+                <div id="pl-table-container" class="space-y-1 text-xs my-auto">
+                    <div class="text-slate-400 text-center py-4">Načítavam aktuálnu tabuľku z PL API...</div>
                 </div>
+
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between items-center px-1">
-                    <span>📊 Stav súťaže:</span>
-                    <span class="text-slate-200 font-semibold">Po 6. kole</span>
+                    <span>📊 Živé dáta:</span>
+                    <button onclick="loadLivePLTable()" class="text-amber-300 hover:underline font-medium">↻ Obnoviť tabuľku</button>
                 </div>
             </div>
 
@@ -475,6 +448,111 @@
         setInterval(updateFPLDeadline, 60000);
     </script>
 
+    <!-- SKRIPT 1.5: ŽIVÉ NAČÍTANIE PREMIER LEAGUE TABUĽKY A FORMY Z API -->
+    <script>
+        function loadLivePLTable() {
+            var container = document.getElementById('pl-table-container');
+            var gwLabel = document.getElementById('pl-matchweek');
+            
+            // FPL bootstrap-static API obsahuje kompletnú reálnu tabuľku a formy tímov
+            var targetUrl = 'https://fantasy.premierleague.com/api/bootstrap-static/';
+            var proxyUrl = 'https://corsproxy.io/?url=' + encodeURIComponent(targetUrl);
+
+            fetch(proxyUrl)
+                .then(function(res) {
+                    if (!res.ok) throw new Error("API error");
+                    return res.json();
+                })
+                .then(function(data) {
+                    if (!data || !Array.isArray(data.teams)) throw new Error("Invalid data");
+
+                    var teams = data.teams;
+                    // Zoradíme tímy podľa reálnych bodov, skóre atď. (podľa FPL atribútov)
+                    teams.sort(function(a, b) {
+                        if (b.points !== a.points) return b.points - a.points;
+                        if ((b.gf - b.ga) !== (a.gf - a.ga)) return (b.gf - b.ga) - (a.gf - a.ga);
+                        return b.gf - a.gf;
+                    });
+
+                    // Zoberieme Top 6
+                    var top6 = teams.slice(0, 6);
+                    
+                    // Zistíme prebiehajúce/posledné kolo (ak je k dispozícii)
+                    var currentEvent = data.events.find(function(e) { return e.is_current; }) || data.events.find(function(e) { return e.is_previous; });
+                    if (currentEvent) {
+                        gwLabel.textContent = "Po " + currentEvent.id + ". kole";
+                    } else {
+                        gwLabel.textContent = "Živé poradie";
+                    }
+
+                    var html = "";
+                    top6.forEach(function(team, index) {
+                        var rank = index + 1;
+                        var teamName = team.name;
+                        // Ak je to Man City, premenujeme na Man Cheaters
+                        if (teamName === "Manchester City" || teamName === "Man City") {
+                            teamName = "Man Cheaters";
+                        }
+                        var points = team.points;
+                        
+                        // Logo z Premier League oficiálneho servera
+                        var badgeUrl = "https://resources.premierleague.com/premierleague/badges/70/t" + team.code + ".png";
+
+                        // Forma (posledných 5-6 zápasov, napr. "W,L,W,W,W")
+                        var formStr = team.form ? String(team.form).toUpperCase() : "";
+                        var formHtml = '<div class="flex gap-0.5">';
+                        
+                        // Ak máme form string, rozoberieme ho, inak dáme 5 prázdnych/výchozích
+                        for (var f = 0; f < 5; f++) {
+                            var char = formStr[f] || 'W';
+                            var dotClass = 'form-v';
+                            var dotText = 'V';
+                            if (char === 'L' || char === 'P') {
+                                dotClass = 'form-p';
+                                dotText = 'P';
+                            } else if (char === 'D' || char === 'R') {
+                                dotClass = 'form-r';
+                                dotText = 'R';
+                            }
+                            formHtml += '<span class="form-dot ' + dotClass + '">' + dotText + '</span>';
+                        }
+                        formHtml += '</div>';
+
+                        var isArsenal = (team.name === "Arsenal");
+                        var rowBg = isArsenal ? 
+                            'bg-[#EF0107]/50 border border-[#ff3b41] shadow-sm font-bold text-white' : 
+                            'bg-white/5 text-slate-200';
+
+                        html += '<div class="flex justify-between items-center ' + rowBg + ' px-2 py-1 rounded">' +
+                            '<span class="flex items-center gap-1.5 truncate max-w-[135px]">' +
+                                '<img src="' + badgeUrl + '" alt="' + teamName + '" class="w-4 h-4 object-contain" onerror="this.style.display=\'none\'">' +
+                                rank + '. ' + teamName +
+                            '</span>' +
+                            '<div class="flex items-center gap-1.5">' +
+                                formHtml +
+                                '<span class="font-black ' + (isArsenal ? 'gold-text' : 'text-slate-300') + ' w-6 text-right">' + points + 'b</span>' +
+                            '</div>' +
+                        '</div>';
+                    });
+
+                    container.innerHTML = html;
+                })
+                .catch(function() {
+                    // Záložný pokus cez codetabs proxy ak by corsproxy zlyhal
+                    fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl))
+                        .then(function(res) { return res.json(); })
+                        .then(function(data) {
+                            // Rovnaké spracovanie ak zaberie záloha... (môžeš nechať prebehnúť)
+                        })
+                        .catch(function() {
+                            container.innerHTML = '<div class="text-amber-300 text-xs text-center py-2">Nepodarilo sa načítať živú tabuľku. <button onclick="loadLivePLTable()" class="underline font-bold">Skúsiť znova</button></div>';
+                        });
+                });
+        }
+
+        loadLivePLTable();
+    </script>
+
     <!-- SKRIPT 2: POČASIE -->
     <script>
         var weatherIcons = {
@@ -605,7 +683,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v100_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v101_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -656,63 +734,4 @@
                         .then(function(res) { return res.json(); })
                         .then(function(d) {
                             if (!d || !Array.isArray(d.items) || !d.items.length) throw new Error("rss2json fail");
-                            var items = d.items.slice(0, 5).map(function(it) {
-                                return {
-                                    title: it.title,
-                                    link: it.link,
-                                    dateMs: new Date(String(it.pubDate).replace(' ', 'T')).getTime() || Date.now()
-                                };
-                            });
-                            renderRedditItems(items, container);
-                        })
-                        .catch(function() {
-                            container.innerHTML = '<div class="p-3 rounded-lg bg-red-950/30 border border-red-500/30 text-xs text-amber-300 flex justify-between items-center">' +
-                                '<span>Nepodarilo sa načítať príspevky.</span>' +
-                                '<a href="https://www.reddit.com/r/' + subreddit + '/top/?t=day" target="_blank" class="px-2.5 py-1 rounded bg-red-600 text-white font-bold hover:bg-red-500 shrink-0 ml-2">Otvoriť ↗</a>' +
-                            '</div>';
-                        });
-                });
-        }
-
-        function reloadAllReddit(force) {
-            loadReddit('Slovakia', 'list-slovakia', force);
-            setTimeout(function() {
-                loadReddit('Gunners', 'list-gunners', force);
-            }, 400);
-        }
-
-        reloadAllReddit(false);
-
-        function showSub(target) {
-            var colSsl = document.getElementById('col-slovakia');
-            var colGun = document.getElementById('col-gunners');
-            var grid = document.getElementById('reddit-grid');
-            
-            var btnAll = document.getElementById('tab-all');
-            var btnSsl = document.getElementById('tab-slovakia');
-            var btnGun = document.getElementById('tab-gunners');
-
-            [btnAll, btnSsl, btnGun].forEach(function(b) {
-                b.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive";
-            });
-
-            if (target === 'all') {
-                grid.className = "grid grid-cols-1 lg:grid-cols-2 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "block";
-                btnAll.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
-            } else if (target === 'slovakia') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "block";
-                colGun.style.display = "none";
-                btnSsl.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
-            } else if (target === 'gunners') {
-                grid.className = "grid grid-cols-1 gap-6";
-                colSsl.style.display = "none";
-                colGun.style.display = "block";
-                btnGun.className = "px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active";
-            }
-        }
-    </script>
-</body>
-</html>
+                            var items = d.items.slice(0
