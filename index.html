@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v1.4)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v1.5)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -499,7 +499,7 @@
         setInterval(updateFPLDeadline, 60000);
     </script>
 
-    <!-- SKRIPT 1.5: 100% ŽIVÁ TABUĽKA A FORMA (ESPN SCOREBOARD + STANDINGS API & FPL ZÁLOHA) -->
+    <!-- SKRIPT 1.5: 100% ŽIVÁ TABUĽKA A FORMA (OPRAVENÝ DÁTUMOVÝ ROZSAH PRE ESPN SCOREBOARD + TIMEOUTY) -->
     <script>
         function getBadgeForTeam(name, code, explicitLogo) {
             if (code) {
@@ -514,11 +514,32 @@
             return "https://resources.premierleague.com/premierleague/badges/70/t3.png";
         }
 
+        function fetchWithTimeoutPL(url, ms) {
+            return new Promise(function(resolve, reject) {
+                var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
+                var t = setTimeout(function() {
+                    if (ctrl) ctrl.abort();
+                    reject(new Error("Timeout"));
+                }, ms || 4000);
+
+                fetch(url, ctrl ? { signal: ctrl.signal } : {})
+                    .then(function(r) {
+                        clearTimeout(t);
+                        if (!r.ok) throw new Error("HTTP " + r.status);
+                        resolve(r);
+                    })
+                    .catch(function(e) {
+                        clearTimeout(t);
+                        reject(e);
+                    });
+            });
+        }
+
         function renderPLTable(teamsArray, maxPlayed) {
             var container = document.getElementById('pl-table-rows');
             var roundEl = document.getElementById('pl-round-status');
-            if (maxPlayed && roundEl) {
-                roundEl.textContent = "Po " + maxPlayed + ". kole";
+            if (roundEl) {
+                roundEl.textContent = maxPlayed ? ("Po " + maxPlayed + ". kole") : "Aktuálne";
             }
 
             var html = "";
@@ -558,34 +579,90 @@
             container.innerHTML = html;
         }
 
-        // Metóda 1: Priame načítanie z verejného ESPN API (Tabuľka + Všetky odohrané zápasy sezóny pre 100% presnú formu)
-        // Toto API má povolený priamy CORS v prehliadači, takže nepotrebuje žiadne externé proxy!
+        // Pomocná funkcia na formátovanie dátumu YYYYMMDD pre ESPN Scoreboard API
+        function formatYMD(dateObj) {
+            var y = dateObj.getFullYear();
+            var m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            var d = String(dateObj.getDate()).padStart(2, '0');
+            return '' + y + m + d;
+        }
+
+        // Metóda 1: Priame ESPN Standings + ESPN Scoreboard (rozdelené na krátke úseky do dnešného dňa, aby ESPN nikdy neodmietol dopyt)
         function fetchFromESPNApiWithForm() {
             var standingsUrl = 'https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings';
-            var matchesUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20270531&limit=400';
+            
+            // Vypočítame dátumové okná od 1.8.2026 po dnešok (max po 45 dňoch, čo ESPN Scoreboard vráti okamžite)
+            var now = new Date();
+            var tomorrow = new Date(now.getTime() + 86400000);
+            var startSeason = new Date(2026, 7, 1); // 1. august 2026
+            if (tomorrow < startSeason) {
+                startSeason = new Date(now.getFullYear() - 1, 7, 1);
+            }
+
+            var scoreboardPromises = [];
+            var cursor = new Date(startSeason.getTime());
+            while (cursor <= tomorrow) {
+                var chunkEnd = new Date(cursor.getTime() + 45 * 86400000);
+                if (chunkEnd > tomorrow) chunkEnd = tomorrow;
+                var rangeStr = formatYMD(cursor) + '-' + formatYMD(chunkEnd);
+                var sbUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=' + rangeStr + '&limit=200';
+                scoreboardPromises.push(
+                    fetchWithTimeoutPL(sbUrl, 4500)
+                        .then(function(r) { return r.json(); })
+                        .catch(function() { return { events: [] }; })
+                );
+                cursor = new Date(chunkEnd.getTime() + 86400000);
+            }
 
             return Promise.all([
-                fetch(standingsUrl).then(function(r) { if (!r.ok) throw new Error("ESPN standings err"); return r.json(); }),
-                fetch(matchesUrl).then(function(r) { if (!r.ok) return { events: [] }; return r.json(); }).catch(function() { return { events: [] }; })
+                fetchWithTimeoutPL(standingsUrl, 4500).then(function(r) { return r.json(); }),
+                Promise.all(scoreboardPromises)
             ]).then(function(results) {
                 var standData = results[0];
-                var matchData = results[1];
+                var sbChunks = results[1];
 
                 var entries = standData && standData.children && standData.children[0] && standData.children[0].standings && standData.children[0].standings.entries;
                 if (!Array.isArray(entries) || !entries.length) throw new Error("No ESPN entries");
 
-                // 1. Vypočítame živú formu každého tímu priamo z odohraných zápasov v ESPN Scoreboard
-                var formByTeamId = {};
-                var events = (matchData && Array.isArray(matchData.events)) ? matchData.events : [];
-                
-                // Zoradíme zápasy chronologicky od najstaršieho po najnovší
-                events.sort(function(a, b) {
+                // Spojíme všetky odohrané zápasy zo všetkých okien
+                var allEvents = [];
+                var seenEventIds = {};
+                sbChunks.forEach(function(chunk) {
+                    if (chunk && Array.isArray(chunk.events)) {
+                        chunk.events.forEach(function(ev) {
+                            if (ev && ev.id && !seenEventIds[ev.id]) {
+                                seenEventIds[ev.id] = true;
+                                allEvents.push(ev);
+                            }
+                        });
+                    }
+                });
+
+                // Zoradíme chronologicky od najstaršieho po najnovší
+                allEvents.sort(function(a, b) {
                     return new Date(a.date || 0) - new Date(b.date || 0);
                 });
 
-                events.forEach(function(ev) {
+                var formByTeamId = {};
+                var formByTeamName = {};
+
+                function pushForm(id, name, letter) {
+                    if (id) {
+                        if (!formByTeamId[id]) formByTeamId[id] = [];
+                        formByTeamId[id].push(letter);
+                    }
+                    if (name) {
+                        if (!formByTeamName[name]) formByTeamName[name] = [];
+                        formByTeamName[name].push(letter);
+                    }
+                }
+
+                allEvents.forEach(function(ev) {
                     var comp = ev.competitions && ev.competitions[0];
-                    if (!comp || !comp.status || !comp.status.type || !comp.status.type.completed) return;
+                    if (!comp) return;
+                    var isCompleted = (comp.status && comp.status.type && (comp.status.type.completed === true || comp.status.type.state === "post"));
+                    if (!isCompleted) return;
+
                     var competitors = comp.competitors || [];
                     if (competitors.length !== 2) return;
 
@@ -597,22 +674,21 @@
 
                     var id1 = String(c1.team && c1.team.id);
                     var id2 = String(c2.team && c2.team.id);
-                    if (!formByTeamId[id1]) formByTeamId[id1] = [];
-                    if (!formByTeamId[id2]) formByTeamId[id2] = [];
+                    var n1 = c1.team && (c1.team.shortDisplayName || c1.team.displayName || c1.team.name);
+                    var n2 = c2.team && (c2.team.shortDisplayName || c2.team.displayName || c2.team.name);
 
                     if (s1 > s2) {
-                        formByTeamId[id1].push('V');
-                        formByTeamId[id2].push('P');
+                        pushForm(id1, n1, 'V');
+                        pushForm(id2, n2, 'P');
                     } else if (s1 < s2) {
-                        formByTeamId[id1].push('P');
-                        formByTeamId[id2].push('V');
+                        pushForm(id1, n1, 'P');
+                        pushForm(id2, n2, 'V');
                     } else {
-                        formByTeamId[id1].push('R');
-                        formByTeamId[id2].push('R');
+                        pushForm(id1, n1, 'R');
+                        pushForm(id2, n2, 'R');
                     }
                 });
 
-                // 2. Spracujeme poradie tabuľky a priradíme vypočítanú formu
                 var maxPlayed = 0;
                 var standings = entries.map(function(entry) {
                     var teamId = String(entry.team.id);
@@ -621,20 +697,26 @@
                     var logo = (entry.team.logos && entry.team.logos[0]) ? entry.team.logos[0].href : null;
                     
                     var stats = {};
-                    var fallbackFormStr = "";
+                    var statFormStr = "";
                     (entry.stats || []).forEach(function(s) {
                         stats[s.name] = s.value;
-                        if (s.name === "streak" || s.type === "form" || s.name === "form") {
-                            fallbackFormStr = s.displayValue || s.summary || "";
+                        // Kontrola, či samotný objekt neobsahuje reťazec formy (napr. "WWLWD")
+                        var valStr = String(s.displayValue || s.summary || s.value || "").trim();
+                        if (/^[WDL]{3,6}$/i.test(valStr)) {
+                            statFormStr = valStr;
                         }
                     });
 
                     var played = stats.gamesPlayed || 0;
                     if (played > maxPlayed) maxPlayed = played;
 
-                    var formArr = formByTeamId[teamId] ? formByTeamId[teamId].slice(-5) : [];
-                    if (formArr.length === 0 && fallbackFormStr) {
-                        fallbackFormStr.replace(/[^WDL]/gi, '').split('').slice(-5).forEach(function(ch) {
+                    var formArr = [];
+                    if (formByTeamId[teamId] && formByTeamId[teamId].length) {
+                        formArr = formByTeamId[teamId].slice(-5);
+                    } else if (formByTeamName[rawName] && formByTeamName[rawName].length) {
+                        formArr = formByTeamName[rawName].slice(-5);
+                    } else if (statFormStr) {
+                        statFormStr.split('').slice(-5).forEach(function(ch) {
                             var u = ch.toUpperCase();
                             if (u === 'W') formArr.push('V');
                             else if (u === 'L') formArr.push('P');
@@ -644,12 +726,13 @@
 
                     return {
                         name: name,
+                        rawName: rawName,
                         logo: logo,
                         points: stats.points !== undefined ? stats.points : 0,
                         played: played,
                         gd: stats.pointDifferential !== undefined ? stats.pointDifferential : 0,
                         gf: stats.pointsFor !== undefined ? stats.pointsFor : 0,
-                         rank: stats.rank || 99,
+                        rank: stats.rank || 99,
                         form: formArr
                     };
                 });
@@ -665,21 +748,21 @@
             });
         }
 
-        // Metóda 2: Záložný výpočet z oficiálneho FPL API cez viaceré proxy brány
+        // Metóda 2: Záložný výpočet z oficiálneho FPL API s prísnym timeoutom
         function fetchFromFPLApi() {
             var bootstrapUrl = 'https://fantasy.premierleague.com/api/bootstrap-static/';
             var fixturesUrl = 'https://fantasy.premierleague.com/api/fixtures/';
 
             function fetchFplJson(target) {
                 var proxies = [
+                    'https://cors.eu.org/' + target,
                     'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
-                    'https://corsproxy.io/?url=' + encodeURIComponent(target),
                     'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target)
                 ];
                 function tryIdx(i) {
                     if (i >= proxies.length) return Promise.reject(new Error("FPL proxies failed"));
-                    return fetch(proxies[i])
-                        .then(function(r) { if (!r.ok) throw new Error("HTTP"); return r.json(); })
+                    return fetchWithTimeoutPL(proxies[i], 3500)
+                        .then(function(r) { return r.json(); })
                         .catch(function() { return tryIdx(i + 1); });
                 }
                 return tryIdx(0);
@@ -762,7 +845,7 @@
         }
 
         function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v14';
+            var cacheKey = 'arsenal_dash_pl_live_v15';
             
             if (!forceRefresh) {
                 try {
@@ -776,10 +859,8 @@
                 document.getElementById('pl-round-status').textContent = "Aktualizujem...";
             }
 
-            // Najprv ide priame ESPN API so živým výpočtom formy zo Scoreboardu (rýchle, bez proxy), ak by vypadlo, ide FPL API
             fetchFromESPNApiWithForm()
                 .then(function(res) {
-                    // Ak by náhodou ESPN scoreboard nevrátil žiadnu formu, skúsime ešte FPL API
                     if (!res.standings[0].form || res.standings[0].form.length === 0) {
                         return fetchFromFPLApi().catch(function() { return res; });
                     }
@@ -799,6 +880,10 @@
                     } catch (e) {}
                 })
                 .catch(function() {
+                    var roundEl = document.getElementById('pl-round-status');
+                    if (roundEl && roundEl.textContent.indexOf("Aktualizujem") !== -1) {
+                        roundEl.textContent = "Chyba spojenia";
+                    }
                     var container = document.getElementById('pl-table-rows');
                     if (container.innerHTML.indexOf("Načítavam") !== -1) {
                         container.innerHTML = '<div class="text-amber-300 text-xs py-4 text-center">Nepodarilo sa stiahnuť živú tabuľku. Klikni na ↻ Obnoviť.</div>';
@@ -939,7 +1024,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v14_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v15_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
