@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v0.97)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v0.98)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -52,6 +52,17 @@
             align-self: stretch !important;
         }
     </style>
+    <script>
+        // Bezpečnostná poistka pre logá: ak obrázok zlyhá, nahradí ho pekným textovým štítkom
+        function handleBadgeError(imgElement) {
+            var teamName = imgElement.getAttribute('alt') || 'Tím';
+            var initials = teamName.substring(0, 2).toUpperCase();
+            var fallbackSpan = document.createElement('span');
+            fallbackSpan.className = "w-4 h-4 flex items-center justify-center bg-slate-800 text-[9px] font-bold text-amber-300 rounded shrink-0 border border-slate-700";
+            fallbackSpan.textContent = initials;
+            imgElement.parentNode.replaceChild(fallbackSpan, imgElement);
+        }
+    </script>
 </head>
 <body class="min-h-screen p-6 md:p-10">
 
@@ -82,37 +93,37 @@
                 <div class="space-y-1 text-xs my-auto">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" class="w-4 h-4 object-contain" alt="MCI"> 1. Man Cheaters
+                            <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" alt="Man Cheaters" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 1. Man Cheaters
                         </span>
                         <span class="font-bold text-slate-300">18 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1 rounded shadow-sm">
                         <span class="font-bold text-white flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" class="w-4 h-4 object-contain" alt="ARS"> 2. Arsenal
+                            <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 2. Arsenal
                         </span>
                         <span class="font-black gold-text">15 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://resources.premierleague.com/premierleague/badges/70/t36.png" class="w-4 h-4 object-contain" alt="BHA"> 3. Brighton
+                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg" alt="Brighton" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 3. Brighton
                         </span>
                         <span class="font-bold text-slate-300">13 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg" class="w-4 h-4 object-contain" alt="BRE"> 4. Brentford
+                            <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg" alt="Brentford" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 4. Brentford
                         </span>
                         <span class="font-bold text-slate-300">10 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/5/50/Leeds_United_F.C._logo.svg" class="w-4 h-4 object-contain" alt="LEE"> 5. Leeds
+                            <img src="https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_FC_logo_%282019%29.svg" alt="Leeds" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 5. Leeds
                         </span>
                         <span class="font-bold text-slate-300">9 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg" class="w-4 h-4 object-contain" alt="LIV"> 6. Liverpool
+                            <img src="https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg" alt="Liverpool" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 6. Liverpool
                         </span>
                         <span class="font-bold text-slate-300">9 b</span>
                     </div>
@@ -317,7 +328,7 @@
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed (S garantovanou záložnou pre prípad zablokovania AdBlockom) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div class="flex items-center gap-3">
@@ -571,7 +582,7 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT (Absolútne čistá obchádzka blokovania cez Feed2JSON & AllOrigins proxy) -->
+    <!-- SKRIPT 3: REDDIT -->
     <script>
         function renderRedditItems(items, container) {
             container.innerHTML = items.slice(0, 5).map(function(item, idx) {
@@ -591,7 +602,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v97_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v98_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -609,8 +620,6 @@
             container.innerHTML = '<span class="text-slate-400 text-xs">Načítavam r/' + subreddit + '...</span>';
 
             var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
-            
-            // Použijeme stabilný konvertor Feed2JSON zabalený v AllOrigins proxy, čo úplne odtieni AdBlock a prehliadačové reštrikcie
             var feed2jsonApi = 'https://www.toptal.com/developers/feed2json/convert?url=' + encodeURIComponent(rssUrl);
             var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed2jsonApi);
 
@@ -640,7 +649,6 @@
                     } catch (e) {}
                 })
                 .catch(function() {
-                    // Záložný pokus cez starý dobrý rss2json ak by proxy zlyhalo
                     fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://www.reddit.com/r/' + subreddit + '/top/.rss'))
                         .then(function(res) { return res.json(); })
                         .then(function(d) {
