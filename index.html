@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v0.93)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v0.94)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -82,7 +82,7 @@
                 <div class="space-y-1.5 text-xs my-auto">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" class="w-4 h-4 object-contain" alt="MCI"> 1. Man City
+                            <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" class="w-4 h-4 object-contain" alt="MCI"> 1. Man Cheaters
                         </span>
                         <span class="font-bold text-slate-300">18 b</span>
                     </div>
@@ -113,7 +113,7 @@
                 </div>
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between items-center px-1">
                     <span>📊 Stav súťaže:</span>
-                    <span class="text-slate-200 font-semibold">Po 7. kole</span>
+                    <span class="text-slate-200 font-semibold">Po 6. kole</span>
                 </div>
             </div>
 
@@ -166,7 +166,7 @@
                 </div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Živý Deadline (Presne 360px) -->
+            <!-- 4. Vpravo: FPL Mini-liga + Bodové rozdiely + Automatický Deadline (Presne 360px) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🎮 FPL Mini-liga (#28856)</span>
@@ -196,10 +196,10 @@
                         <span class="font-bold text-slate-300">375 b</span>
                     </div>
                 </div>
-                <!-- Deadline pod FPL tabuľkou (Živé načítanie) -->
+                <!-- Presný FPL Deadline zo zabudovaného kalendára 2026/27 -->
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
                     <span>⏳ Najbližší deadline:</span>
-                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam z FPL...</a>
+                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
                 </div>
             </div>
 
@@ -314,10 +314,11 @@
         <!-- SPODNÝ RIADOK: Reddit Feed -->
         <section class="card p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <div>
+                <div class="flex items-center gap-3">
                     <h2 class="text-xl font-bold text-white flex items-center gap-2">
                         🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
                     </h2>
+                    <button onclick="reloadAllReddit()" class="text-xs text-red-400 hover:underline font-medium">↻ Obnoviť</button>
                 </div>
                 <div class="flex gap-2">
                     <button onclick="showSub('all')" id="tab-all" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active">Všetky vedľa seba</button>
@@ -349,7 +350,7 @@
 
     </div>
 
-    <!-- SKRIPT 1: DÁTUM, ČAS, POZDRAV A ŽIVÝ FPL DEADLINE -->
+    <!-- SKRIPT 1: DÁTUM, ČAS, POZDRAV A KOMPLETNÝ FPL KALENDÁR (GW1 - GW38) -->
     <script>
         function updateDateTime() {
             try {
@@ -371,73 +372,89 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
 
-        // Načítanie skutočného najbližšieho deadlinu z oficiálneho FPL API
-        function loadFPLDeadline() {
-            var fplApi = 'https://fantasy.premierleague.com/api/bootstrap-static/';
-            var gateways = [
-                { url: 'https://api.allorigins.win/raw?url=' + encodeURIComponent(fplApi), wrapped: false },
-                { url: 'https://api.allorigins.win/get?url=' + encodeURIComponent(fplApi), wrapped: true },
-                { url: 'https://thingproxy.freeboard.io/fetch/' + fplApi, wrapped: false },
-                { url: 'https://corsproxy.io/?url=' + encodeURIComponent(fplApi), wrapped: false }
-            ];
+        // Kompletný harmonogram FPL Deadlines 2026/2027 (uložený v presnom UTC, automaticky zohľadňuje letný/zimný čas v SR)
+        var fplScheduleUTC = [
+            { gw: 1,  utc: "2026-08-21T17:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 2,  utc: "2026-08-28T17:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 3,  utc: "2026-09-04T17:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 4,  utc: "2026-09-12T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 5,  utc: "2026-09-18T17:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 6,  utc: "2026-10-10T10:00:00Z" }, // UK 11:00 -> SK 12:00
+            { gw: 7,  utc: "2026-10-17T10:00:00Z" }, // UK 11:00 -> SK 12:00
+            { gw: 8,  utc: "2026-10-23T17:30:00Z" }, // UK 18:30 -> SK 19:30 (letný čas končí 25.10.)
+            { gw: 9,  utc: "2026-10-31T11:00:00Z" }, // UK 11:00 -> SK 12:00 (už zimný čas v UK aj SK)
+            { gw: 10, utc: "2026-11-06T18:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 11, utc: "2026-11-21T11:00:00Z" }, // UK 11:00 -> SK 12:00
+            { gw: 12, utc: "2026-11-27T18:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 13, utc: "2026-12-02T18:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 14, utc: "2026-12-05T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 15, utc: "2026-12-12T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 16, utc: "2026-12-19T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 17, utc: "2026-12-26T11:00:00Z" }, // UK 11:00 -> SK 12:00
+            { gw: 18, utc: "2026-12-29T18:00:00Z" }, // UK 18:00 -> SK 19:00
+            { gw: 19, utc: "2027-01-01T18:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 20, utc: "2027-01-05T18:00:00Z" }, // UK 18:00 -> SK 19:00
+            { gw: 21, utc: "2027-01-16T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 22, utc: "2027-01-23T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 23, utc: "2027-01-30T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 24, utc: "2027-02-06T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 25, utc: "2027-02-10T18:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 26, utc: "2027-02-20T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 27, utc: "2027-02-27T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 28, utc: "2027-03-03T18:30:00Z" }, // UK 18:30 -> SK 19:30
+            { gw: 29, utc: "2027-03-13T13:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 30, utc: "2027-03-20T13:30:00Z" }, // UK 13:30 -> SK 14:30 (zimný čas končí 28.03.)
+            { gw: 31, utc: "2027-04-10T12:30:00Z" }, // UK 13:30 -> SK 14:30 (už letný čas v UK aj SK)
+            { gw: 32, utc: "2027-04-17T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 33, utc: "2027-04-24T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 34, utc: "2027-05-01T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 35, utc: "2027-05-08T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 36, utc: "2027-05-15T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 37, utc: "2027-05-23T12:30:00Z" }, // UK 13:30 -> SK 14:30
+            { gw: 38, utc: "2027-05-30T13:30:00Z" }  // UK 14:30 -> SK 15:30
+        ];
 
-            function tryGateway(idx) {
-                if (idx >= gateways.length) {
-                    document.getElementById('fpl-deadline').textContent = 'Otvoriť FPL Fixtures ↗';
-                    return;
+        function updateFPLDeadline() {
+            var nowMs = Date.now();
+            var nextItem = null;
+
+            for (var i = 0; i < fplScheduleUTC.length; i++) {
+                var itemMs = new Date(fplScheduleUTC[i].utc).getTime();
+                if (itemMs > nowMs) {
+                    nextItem = fplScheduleUTC[i];
+                    break;
                 }
-                fetch(gateways[idx].url)
-                    .then(function(res) {
-                        if (!res.ok) throw new Error("HTTP " + res.status);
-                        return res.json();
-                    })
-                    .then(function(raw) {
-                        var data = gateways[idx].wrapped ? JSON.parse(raw.contents) : raw;
-                        if (!data || !Array.isArray(data.events)) throw new Error("No events");
-                        
-                        var nowMs = Date.now();
-                        var upcoming = null;
-
-                        // Nájde najbližší budúci deadline podľa reálneho času
-                        for (var i = 0; i < data.events.length; i++) {
-                            var ev = data.events[i];
-                            var dlMs = new Date(ev.deadline_time).getTime();
-                            if (dlMs > nowMs) {
-                                upcoming = ev;
-                                break;
-                            }
-                        }
-                        // Fallback ak by nebol nájdený podľa času, skúsime is_next
-                        if (!upcoming) {
-                            for (var j = 0; j < data.events.length; j++) {
-                                if (data.events[j].is_next) {
-                                    upcoming = data.events[j];
-                                    break;
-                                }
-                            }
-                        }
-
-                        if (upcoming && upcoming.deadline_time) {
-                            var dl = new Date(upcoming.deadline_time);
-                            var days = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
-                            var dayName = days[dl.getDay()];
-                            var d = dl.getDate();
-                            var m = dl.getMonth() + 1;
-                            var hh = String(dl.getHours()).padStart(2, '0');
-                            var mm = String(dl.getMinutes()).padStart(2, '0');
-                            var gwName = upcoming.id ? ' (GW' + upcoming.id + ')' : '';
-                            document.getElementById('fpl-deadline').textContent = dayName + ' ' + d + '.' + m + '. o ' + hh + ':' + mm + gwName + ' ↗';
-                        } else {
-                            throw new Error("Not found");
-                        }
-                    })
-                    .catch(function() {
-                        tryGateway(idx + 1);
-                    });
             }
-            tryGateway(0);
+
+            var el = document.getElementById('fpl-deadline');
+            if (!nextItem) {
+                el.textContent = "Koniec sezóny 26/27";
+                return;
+            }
+
+            var dlDate = new Date(nextItem.utc);
+            // Formátovanie presne podľa slovenského času (Europe/Bratislava)
+            var skParts = new Intl.DateTimeFormat('sk-SK', {
+                timeZone: 'Europe/Bratislava',
+                weekday: 'short',
+                day: 'numeric',
+                month: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).formatToParts(dlDate);
+
+            var p = {};
+            skParts.forEach(function(part) { p[part.type] = part.value; });
+
+            var dayClean = (p.weekday || '').replace('.', '');
+            dayClean = dayClean.charAt(0).toUpperCase() + dayClean.slice(1);
+            
+            el.textContent = dayClean + ' ' + p.day + '.' + p.month + '. o ' + p.hour + ':' + p.minute + ' (GW' + nextItem.gw + ') ↗';
         }
-        loadFPLDeadline();
+
+        updateFPLDeadline();
+        setInterval(updateFPLDeadline, 60000);
     </script>
 
     <!-- SKRIPT 2: POČASIE -->
@@ -550,11 +567,30 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT (Opravené parsovanie dátumu + postupné volanie bez Rate-Limit blokovania) -->
+    <!-- SKRIPT 3: REDDIT (5-stupňová záloha s ochranou proti AdBlocku a zamrznutiu) -->
     <script>
+        function fetchWithTimeout(url, timeoutMs) {
+            return new Promise(function(resolve, reject) {
+                var timer = setTimeout(function() {
+                    reject(new Error("Timeout"));
+                }, timeoutMs || 5500);
+
+                fetch(url)
+                    .then(function(res) {
+                        clearTimeout(timer);
+                        if (!res.ok) throw new Error("HTTP " + res.status);
+                        resolve(res);
+                    })
+                    .catch(function(err) {
+                        clearTimeout(timer);
+                        reject(err);
+                    });
+            });
+        }
+
         function renderRedditItems(items, container) {
             container.innerHTML = items.slice(0, 5).map(function(item, idx) {
-                var validMs = isNaN(item.dateMs) ? (Date.now() - 3600000 * (idx + 1)) : item.dateMs;
+                var validMs = (item.dateMs && !isNaN(item.dateMs)) ? item.dateMs : (Date.now() - 3600000 * (idx + 1));
                 var hoursAgo = Math.max(1, Math.floor((Date.now() - validMs) / (1000 * 60 * 60)));
                 return '<a href="' + item.link + '" target="_blank" class="block p-3 rounded-lg bg-slate-800/60 hover:bg-slate-800 border border-slate-700/50 transition flex justify-between items-start gap-3">' +
                     '<div class="space-y-1.5 flex-1 min-w-0">' +
@@ -568,94 +604,139 @@
             }).join('');
         }
 
-        function parseXmlFeed(xmlText) {
-            var parser = new DOMParser();
-            var doc = parser.parseFromString(xmlText, "text/xml");
-            var entries = doc.getElementsByTagName("entry");
-            if (!entries || entries.length === 0) return null;
-            var res = [];
-            for (var i = 0; i < Math.min(5, entries.length); i++) {
-                var entry = entries[i];
-                var tEl = entry.getElementsByTagName("title")[0];
-                var lEl = entry.getElementsByTagName("link")[0];
-                var uEl = entry.getElementsByTagName("updated")[0] || entry.getElementsByTagName("published")[0];
-                res.push({
-                    title: tEl ? tEl.textContent : "Príspevok",
-                    link: lEl ? (lEl.getAttribute("href") || lEl.textContent) : "#",
-                    dateMs: uEl ? new Date(uEl.textContent).getTime() : Date.now()
+        function parseFeedXml(xmlText) {
+            var doc = new DOMParser().parseFromString(xmlText, "text/xml");
+            var nodes = doc.querySelectorAll("entry, item");
+            if (!nodes || nodes.length === 0) return null;
+            var list = [];
+            for (var i = 0; i < Math.min(5, nodes.length); i++) {
+                var n = nodes[i];
+                var titleEl = n.querySelector("title");
+                var linkEl = n.querySelector("link");
+                var dateEl = n.querySelector("updated, published, pubDate");
+                
+                var linkHref = "#";
+                if (linkEl) {
+                    linkHref = linkEl.getAttribute("href") || linkEl.textContent || "#";
+                }
+                if (linkHref.indexOf("http") !== 0) {
+                    linkHref = "https://www.reddit.com" + linkHref;
+                }
+
+                list.push({
+                    title: titleEl ? titleEl.textContent : "Príspevok",
+                    link: linkHref.trim(),
+                    dateMs: dateEl ? new Date(dateEl.textContent).getTime() : Date.now()
                 });
             }
-            return res;
+            return list;
+        }
+
+        function parseRedditJson(data) {
+            var ch = data && data.data && data.data.children;
+            if (!ch || !ch.length) return null;
+            return ch.slice(0, 5).map(function(c) {
+                return {
+                    title: c.data.title,
+                    link: 'https://www.reddit.com' + c.data.permalink,
+                    dateMs: c.data.created_utc * 1000
+                };
+            });
         }
 
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
-            var rssUrl1 = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
-            var rssUrl2 = 'https://www.reddit.com/r/' + subreddit + '/top/.rss';
-            var jsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
+            container.innerHTML = '<span class="text-slate-400 text-xs">Načítavam r/' + subreddit + '...</span>';
 
-            // 1. pokus: rss2json (s bezpečným parsovaním dátumu, aby r/Slovakia nezamrzlo)
-            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl1))
-                .then(function(res) { return res.json(); })
-                .then(function(data) {
-                    if (!data || !Array.isArray(data.items) || data.items.length === 0) throw new Error("rss2json 1 failed");
-                    var parsed = data.items.map(function(item) {
-                        var dStr = item.pubDate ? String(item.pubDate).replace(' ', 'T') : '';
-                        var ms = new Date(dStr).getTime();
-                        if (isNaN(ms)) ms = new Date(item.pubDate).getTime();
-                        return { title: item.title, link: item.link, dateMs: ms };
-                    });
-                    renderRedditItems(parsed, container);
-                })
-                .catch(function() {
-                    // 2. pokus: rss2json bez query parametra
-                    fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl2))
-                        .then(function(res) { return res.json(); })
-                        .then(function(data) {
-                            if (!data || !Array.isArray(data.items) || data.items.length === 0) throw new Error("rss2json 2 failed");
-                            var parsed = data.items.map(function(item) {
-                                return { title: item.title, link: item.link, dateMs: new Date(item.pubDate).getTime() };
-                            });
-                            renderRedditItems(parsed, container);
-                        })
-                        .catch(function() {
-                            // 3. pokus: AllOrigins RAW XML
-                            fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(rssUrl1))
-                                .then(function(res) { return res.text(); })
-                                .then(function(xmlStr) {
-                                    var parsed = parseXmlFeed(xmlStr);
-                                    if (!parsed) throw new Error("Invalid XML");
-                                    renderRedditItems(parsed, container);
-                                })
-                                .catch(function() {
-                                    // 4. pokus: Priamy JSON / Corsproxy
-                                    fetch('https://corsproxy.io/?url=' + encodeURIComponent(jsonUrl))
-                                        .then(function(res) { return res.json(); })
-                                        .then(function(data) {
-                                            var ch = data && data.data && data.data.children;
-                                            if (!ch || !ch.length) throw new Error("No JSON children");
-                                            var parsed = ch.map(function(c) {
-                                                return {
-                                                    title: c.data.title,
-                                                    link: 'https://www.reddit.com' + c.data.permalink,
-                                                    dateMs: c.data.created_utc * 1000
-                                                };
-                                            });
-                                            renderRedditItems(parsed, container);
-                                        })
-                                        .catch(function() {
-                                            container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
-                                        });
-                                });
+            var rssDay = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
+            var jsonDay = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
+            var redlibRss = 'https://redlib.catsarch.com/r/' + subreddit + '/top.rss?t=day';
+
+            // Zoznam 5 nezávislých metód (ak jednu zablokuje prehliadač alebo limit, okamžite ide ďalšia)
+            var strategies = [
+                // 1. AllOrigins JSON wrapper (obchádza AdBlock na doméne reddit.com)
+                function() {
+                    return fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(rssDay), 5000)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            if (!d || !d.contents) throw new Error("Empty contents");
+                            var items = parseFeedXml(d.contents);
+                            if (!items) throw new Error("XML parse fail");
+                            return items;
                         });
-                });
+                },
+                // 2. CodeTabs Proxy + Reddit JSON
+                function() {
+                    return fetchWithTimeout('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(jsonDay), 5000)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            var items = parseRedditJson(d);
+                            if (!items) throw new Error("JSON parse fail");
+                            return items;
+                        });
+                },
+                // 3. rss2json (klasika z pôvodného stable.html)
+                function() {
+                    return fetchWithTimeout('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssDay), 5000)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            if (!d || !Array.isArray(d.items) || !d.items.length) throw new Error("rss2json empty");
+                            return d.items.map(function(it) {
+                                return {
+                                    title: it.title,
+                                    link: it.link,
+                                    dateMs: new Date(String(it.pubDate).replace(' ', 'T')).getTime() || Date.now()
+                                };
+                            });
+                        });
+                },
+                // 4. Redlib mirror cez AllOrigins (ak Reddit blokuje IP adresu proxy servera)
+                function() {
+                    return fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(redlibRss), 5000)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            var items = parseFeedXml(d.contents);
+                            if (!items) throw new Error("Redlib fail");
+                            return items;
+                        });
+                },
+                // 5. Priamy Reddit JSON (ak prehliadač neblokuje priame spojenie)
+                function() {
+                    return fetchWithTimeout(jsonDay, 4000)
+                        .then(function(r) { return r.json(); })
+                        .then(function(d) {
+                            var items = parseRedditJson(d);
+                            if (!items) throw new Error("Direct fail");
+                            return items;
+                        });
+                }
+            ];
+
+            function runStrategy(index) {
+                if (index >= strategies.length) {
+                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky. Klikni na ↻ Obnoviť vyššie.</p>';
+                    return;
+                }
+                strategies[index]()
+                    .then(function(items) {
+                        renderRedditItems(items, container);
+                    })
+                    .catch(function() {
+                        runStrategy(index + 1);
+                    });
+            }
+
+            runStrategy(0);
         }
 
-        // Spustenie s malým odstupom (800 ms), aby rss2json nezablokoval druhý dopyt kvôli rate-limitu
-        loadReddit('Slovakia', 'list-slovakia');
-        setTimeout(function() {
-            loadReddit('Gunners', 'list-gunners');
-        }, 800);
+        function reloadAllReddit() {
+            loadReddit('Slovakia', 'list-slovakia');
+            setTimeout(function() {
+                loadReddit('Gunners', 'list-gunners');
+            }, 600);
+        }
+
+        reloadAllReddit();
 
         function showSub(target) {
             var colSsl = document.getElementById('col-slovakia');
