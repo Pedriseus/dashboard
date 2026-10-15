@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v0.98)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v0.99)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -53,7 +53,6 @@
         }
     </style>
     <script>
-        // Bezpečnostná poistka pre logá: ak obrázok zlyhá, nahradí ho pekným textovým štítkom
         function handleBadgeError(imgElement) {
             var teamName = imgElement.getAttribute('alt') || 'Tím';
             var initials = teamName.substring(0, 2).toUpperCase();
@@ -93,37 +92,37 @@
                 <div class="space-y-1 text-xs my-auto">
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/e/eb/Manchester_City_FC_badge.svg" alt="Man Cheaters" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 1. Man Cheaters
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t43.png" alt="Man Cheaters" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 1. Man Cheaters
                         </span>
                         <span class="font-bold text-slate-300">18 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1 rounded shadow-sm">
                         <span class="font-bold text-white flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 2. Arsenal
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t3.png" alt="Arsenal" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 2. Arsenal
                         </span>
                         <span class="font-black gold-text">15 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/f/fd/Brighton_%26_Hove_Albion_logo.svg" alt="Brighton" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 3. Brighton
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t36.png" alt="Brighton" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 3. Brighton
                         </span>
                         <span class="font-bold text-slate-300">13 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/2/2a/Brentford_FC_crest.svg" alt="Brentford" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 4. Brentford
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t94.png" alt="Brentford" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 4. Brentford
                         </span>
                         <span class="font-bold text-slate-300">10 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/5/54/Leeds_United_FC_logo_%282019%29.svg" alt="Leeds" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 5. Leeds
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t2.png" alt="Leeds" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 5. Leeds
                         </span>
                         <span class="font-bold text-slate-300">9 b</span>
                     </div>
                     <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
                         <span class="font-medium text-slate-200 flex items-center gap-2">
-                            <img src="https://upload.wikimedia.org/wikipedia/en/0/0c/Liverpool_FC.svg" alt="Liverpool" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 6. Liverpool
+                            <img src="https://resources.premierleague.com/premierleague/badges/70/t14.png" alt="Liverpool" class="w-4 h-4 object-contain" onerror="handleBadgeError(this)"> 6. Liverpool
                         </span>
                         <span class="font-bold text-slate-300">9 b</span>
                     </div>
@@ -602,7 +601,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v98_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v99_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
