@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v0.99)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v1.2)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -41,15 +41,20 @@
             border-color: #d4af37;
             color: #ffffff;
         }
-        /* ROVNAKÁ ŠÍRKA A VÝŠKA PRE VŠETKY TRI TABUĽKY V HLAVIČKE */
+        /* RESPONZÍVNE BOXY: Na mobile plná šírka, od veľkých obrazoviek pevných 360px */
         .exact-box {
-            width: 360px !important;
-            min-width: 360px !important;
-            max-width: 360px !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            align-self: stretch !important;
+            width: 100% !important;
+        }
+        @media (min-width: 1536px) {
+            .exact-box {
+                width: 360px !important;
+                min-width: 360px !important;
+                max-width: 360px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                align-self: stretch !important;
+            }
         }
     </style>
     <script>
@@ -63,27 +68,27 @@
         }
     </script>
 </head>
-<body class="min-h-screen p-6 md:p-10">
+<body class="min-h-screen p-4 sm:p-6 md:p-10">
 
     <div class="max-w-[95rem] mx-auto space-y-6">
         
-        <!-- HLAVIČKA V ŠTÝLE ARSENALU S TROMI ROVNAKÝMI TABUĽKAMI -->
-        <header class="arsenal-header p-5 md:p-6 flex flex-col 2xl:flex-row justify-between items-stretch gap-6 shadow-xl">
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU -->
+        <header class="arsenal-header p-4 sm:p-6 flex flex-col 2xl:flex-row justify-between items-stretch gap-6 shadow-xl">
             
-            <!-- 1. Vľavo: Logo, pozdrav, dátum a čas presne zarovnaný pod textom -->
+            <!-- 1. Vľavo: Logo, pozdrav, dátum a čas -->
             <div class="flex items-center gap-4 shrink-0">
-                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 drop-shadow-lg" onerror="this.style.display='none'">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-lg" onerror="this.style.display='none'">
                 <div>
-                    <div class="text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
-                    <h1 id="greeting" class="text-xl md:text-2xl font-extrabold text-white">Dobrý deň! 👋</h1>
-                    <p id="current-date" class="text-red-100 text-sm mt-0.5">Načítavam dátum...</p>
-                    <div class="mt-1.5 text-left pl-0.5">
-                        <div id="current-time" class="text-2xl md:text-3xl font-black text-white tracking-tight drop-shadow">--:--</div>
+                    <div class="text-[10px] sm:text-xs uppercase tracking-widest font-bold text-amber-300">Victoria Concordia Crescit</div>
+                    <h1 id="greeting" class="text-lg sm:text-2xl font-extrabold text-white">Dobrý deň! 👋</h1>
+                    <p id="current-date" class="text-red-100 text-xs sm:text-sm mt-0.5">Načítavam dátum...</p>
+                    <div class="mt-1 text-left pl-0.5">
+                        <div id="current-time" class="text-xl sm:text-3xl font-black text-white tracking-tight drop-shadow">--:--</div>
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Stred 1: Top 6 Premier League Tabuľka (Presne 360px) -->
+            <!-- 2. Stred 1: Top 6 Premier League Tabuľka -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🏆 PREMIER LEAGUE (TOP 6)</span>
@@ -133,7 +138,7 @@
                 </div>
             </div>
 
-            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, PL=jasná bordová, UCL=zlatá, EFL=modrá) -->
+            <!-- 3. Stred 2: Zápasy Arsenalu -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>⚽ ZÁPASY ARSENALU</span>
@@ -182,7 +187,7 @@
                 </div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga (bez čísla) + Bodové rozdiely + Automatický Deadline (Presne 360px) -->
+            <!-- 4. Vpravo: FPL Mini-liga + Deadline -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🎮 FPL Mini-liga</span>
@@ -212,7 +217,6 @@
                         <span class="font-bold text-slate-300">375 b</span>
                     </div>
                 </div>
-                <!-- Presný FPL Deadline zo zabudovaného kalendára 2026/27 -->
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
                     <span>⏳ Najbližší deadline:</span>
                     <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
@@ -224,21 +228,21 @@
         <!-- HORNÝ RIADOK: Aktuálne počasie + SHMÚ ALADIN / Radar -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- POČASIE DNES + TIP NA OBLIEKANIE (5 stĺpcov) -->
-            <section class="card p-6 lg:col-span-5 flex flex-col justify-between">
+            <!-- POČASIE DNES -->
+            <section class="card p-5 sm:p-6 lg:col-span-5 flex flex-col justify-between">
                 <div>
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2 mb-4">
+                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2 mb-4">
                         🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
                     </h2>
                     <div id="weather-box" class="flex items-center justify-between py-2 text-slate-300">
-                        <div class="flex items-center gap-4">
-                            <span id="w-icon" class="text-5xl">⛅</span>
+                        <div class="flex items-center gap-3 sm:gap-4">
+                            <span id="w-icon" class="text-4xl sm:text-5xl">⛅</span>
                             <div>
-                                <div id="w-temp" class="text-4xl font-extrabold text-white">16 °C</div>
-                                <div id="w-desc" class="text-slate-400 text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
+                                <div id="w-temp" class="text-3xl sm:text-4xl font-extrabold text-white">16 °C</div>
+                                <div id="w-desc" class="text-slate-400 text-xs sm:text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
                             </div>
                         </div>
-                        <div class="text-right text-sm space-y-1 text-slate-300">
+                        <div class="text-right text-xs sm:text-sm space-y-1 text-slate-300">
                             <div>🔼 Max: <strong id="w-max" class="text-white">16 °C</strong> / 🔽 Min: <strong id="w-min" class="text-white">7 °C</strong></div>
                             <div>💧 Zrážky: <strong id="w-rain" class="text-red-400">35 %</strong> <span id="w-rain-mm" class="text-xs text-slate-400">(0.0 mm)</span></div>
                             <div>💨 Vietor: <strong id="w-wind" class="text-white">7 km/h</strong></div>
@@ -263,17 +267,17 @@
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
-                    <span>Dáta: Stanica Bratislava + numerický model</span>
+                    <span>Stanica Bratislava + model</span>
                     <button onclick="updateLiveWeather()" class="text-red-400 hover:underline font-medium">↻ Obnoviť</button>
                 </div>
             </section>
 
-            <!-- SHMÚ ALADIN METEOGRAM & ZRÁŽKY (7 stĺpcov) -->
-            <section class="card p-6 lg:col-span-7 flex flex-col justify-between">
+            <!-- SHMÚ ALADIN METEOGRAM & ZRÁŽKY -->
+            <section class="card p-5 sm:p-6 lg:col-span-7 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
                         <div>
-                            <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                                 📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Najbližšie hodiny)</span>
                             </h2>
                             <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
@@ -282,45 +286,45 @@
                         </div>
                         <div class="flex gap-2">
                             <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-red-600/20 border border-red-500/40 text-red-300 hover:bg-red-600 hover:text-white transition font-semibold">
-                                Meteogram ALADIN ↗
+                                Meteogram ↗
                             </a>
                             <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-lg text-xs bg-slate-800 border border-slate-700 text-amber-300 hover:bg-slate-700 transition font-semibold">
-                                Radar SHMÚ ↗
+                                Radar ↗
                             </a>
                         </div>
                     </div>
 
-                    <!-- Hodinový prehľad od aktuálnej hodiny -->
+                    <!-- Hodinový prehľad -->
                     <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
                         <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div id="h-1-time" class="text-xs text-slate-400">+1 hod</div>
                             <div id="h-1-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-1-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-1-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
                             <div id="h-1-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
                         </div>
                         <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div id="h-2-time" class="text-xs text-slate-400">+3 hod</div>
                             <div id="h-2-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-2-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-2-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
                             <div id="h-2-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
                         </div>
                         <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div id="h-3-time" class="text-xs text-slate-400">+6 hod</div>
                             <div id="h-3-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-3-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-3-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
                             <div id="h-3-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
                         </div>
                         <div class="p-3 rounded-lg bg-slate-900/80 border border-slate-800">
                             <div id="h-4-time" class="text-xs text-slate-400">+9 hod</div>
                             <div id="h-4-icon" class="text-2xl my-1">🌙</div>
-                            <div id="h-4-temp" class="font-bold text-white text-lg">-- °C</div>
+                            <div id="h-4-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
                             <div id="h-4-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-slate-800 text-xs text-slate-400 flex justify-between">
-                    <span>Rozlíšenie: 2 km (Stredná Európa / ALADIN doména)</span>
+                    <span>Rozlíšenie: 2 km (ALADIN doména)</span>
                     <a href="https://opendata.shmu.sk/" target="_blank" class="text-slate-400 hover:text-red-400">opendata.shmu.sk ↗</a>
                 </div>
             </section>
@@ -328,18 +332,18 @@
         </div>
 
         <!-- SPODNÝ RIADOK: Reddit Feed -->
-        <section class="card p-6">
+        <section class="card p-5 sm:p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div class="flex items-center gap-3">
-                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
-                        🔥 Top upvotované posty na Reddite <span class="text-sm font-normal text-slate-400">(za posledných 24 hodín)</span>
+                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                        🔥 Top posty na Reddite <span class="text-xs sm:text-sm font-normal text-slate-400">(za 24 hodín)</span>
                     </h2>
                     <button onclick="reloadAllReddit(true)" class="text-xs text-red-400 hover:underline font-medium">↻ Obnoviť</button>
                 </div>
                 <div class="flex gap-2">
-                    <button onclick="showSub('all')" id="tab-all" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-active">Všetky vedľa seba</button>
-                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive">r/Slovakia</button>
-                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3.5 py-1.5 rounded-lg text-sm transition arsenal-btn-inactive">r/Gunners</button>
+                    <button onclick="showSub('all')" id="tab-all" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm transition arsenal-btn-active">Všetky</button>
+                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm transition arsenal-btn-inactive">r/Slovakia</button>
+                    <button onclick="showSub('gunners')" id="tab-gunners" class="px-3 py-1.5 rounded-lg text-xs sm:text-sm transition arsenal-btn-inactive">r/Gunners</button>
                 </div>
             </div>
             
@@ -347,7 +351,7 @@
                 <!-- r/Slovakia -->
                 <div id="col-slovakia" class="space-y-3">
                     <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
-                        <h3 class="font-bold text-red-400 text-lg">r/Slovakia</h3>
+                        <h3 class="font-bold text-red-400 text-base">r/Slovakia</h3>
                         <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
                     </div>
                     <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Slovakia...</div>
@@ -356,7 +360,7 @@
                 <!-- r/Gunners -->
                 <div id="col-gunners" class="space-y-3">
                     <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
-                        <h3 class="font-bold text-red-400 text-lg flex items-center gap-2">🔴⚪ r/Gunners</h3>
+                        <h3 class="font-bold text-red-400 text-base flex items-center gap-2">🔴⚪ r/Gunners</h3>
                         <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
                     </div>
                     <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Gunners...</div>
@@ -601,7 +605,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v99_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v100_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
