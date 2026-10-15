@@ -371,7 +371,6 @@
         updateDateTime();
         setInterval(updateDateTime, 1000);
 
-        // Živé načítanie FPL deadlinu s tichou poistkou (ak API zlyhá, ostane pekne So 17.10. o 11:30 ↗)
         function loadFPLDeadline() {
             var targetUrl = 'https://fantasy.premierleague.com/api/bootstrap-static/';
             var proxies = [
@@ -415,7 +414,7 @@
         loadFPLDeadline();
     </script>
 
-    <!-- SKRIPT 2: POČASIE (Priame volanie Open-Meteo ako v stable.html) -->
+    <!-- SKRIPT 2: POČASIE -->
     <script>
         var weatherIcons = {
             0: { text: "Jasno", icon: "☀️" },
@@ -525,7 +524,7 @@
         updateLiveWeather();
     </script>
 
-    <!-- SKRIPT 3: REDDIT (3-stupňová záloha pre 100% načítanie) -->
+    <!-- SKRIPT 3: REDDIT (Opravený rss2json bez blokovaného parametra + JSONP + XML záloha) -->
     <script>
         function renderRedditItems(items, container) {
             container.innerHTML = items.slice(0, 5).map(function(item, idx) {
@@ -542,65 +541,99 @@
             }).join('');
         }
 
+        // Pomocná funkcia pre JSONP (obchádza CORS úplne bez potreby fetch)
+        function fetchRedditJsonp(subreddit) {
+            return new Promise(function(resolve, reject) {
+                var cbName = 'reddit_cb_' + subreddit + '_' + Math.floor(Math.random() * 100000);
+                var script = document.createElement('script');
+                var timer = setTimeout(function() {
+                    cleanup();
+                    reject(new Error('JSONP timeout'));
+                }, 4500);
+
+                function cleanup() {
+                    clearTimeout(timer);
+                    delete window[cbName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+
+                window[cbName] = function(data) {
+                    cleanup();
+                    if (data && data.data && Array.isArray(data.data.children) && data.data.children.length > 0) {
+                        var parsed = data.data.children.map(function(c) {
+                            return {
+                                title: c.data.title,
+                                link: 'https://www.reddit.com' + c.data.permalink,
+                                dateMs: c.data.created_utc * 1000
+                            };
+                        });
+                        resolve(parsed);
+                    } else {
+                        reject(new Error('Invalid JSONP payload'));
+                    }
+                };
+
+                script.onerror = function() {
+                    cleanup();
+                    reject(new Error('JSONP blocked'));
+                };
+
+                script.src = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&jsonp=' + cbName;
+                document.body.appendChild(script);
+            });
+        }
+
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
-            var redditJsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
-            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
+            // Čisté RSS URL bez ?t=day (aby rss2json nevyhadzoval chybu 422)
+            var cleanRssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss';
 
-            // 1. pokus: Priame Reddit JSON API
-            fetch(redditJsonUrl)
-                .then(function(res) {
-                    if (!res.ok) throw new Error("Direct JSON blocked");
-                    return res.json();
-                })
+            // 1. pokus: Vyčistený rss2json.com (presne ako v stable.html, ale bez blokovaného query parametra)
+            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(cleanRssUrl))
+                .then(function(res) { return res.json(); })
                 .then(function(data) {
-                    var children = data && data.data && data.data.children;
-                    if (!children || !children.length) throw new Error("Empty");
-                    var parsed = children.map(function(c) {
+                    if (!data || data.status !== 'ok' || !Array.isArray(data.items) || !data.items.length) {
+                        throw new Error("rss2json limit");
+                    }
+                    var parsed = data.items.map(function(item) {
                         return {
-                            title: c.data.title,
-                            link: 'https://www.reddit.com' + c.data.permalink,
-                            dateMs: c.data.created_utc * 1000
+                            title: item.title,
+                            link: item.link,
+                            dateMs: new Date(item.pubDate.replace(' ', 'T') + 'Z').getTime() || new Date(item.pubDate).getTime()
                         };
                     });
                     renderRedditItems(parsed, container);
                 })
                 .catch(function() {
-                    // 2. pokus: Cez Corsproxy.io
-                    fetch('https://corsproxy.io/?' + encodeURIComponent(redditJsonUrl))
-                        .then(function(res) {
-                            if (!res.ok) throw new Error("Corsproxy failed");
-                            return res.json();
-                        })
-                        .then(function(data) {
-                            var children = data && data.data && data.data.children;
-                            if (!children || !children.length) throw new Error("Empty");
-                            var parsed = children.map(function(c) {
-                                return {
-                                    title: c.data.title,
-                                    link: 'https://www.reddit.com' + c.data.permalink,
-                                    dateMs: c.data.created_utc * 1000
-                                };
-                            });
+                    // 2. pokus: JSONP priamo z Redditu (obchádza CORS)
+                    fetchRedditJsonp(subreddit)
+                        .then(function(parsed) {
                             renderRedditItems(parsed, container);
                         })
                         .catch(function() {
-                            // 3. pokus: Pôvodný rss2json
-                            fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(rssUrl))
-                                .then(function(res) { return res.json(); })
-                                .then(function(data) {
-                                    if (!data || !Array.isArray(data.items) || !data.items.length) throw new Error("RSS failed");
-                                    var parsed = data.items.map(function(item) {
-                                        return {
-                                            title: item.title,
-                                            link: item.link,
-                                            dateMs: new Date(item.pubDate).getTime()
-                                        };
-                                    });
+                            // 3. pokus: Cez CodeTabs Proxy + XML Parser
+                            fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent('https://old.reddit.com/r/' + subreddit + '/top/.rss?t=day'))
+                                .then(function(res) { return res.text(); })
+                                .then(function(xmlStr) {
+                                    var doc = new DOMParser().parseFromString(xmlStr, "text/xml");
+                                    var entries = doc.querySelectorAll("entry");
+                                    if (!entries || entries.length === 0) throw new Error("No XML entries");
+                                    var parsed = [];
+                                    for (var i = 0; i < Math.min(5, entries.length); i++) {
+                                        var e = entries[i];
+                                        var titleEl = e.querySelector("title");
+                                        var linkEl = e.querySelector("link");
+                                        var updatedEl = e.querySelector("updated");
+                                        parsed.push({
+                                            title: titleEl ? titleEl.textContent : "Príspevok",
+                                            link: linkEl ? linkEl.getAttribute("href") : "#",
+                                            dateMs: updatedEl ? new Date(updatedEl.textContent).getTime() : Date.now()
+                                        });
+                                    }
                                     renderRedditItems(parsed, container);
                                 })
                                 .catch(function() {
-                                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky (skontroluj AdBlock / ochranu prehliadača).</p>';
+                                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
                                 });
                         });
                 });
