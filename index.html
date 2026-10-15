@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v1.2)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v1.3)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -56,15 +56,15 @@
                 align-self: stretch !important;
             }
         }
-        /* Štýly pre formu v tabuľke */
+        /* Štýly pre formu v tabuľke (bez otáznika) */
         .form-dot {
-            width: 14px;
-            height: 14px;
+            width: 15px;
+            height: 15px;
             border-radius: 3px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            font-size: 8px;
+            font-size: 9px;
             font-weight: 800;
             color: white;
             line-height: 1;
@@ -72,7 +72,6 @@
         .form-v { background-color: #16a34a; }
         .form-r { background-color: #d97706; }
         .form-p { background-color: #dc2626; }
-        .form-q { background-color: #475569; }
     </style>
     <script>
         var CLUB_BADGES = {
@@ -154,10 +153,12 @@
                     <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
                 </div>
                 
-                <div id="pl-table-rows" class="space-y-1 text-xs my-auto"></div>
+                <div id="pl-table-rows" class="space-y-1 text-xs my-auto">
+                    <div class="text-slate-300 text-xs py-6 text-center">Načítavam živú tabuľku...</div>
+                </div>
 
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between items-center px-1">
-                    <span>📊 Stav súťaže: <strong id="pl-round-status" class="text-slate-200">Po 6. kole</strong></span>
+                    <span>📊 Stav súťaže: <strong id="pl-round-status" class="text-slate-200">Načítavam...</strong></span>
                     <button onclick="updateLivePLStandings(true)" class="text-amber-300 hover:underline font-semibold">↻ Obnoviť</button>
                 </div>
             </div>
@@ -497,24 +498,17 @@
         setInterval(updateFPLDeadline, 60000);
     </script>
 
-    <!-- SKRIPT 1.5: DYNAMICKÁ TABUĽKA PREMIER LEAGUE (TOP 6 + FORMA + VŽDY FUNKČNÉ LOGÁ) -->
+    <!-- SKRIPT 1.5: 100% ŽIVÁ TABUĽKA PREMIER LEAGUE (Z FPL FIXTURES + ZÁLOHA ESPN API) -->
     <script>
-        // Východiskový reálny stav po 6. kole (zobrazí sa hneď pri načítaní a následne sa aktualizuje zo živých zápasov)
-        var initialStandings = [
-            { name: "Man Cheaters", code: 43, points: 18, played: 6, form: ["V", "V", "V", "V", "V"] },
-            { name: "Arsenal",      code: 3,  points: 15, played: 6, form: ["V", "P", "V", "V", "V"] },
-            { name: "Brighton",     code: 36, points: 13, played: 6, form: ["V", "V", "V", "R", "P"] },
-            { name: "Brentford",    code: 94, points: 10, played: 6, form: ["R", "V", "R", "R", "R"] },
-            { name: "Everton",      code: 11, points: 10, played: 6, form: ["R", "V", "R", "R", "R"] },
-            { name: "Chelsea",      code: 8,  points: 10, played: 6, form: ["V", "P", "R", "P", "V"] }
-        ];
-
-        function getBadgeForTeam(name, code) {
+        function getBadgeForTeam(name, code, explicitLogo) {
             if (code) {
                 return "https://resources.premierleague.com/premierleague/badges/70/t" + code + ".png";
             }
             if (CLUB_BADGES[name]) {
                 return CLUB_BADGES[name];
+            }
+            if (explicitLogo) {
+                return explicitLogo;
             }
             return "https://resources.premierleague.com/premierleague/badges/70/t3.png";
         }
@@ -531,14 +525,14 @@
                 var rank = idx + 1;
                 var displayName = (t.name === "Manchester City" || t.name === "Man City") ? "Man Cheaters" : t.name;
                 var isArsenal = (displayName === "Arsenal");
-                var badgeUrl = t.logo || getBadgeForTeam(displayName, t.code);
+                var badgeUrl = getBadgeForTeam(displayName, t.code, t.logo);
 
                 var rowStyle = isArsenal
                     ? "bg-[#EF0107]/50 border border-[#ff3b41] shadow-sm font-bold text-white"
                     : "bg-white/5 font-medium text-slate-200";
 
-                var formArr = Array.isArray(t.form) && t.form.length ? t.form.slice(-5) : ["V", "V", "R", "V", "V"];
-                var formBadges = '<span class="form-dot form-q" title="Najbližší zápas">?</span>';
+                var formArr = Array.isArray(t.form) ? t.form.slice(-5) : [];
+                var formBadges = '';
                 formArr.forEach(function(res) {
                     var c = String(res).toUpperCase();
                     var cls = "form-r";
@@ -549,7 +543,7 @@
                 });
 
                 html += '<div class="flex justify-between items-center ' + rowStyle + ' px-2 py-1 rounded">' +
-                    '<span class="flex items-center gap-1.5 truncate max-w-[138px]">' +
+                    '<span class="flex items-center gap-1.5 truncate max-w-[150px]">' +
                         '<img src="' + badgeUrl + '" alt="' + displayName + '" class="w-4 h-4 object-contain shrink-0" onerror="handleBadgeError(this)">' +
                         '<span class="truncate">' + rank + '. ' + displayName + '</span>' +
                     '</span>' +
@@ -563,37 +557,26 @@
             container.innerHTML = html;
         }
 
-        // Výpočet živej tabuľky a formy priamo z odohraných zápasov FPL API
-        function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_standings_v12';
-            if (!forceRefresh) {
-                try {
-                    var cached = JSON.parse(localStorage.getItem(cacheKey));
-                    if (cached && Array.isArray(cached.standings) && (Date.now() - cached.ts < 15 * 60 * 1000)) {
-                        renderPLTable(cached.standings, cached.maxPlayed);
-                        return;
-                    }
-                } catch (e) {}
-            }
-
+        // Metóda A: Výpočet živej tabuľky a formy priamo z odohraných zápasov oficiálneho FPL API
+        function fetchFromFPLApi() {
             var bootstrapUrl = 'https://fantasy.premierleague.com/api/bootstrap-static/';
             var fixturesUrl = 'https://fantasy.premierleague.com/api/fixtures/';
 
-            function fetchViaProxy(target) {
+            function fetchFplJson(target) {
                 return fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(target))
                     .then(function(r) {
-                        if (!r.ok) throw new Error("Proxy err");
+                        if (!r.ok) throw new Error("Proxy error");
                         return r.json();
                     })
                     .then(function(d) { return JSON.parse(d.contents); });
             }
 
-            Promise.all([fetchViaProxy(bootstrapUrl), fetchViaProxy(fixturesUrl)])
+            return Promise.all([fetchFplJson(bootstrapUrl), fetchFplJson(fixturesUrl)])
                 .then(function(results) {
                     var boot = results[0];
                     var fixtures = results[1];
                     if (!boot || !Array.isArray(boot.teams) || !Array.isArray(fixtures)) {
-                        throw new Error("Invalid FPL data");
+                        throw new Error("Invalid FPL format");
                     }
 
                     var tableMap = {};
@@ -610,7 +593,6 @@
                         };
                     });
 
-                    // Zoradíme zápasy chronologicky podľa výkopu
                     fixtures.sort(function(a, b) {
                         return new Date(a.kickoff_time || 0) - new Date(b.kickoff_time || 0);
                     });
@@ -650,7 +632,7 @@
                         }
                     });
 
-                    if (maxPlayed === 0) throw new Error("No finished matches in API");
+                    if (maxPlayed === 0) throw new Error("No finished matches");
 
                     var standings = Object.keys(tableMap).map(function(k) { return tableMap[k]; });
                     standings.sort(function(a, b) {
@@ -661,22 +643,111 @@
                         return b.gf - a.gf;
                     });
 
-                    renderPLTable(standings, maxPlayed);
+                    return { standings: standings, maxPlayed: maxPlayed };
+                });
+        }
+
+        // Metóda B: Záložné priame načítanie z verejného ESPN Premier League API (nepotrebuje proxy, má povolený CORS)
+        function fetchFromESPNApi() {
+            var espnUrl = 'https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings';
+            return fetch(espnUrl)
+                .then(function(r) {
+                    if (!r.ok) throw new Error("ESPN error");
+                    return r.json();
+                })
+                .then(function(data) {
+                    var entries = data && data.children && data.children[0] && data.children[0].standings && data.children[0].standings.entries;
+                    if (!Array.isArray(entries) || !entries.length) throw new Error("No ESPN entries");
+
+                    var maxPlayed = 0;
+                    var standings = entries.map(function(entry) {
+                        var rawName = entry.team.shortDisplayName || entry.team.displayName || entry.team.name;
+                        var name = (rawName === "Manchester City" || rawName === "Man City") ? "Man Cheaters" : rawName;
+                        var logo = (entry.team.logos && entry.team.logos[0]) ? entry.team.logos[0].href : null;
+                        
+                        var stats = {};
+                        var formStr = "";
+                        (entry.stats || []).forEach(function(s) {
+                            stats[s.name] = s.value;
+                            if (s.name === "streak" || s.type === "form" || s.name === "form") {
+                                formStr = s.displayValue || s.summary || "";
+                            }
+                        });
+
+                        var played = stats.gamesPlayed || 0;
+                        if (played > maxPlayed) maxPlayed = played;
+
+                        var formArr = [];
+                        if (formStr) {
+                            formStr.replace(/[^WDL]/gi, '').split('').slice(-5).forEach(function(ch) {
+                                var u = ch.toUpperCase();
+                                if (u === 'W') formArr.push('V');
+                                else if (u === 'L') formArr.push('P');
+                                else formArr.push('R');
+                            });
+                        }
+
+                        return {
+                            name: name,
+                            logo: logo,
+                            points: stats.points || 0,
+                            played: played,
+                            gd: stats.pointDifferential || 0,
+                            gf: stats.pointsFor || 0,
+                            form: formArr
+                        };
+                    });
+
+                    standings.sort(function(a, b) {
+                        if (b.points !== a.points) return b.points - a.points;
+                        if (b.gd !== a.gd) return b.gd - a.gd;
+                        return b.gf - a.gf;
+                    });
+
+                    return { standings: standings, maxPlayed: maxPlayed };
+                });
+        }
+
+        function updateLivePLStandings(forceRefresh) {
+            var cacheKey = 'arsenal_dash_pl_live_v13';
+            
+            // Ak máme uloženú čerstvú tabuľku v localStorage, okamžite ju zobrazíme
+            if (!forceRefresh) {
+                try {
+                    var cached = JSON.parse(localStorage.getItem(cacheKey));
+                    if (cached && Array.isArray(cached.standings) && cached.standings.length) {
+                        renderPLTable(cached.standings, cached.maxPlayed);
+                        // Ak má menej ako 15 minút, nemusíme znova ťahať
+                        if (Date.now() - cached.ts < 15 * 60 * 1000) return;
+                    }
+                } catch (e) {}
+            } else {
+                document.getElementById('pl-round-status').textContent = "Aktualizujem...";
+            }
+
+            // Najprv skúsime presný výpočet z FPL Fixtures API (má presnú formu všetkých 5 zápasov), ak zlyhá, ide priame ESPN API
+            fetchFromFPLApi()
+                .catch(function() {
+                    return fetchFromESPNApi();
+                })
+                .then(function(res) {
+                    renderPLTable(res.standings, res.maxPlayed);
                     try {
                         localStorage.setItem(cacheKey, JSON.stringify({
                             ts: Date.now(),
-                            standings: standings.slice(0, 6),
-                            maxPlayed: maxPlayed
+                            standings: res.standings.slice(0, 6),
+                            maxPlayed: res.maxPlayed
                         }));
                     } catch (e) {}
                 })
                 .catch(function() {
-                    // Ak zlyhá FPL proxy, zostane vykreslená presná aktuálna tabuľka
+                    var container = document.getElementById('pl-table-rows');
+                    if (container.innerHTML.indexOf("Načítavam") !== -1) {
+                        container.innerHTML = '<div class="text-amber-300 text-xs py-4 text-center">Nepodarilo sa stiahnuť živú tabuľku. Klikni na ↻ Obnoviť.</div>';
+                    }
                 });
         }
 
-        // Okamžite vykreslíme tabuľku a na pozadí skontrolujeme novšie kolá
-        renderPLTable(initialStandings, 6);
         updateLivePLStandings(false);
     </script>
 
@@ -810,7 +881,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v12_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v13_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
