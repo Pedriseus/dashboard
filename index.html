@@ -116,7 +116,7 @@
                 <div></div>
             </div>
 
-            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, opravené dobre viditeľné farby) -->
+            <!-- 3. Stred 2: Zápasy Arsenalu (Presne 360px, dobre viditeľné farby) -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div>
                     <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
@@ -366,4 +366,79 @@
                     greetingText = "Dobré ráno! ☕";
                 } else if (hours >= 9 && hours < 18) {
                     greetingText = "Dobrý deň! 👋";
-                } else
+                } else {
+                    greetingText = "Dobrý večer! 🌙";
+                }
+                document.getElementById('greeting').textContent = greetingText;
+
+                var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+                document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
+                document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+            } catch (e) {}
+        }
+        updateDateTime();
+        setInterval(updateDateTime, 1000);
+    </script>
+
+    <!-- SKRIPT 2: POČASIE -->
+    <script>
+        var weatherIcons = {
+            0: { text: "Jasno", icon: "☀️" },
+            1: { text: "Prevažne jasno", icon: "🌤️" },
+            2: { text: "Polooblačno", icon: "⛅" },
+            3: { text: "Zamračené", icon: "☁️" },
+            45: { text: "Hmla", icon: "🌫️" },
+            48: { text: "Hmla", icon: "🌫️" },
+            51: { text: "Mrholenie", icon: "🌦️" },
+            53: { text: "Mrholenie", icon: "🌦️" },
+            61: { text: "Slabý dážď", icon: "🌧️" },
+            63: { text: "Mierny dážď", icon: "🌧️" },
+            65: { text: "Silný dážď", icon: "⛈️" },
+            71: { text: "Sneženie", icon: "❄️" },
+            80: { text: "Prehánky", icon: "🌦️" },
+            95: { text: "Búrka", icon: "⚡" }
+        };
+
+        function updateLiveWeather() {
+            var url = "https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2";
+            fetch(url)
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    var cur = Math.round(data.current.temperature_2m);
+                    var app = Math.round(data.current.apparent_temperature);
+                    var curRainMm = data.current.precipitation || 0;
+                    var maxT = Math.round(data.daily.temperature_2m_max[0]);
+                    var minT = Math.round(data.daily.temperature_2m_min[0]);
+                    var rainProb = data.daily.precipitation_probability_max[0];
+                    var rainSumMm = (data.daily.precipitation_sum && data.daily.precipitation_sum[0] !== undefined) ? data.daily.precipitation_sum[0].toFixed(1) : "0.0";
+                    var wind = Math.round(data.current.wind_speed_10m);
+                    var wInfo = weatherIcons[data.current.weather_code] || { text: "Polooblačno", icon: "⛅" };
+
+                    document.getElementById('w-icon').textContent = wInfo.icon;
+                    document.getElementById('w-temp').textContent = cur + " °C";
+                    document.getElementById('w-desc').textContent = wInfo.text + " • pocitovo " + app + " °C";
+                    document.getElementById('w-max').textContent = maxT + " °C";
+                    document.getElementById('w-min').textContent = minT + " °C";
+                    document.getElementById('w-rain').textContent = rainProb + " %";
+                    document.getElementById('w-rain-mm').textContent = "(" + rainSumMm + " mm)";
+                    document.getElementById('w-wind').textContent = wind + " km/h";
+
+                    document.getElementById('aladin-rain-summary').innerHTML =
+                        '🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">' + rainSumMm + ' mm</strong> (max. pravdepodobnosť <strong class="text-red-400">' + rainProb + ' %</strong>)';
+
+                    var nowIso = new Date().toISOString().slice(0, 13);
+                    var currentIdx = 0;
+                    if (data.hourly && data.hourly.time) {
+                        for (var i = 0; i < data.hourly.time.length; i++) {
+                            if (data.hourly.time[i].startsWith(nowIso)) {
+                                currentIdx = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    var offsets = [2, 4, 6, 8];
+                    offsets.forEach(function(offset, index) {
+                        var targetIdx = currentIdx + offset;
+                        var slotNum = index + 1;
+                        if (data.hourly && data.hourly.time && data.hourly.time[targetIdx]) {
