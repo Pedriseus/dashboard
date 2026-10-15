@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v1.5)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v1.6)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -499,7 +499,7 @@
         setInterval(updateFPLDeadline, 60000);
     </script>
 
-    <!-- SKRIPT 1.5: 100% ŽIVÁ TABUĽKA A FORMA (OPRAVENÝ DÁTUMOVÝ ROZSAH PRE ESPN SCOREBOARD + TIMEOUTY) -->
+    <!-- SKRIPT 1.5: 100% ŽIVÁ TABUĽKA A FORMA (PRIAME ESPN TEAM SCHEDULE API BEZ PROXY) -->
     <script>
         function getBadgeForTeam(name, code, explicitLogo) {
             if (code) {
@@ -514,25 +514,90 @@
             return "https://resources.premierleague.com/premierleague/badges/70/t3.png";
         }
 
-        function fetchWithTimeoutPL(url, ms) {
-            return new Promise(function(resolve, reject) {
-                var ctrl = typeof AbortController !== 'undefined' ? new AbortController() : null;
-                var t = setTimeout(function() {
-                    if (ctrl) ctrl.abort();
-                    reject(new Error("Timeout"));
-                }, ms || 4000);
-
-                fetch(url, ctrl ? { signal: ctrl.signal } : {})
-                    .then(function(r) {
-                        clearTimeout(t);
-                        if (!r.ok) throw new Error("HTTP " + r.status);
-                        resolve(r);
-                    })
-                    .catch(function(e) {
-                        clearTimeout(t);
-                        reject(e);
-                    });
+        function convertWDLString(str) {
+            if (!str || typeof str !== 'string') return [];
+            var cleaned = str.replace(/[^WDLVRP]/gi, '').toUpperCase();
+            if (cleaned.length < 3) return [];
+            return cleaned.split('').slice(-5).map(function(ch) {
+                if (ch === 'W' || ch === 'V') return 'V';
+                if (ch === 'L' || ch === 'P') return 'P';
+                return 'R';
             });
+        }
+
+        function extractScoreNumber(scoreProp) {
+            if (scoreProp === null || scoreProp === undefined) return NaN;
+            if (typeof scoreProp === 'number') return scoreProp;
+            if (typeof scoreProp === 'string') return parseInt(scoreProp, 10);
+            if (typeof scoreProp === 'object') {
+                if (scoreProp.value !== undefined) return Number(scoreProp.value);
+                if (scoreProp.displayValue !== undefined) return parseInt(scoreProp.displayValue, 10);
+            }
+            return NaN;
+        }
+
+        // Priame stiahnutie odohraných zápasov konkrétneho tímu z ESPN Team Schedule API (žiadna proxy, čistý CORS)
+        function fetchTeamFormFromSchedule(teamId) {
+            var schedUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/' + teamId + '/schedule';
+            return fetch(schedUrl)
+                .then(function(r) {
+                    if (!r.ok) throw new Error("Schedule HTTP error");
+                    return r.json();
+                })
+                .then(function(data) {
+                    var events = (data && Array.isArray(data.events)) ? data.events : [];
+                    var finishedEvents = [];
+
+                    events.forEach(function(ev) {
+                        var comp = ev.competitions && ev.competitions[0];
+                        if (!comp) return;
+                        var st = comp.status && comp.status.type;
+                        var isDone = st && (st.completed === true || st.state === "post" || st.name === "STATUS_FULL_TIME");
+                        if (!isDone) return;
+
+                        var comps = comp.competitors || [];
+                        if (comps.length !== 2) return;
+
+                        var myComp = null;
+                        var oppComp = null;
+                        for (var i = 0; i < comps.length; i++) {
+                            if ( comps[i].team && String(comps[i].team.id) === String(teamId) ) {
+                                myComp = comps[i];
+                            } else {
+                                oppComp = comps[i];
+                            }
+                        }
+                        if (!myComp || !oppComp) return;
+
+                        var resLetter = null;
+                        if (myComp.winner === true) {
+                            resLetter = 'V';
+                        } else if (oppComp.winner === true) {
+                            resLetter = 'P';
+                        } else {
+                            var myScore = extractScoreNumber(myComp.score);
+                            var oppScore = extractScoreNumber(oppComp.score);
+                            if (!isNaN(myScore) && !isNaN(oppScore)) {
+                                if (myScore > oppScore) resLetter = 'V';
+                                else if (myScore < oppScore) resLetter = 'P';
+                                else resLetter = 'R';
+                            }
+                        }
+
+                        if (resLetter) {
+                            finishedEvents.push({
+                                dateMs: new Date(ev.date || 0).getTime(),
+                                result: resLetter
+                            });
+                        }
+                    });
+
+                    finishedEvents.sort(function(a, b) { return a.dateMs - b.dateMs; });
+                    return finishedEvents.slice(-5).map(function(item) { return item.result; });
+                })
+                .catch(function() {
+                    return [];
+                });
         }
 
         function renderPLTable(teamsArray, maxPlayed) {
@@ -579,273 +644,8 @@
             container.innerHTML = html;
         }
 
-        // Pomocná funkcia na formátovanie dátumu YYYYMMDD pre ESPN Scoreboard API
-        function formatYMD(dateObj) {
-            var y = dateObj.getFullYear();
-            var m = String(dateObj.getMonth() + 1).padStart(2, '0');
-            var d = String(dateObj.getDate()).padStart(2, '0');
-            return '' + y + m + d;
-        }
-
-        // Metóda 1: Priame ESPN Standings + ESPN Scoreboard (rozdelené na krátke úseky do dnešného dňa, aby ESPN nikdy neodmietol dopyt)
-        function fetchFromESPNApiWithForm() {
-            var standingsUrl = 'https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings';
-            
-            // Vypočítame dátumové okná od 1.8.2026 po dnešok (max po 45 dňoch, čo ESPN Scoreboard vráti okamžite)
-            var now = new Date();
-            var tomorrow = new Date(now.getTime() + 86400000);
-            var startSeason = new Date(2026, 7, 1); // 1. august 2026
-            if (tomorrow < startSeason) {
-                startSeason = new Date(now.getFullYear() - 1, 7, 1);
-            }
-
-            var scoreboardPromises = [];
-            var cursor = new Date(startSeason.getTime());
-            while (cursor <= tomorrow) {
-                var chunkEnd = new Date(cursor.getTime() + 45 * 86400000);
-                if (chunkEnd > tomorrow) chunkEnd = tomorrow;
-                var rangeStr = formatYMD(cursor) + '-' + formatYMD(chunkEnd);
-                var sbUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=' + rangeStr + '&limit=200';
-                scoreboardPromises.push(
-                    fetchWithTimeoutPL(sbUrl, 4500)
-                        .then(function(r) { return r.json(); })
-                        .catch(function() { return { events: [] }; })
-                );
-                cursor = new Date(chunkEnd.getTime() + 86400000);
-            }
-
-            return Promise.all([
-                fetchWithTimeoutPL(standingsUrl, 4500).then(function(r) { return r.json(); }),
-                Promise.all(scoreboardPromises)
-            ]).then(function(results) {
-                var standData = results[0];
-                var sbChunks = results[1];
-
-                var entries = standData && standData.children && standData.children[0] && standData.children[0].standings && standData.children[0].standings.entries;
-                if (!Array.isArray(entries) || !entries.length) throw new Error("No ESPN entries");
-
-                // Spojíme všetky odohrané zápasy zo všetkých okien
-                var allEvents = [];
-                var seenEventIds = {};
-                sbChunks.forEach(function(chunk) {
-                    if (chunk && Array.isArray(chunk.events)) {
-                        chunk.events.forEach(function(ev) {
-                            if (ev && ev.id && !seenEventIds[ev.id]) {
-                                seenEventIds[ev.id] = true;
-                                allEvents.push(ev);
-                            }
-                        });
-                    }
-                });
-
-                // Zoradíme chronologicky od najstaršieho po najnovší
-                allEvents.sort(function(a, b) {
-                    return new Date(a.date || 0) - new Date(b.date || 0);
-                });
-
-                var formByTeamId = {};
-                var formByTeamName = {};
-
-                function pushForm(id, name, letter) {
-                    if (id) {
-                        if (!formByTeamId[id]) formByTeamId[id] = [];
-                        formByTeamId[id].push(letter);
-                    }
-                    if (name) {
-                        if (!formByTeamName[name]) formByTeamName[name] = [];
-                        formByTeamName[name].push(letter);
-                    }
-                }
-
-                allEvents.forEach(function(ev) {
-                    var comp = ev.competitions && ev.competitions[0];
-                    if (!comp) return;
-                    var isCompleted = (comp.status && comp.status.type && (comp.status.type.completed === true || comp.status.type.state === "post"));
-                    if (!isCompleted) return;
-
-                    var competitors = comp.competitors || [];
-                    if (competitors.length !== 2) return;
-
-                    var c1 = competitors[0];
-                    var c2 = competitors[1];
-                    var s1 = parseInt(c1.score, 10);
-                    var s2 = parseInt(c2.score, 10);
-                    if (isNaN(s1) || isNaN(s2)) return;
-
-                    var id1 = String(c1.team && c1.team.id);
-                    var id2 = String(c2.team && c2.team.id);
-                    var n1 = c1.team && (c1.team.shortDisplayName || c1.team.displayName || c1.team.name);
-                    var n2 = c2.team && (c2.team.shortDisplayName || c2.team.displayName || c2.team.name);
-
-                    if (s1 > s2) {
-                        pushForm(id1, n1, 'V');
-                        pushForm(id2, n2, 'P');
-                    } else if (s1 < s2) {
-                        pushForm(id1, n1, 'P');
-                        pushForm(id2, n2, 'V');
-                    } else {
-                        pushForm(id1, n1, 'R');
-                        pushForm(id2, n2, 'R');
-                    }
-                });
-
-                var maxPlayed = 0;
-                var standings = entries.map(function(entry) {
-                    var teamId = String(entry.team.id);
-                    var rawName = entry.team.shortDisplayName || entry.team.displayName || entry.team.name;
-                    var name = (rawName === "Manchester City" || rawName === "Man City") ? "Man Cheaters" : rawName;
-                    var logo = (entry.team.logos && entry.team.logos[0]) ? entry.team.logos[0].href : null;
-                    
-                    var stats = {};
-                    var statFormStr = "";
-                    (entry.stats || []).forEach(function(s) {
-                        stats[s.name] = s.value;
-                        // Kontrola, či samotný objekt neobsahuje reťazec formy (napr. "WWLWD")
-                        var valStr = String(s.displayValue || s.summary || s.value || "").trim();
-                        if (/^[WDL]{3,6}$/i.test(valStr)) {
-                            statFormStr = valStr;
-                        }
-                    });
-
-                    var played = stats.gamesPlayed || 0;
-                    if (played > maxPlayed) maxPlayed = played;
-
-                    var formArr = [];
-                    if (formByTeamId[teamId] && formByTeamId[teamId].length) {
-                        formArr = formByTeamId[teamId].slice(-5);
-                    } else if (formByTeamName[rawName] && formByTeamName[rawName].length) {
-                        formArr = formByTeamName[rawName].slice(-5);
-                    } else if (statFormStr) {
-                        statFormStr.split('').slice(-5).forEach(function(ch) {
-                            var u = ch.toUpperCase();
-                            if (u === 'W') formArr.push('V');
-                            else if (u === 'L') formArr.push('P');
-                            else formArr.push('R');
-                        });
-                    }
-
-                    return {
-                        name: name,
-                        rawName: rawName,
-                        logo: logo,
-                        points: stats.points !== undefined ? stats.points : 0,
-                        played: played,
-                        gd: stats.pointDifferential !== undefined ? stats.pointDifferential : 0,
-                        gf: stats.pointsFor !== undefined ? stats.pointsFor : 0,
-                        rank: stats.rank || 99,
-                        form: formArr
-                    };
-                });
-
-                standings.sort(function(a, b) {
-                    if (b.points !== a.points) return b.points - a.points;
-                    if (b.gd !== a.gd) return b.gd - a.gd;
-                    if (b.gf !== a.gf) return b.gf - a.gf;
-                    return a.rank - b.rank;
-                });
-
-                return { standings: standings, maxPlayed: maxPlayed };
-            });
-        }
-
-        // Metóda 2: Záložný výpočet z oficiálneho FPL API s prísnym timeoutom
-        function fetchFromFPLApi() {
-            var bootstrapUrl = 'https://fantasy.premierleague.com/api/bootstrap-static/';
-            var fixturesUrl = 'https://fantasy.premierleague.com/api/fixtures/';
-
-            function fetchFplJson(target) {
-                var proxies = [
-                    'https://cors.eu.org/' + target,
-                    'https://api.allorigins.win/raw?url=' + encodeURIComponent(target),
-                    'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(target)
-                ];
-                function tryIdx(i) {
-                    if (i >= proxies.length) return Promise.reject(new Error("FPL proxies failed"));
-                    return fetchWithTimeoutPL(proxies[i], 3500)
-                        .then(function(r) { return r.json(); })
-                        .catch(function() { return tryIdx(i + 1); });
-                }
-                return tryIdx(0);
-            }
-
-            return Promise.all([fetchFplJson(bootstrapUrl), fetchFplJson(fixturesUrl)])
-                .then(function(results) {
-                    var boot = results[0];
-                    var fixtures = results[1];
-                    if (!boot || !Array.isArray(boot.teams) || !Array.isArray(fixtures)) {
-                        throw new Error("Invalid FPL format");
-                    }
-
-                    var tableMap = {};
-                    boot.teams.forEach(function(team) {
-                        tableMap[team.id] = {
-                            id: team.id,
-                            name: (team.name === "Manchester City" || team.name === "Man City") ? "Man Cheaters" : team.name,
-                            code: team.code,
-                            played: 0,
-                            gf: 0,
-                            ga: 0,
-                            points: 0,
-                            form: []
-                        };
-                    });
-
-                    fixtures.sort(function(a, b) {
-                        return new Date(a.kickoff_time || 0) - new Date(b.kickoff_time || 0);
-                    });
-
-                    var maxPlayed = 0;
-                    fixtures.forEach(function(fix) {
-                        if ((fix.finished || fix.finished_provisional) && fix.team_h_score !== null && fix.team_a_score !== null) {
-                            var home = tableMap[fix.team_h];
-                            var away = tableMap[fix.team_a];
-                            if (!home || !away) return;
-
-                            var hs = fix.team_h_score;
-                            var as = fix.team_a_score;
-
-                            home.played++;
-                            away.played++;
-                            home.gf += hs; home.ga += as;
-                            away.gf += as; away.ga += hs;
-
-                            if (hs > as) {
-                                home.points += 3;
-                                home.form.push("V");
-                                away.form.push("P");
-                            } else if (hs < as) {
-                                away.points += 3;
-                                away.form.push("V");
-                                home.form.push("P");
-                            } else {
-                                home.points += 1;
-                                away.points += 1;
-                                home.form.push("R");
-                                away.form.push("R");
-                            }
-
-                            if (home.played > maxPlayed) maxPlayed = home.played;
-                            if (away.played > maxPlayed) maxPlayed = away.played;
-                        }
-                    });
-
-                    if (maxPlayed === 0) throw new Error("No finished matches");
-
-                    var standings = Object.keys(tableMap).map(function(k) { return tableMap[k]; });
-                    standings.sort(function(a, b) {
-                        if (b.points !== a.points) return b.points - a.points;
-                        var gdA = a.gf - a.ga;
-                        var gdB = b.gf - b.ga;
-                        if (gdB !== gdA) return gdB - gdA;
-                        return b.gf - a.gf;
-                    });
-
-                    return { standings: standings, maxPlayed: maxPlayed };
-                });
-        }
-
         function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v15';
+            var cacheKey = 'arsenal_dash_pl_live_v16';
             
             if (!forceRefresh) {
                 try {
@@ -859,35 +659,93 @@
                 document.getElementById('pl-round-status').textContent = "Aktualizujem...";
             }
 
-            fetchFromESPNApiWithForm()
-                .then(function(res) {
-                    if (!res.standings[0].form || res.standings[0].form.length === 0) {
-                        return fetchFromFPLApi().catch(function() { return res; });
-                    }
-                    return res;
+            var standingsUrl = 'https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings';
+
+            fetch(standingsUrl)
+                .then(function(r) {
+                    if (!r.ok) throw new Error("ESPN standings HTTP error");
+                    return r.json();
+                })
+                .then(function(standData) {
+                    var entries = standData && standData.children && standData.children[0] && standData.children[0].standings && standData.children[0].standings.entries;
+                    if (!Array.isArray(entries) || !entries.length) throw new Error("No entries");
+
+                    var maxPlayed = 0;
+                    var parsedTeams = entries.map(function(entry) {
+                        var teamId = String(entry.team.id);
+                        var rawName = entry.team.shortDisplayName || entry.team.displayName || entry.team.name;
+                        var name = (rawName === "Manchester City" || rawName === "Man City") ? "Man Cheaters" : rawName;
+                        var logo = (entry.team.logos && entry.team.logos[0]) ? entry.team.logos[0].href : null;
+                        
+                        var stats = {};
+                        var inlineForm = [];
+
+                        (entry.stats || []).forEach(function(s) {
+                            if (s.value !== undefined) stats[s.name] = s.value;
+                            // Hľadáme prípadný reťazec formy priamo v štatistikách tímu (napr. "WWLWD" alebo "W-W-L-W-D")
+                            var candidates = [s.displayValue, s.summary, s.value, s.description];
+                            candidates.forEach(function(cand) {
+                                if (typeof cand === 'string' && /^[WDL](\s*[-,]\s*[WDL]){2,5}$/i.test(cand.trim())) {
+                                    inlineForm = convertWDLString(cand);
+                                } else if (typeof cand === 'string' && /^[WDL]{3,6}$/i.test(cand.trim())) {
+                                    inlineForm = convertWDLString(cand);
+                                }
+                            });
+                        });
+
+                        var played = stats.gamesPlayed || 0;
+                        if (played > maxPlayed) maxPlayed = played;
+
+                        return {
+                            id: teamId,
+                            name: name,
+                            logo: logo,
+                            points: stats.points !== undefined ? stats.points : 0,
+                            played: played,
+                            gd: stats.pointDifferential !== undefined ? stats.pointDifferential : 0,
+                            gf: stats.pointsFor !== undefined ? stats.pointsFor : 0,
+                            rank: stats.rank || 99,
+                            form: inlineForm
+                        };
+                    });
+
+                    parsedTeams.sort(function(a, b) {
+                        if (b.points !== a.points) return b.points - a.points;
+                        if (b.gd !== a.gd) return b.gd - a.gd;
+                        if (b.gf !== a.gf) return b.gf - a.gf;
+                        return a.rank - b.rank;
+                    });
+
+                    var top6 = parsedTeams.slice(0, 6);
+                    // Hneď vykreslíme poradie a body
+                    renderPLTable(top6, maxPlayed);
+
+                    // Pre každý tím z Top 6, ktorému chýba forma, dotiahneme jeho posledných 5 zápasov priamo z jeho ESPN Schedule
+                    var schedulePromises = top6.map(function(teamObj) {
+                        if (teamObj.form && teamObj.form.length >= 3) {
+                            return Promise.resolve(teamObj);
+                        }
+                        return fetchTeamFormFromSchedule(teamObj.id).then(function(fetchedForm) {
+                            if (fetchedForm && fetchedForm.length) {
+                                teamObj.form = fetchedForm;
+                            }
+                            return teamObj;
+                        });
+                    });
+
+                    return Promise.all(schedulePromises).then(function(updatedTop6) {
+                        renderPLTable(updatedTop6, maxPlayed);
+                        try {
+                            localStorage.setItem(cacheKey, JSON.stringify({
+                                ts: Date.now(),
+                                standings: updatedTop6,
+                                maxPlayed: maxPlayed
+                            }));
+                        } catch (e) {}
+                    });
                 })
                 .catch(function() {
-                    return fetchFromFPLApi();
-                })
-                .then(function(res) {
-                    renderPLTable(res.standings, res.maxPlayed);
-                    try {
-                        localStorage.setItem(cacheKey, JSON.stringify({
-                            ts: Date.now(),
-                            standings: res.standings.slice(0, 6),
-                            maxPlayed: res.maxPlayed
-                        }));
-                    } catch (e) {}
-                })
-                .catch(function() {
-                    var roundEl = document.getElementById('pl-round-status');
-                    if (roundEl && roundEl.textContent.indexOf("Aktualizujem") !== -1) {
-                        roundEl.textContent = "Chyba spojenia";
-                    }
-                    var container = document.getElementById('pl-table-rows');
-                    if (container.innerHTML.indexOf("Načítavam") !== -1) {
-                        container.innerHTML = '<div class="text-amber-300 text-xs py-4 text-center">Nepodarilo sa stiahnuť živú tabuľku. Klikni na ↻ Obnoviť.</div>';
-                    }
+                    document.getElementById('pl-round-status').textContent = "Chyba spojenia";
                 });
         }
 
@@ -1024,7 +882,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v15_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v16_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
