@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v2.3)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v2.4)</title>
     <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -156,7 +156,7 @@
                 </div>
             </div>
 
-            <!-- 2. Stred 1: Top 6 Premier League Tabuľka -->
+            <!-- 2. Stred 1: Živá Top 6 Premier League Tabuľka -->
             <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
                     <span>🏆 PREMIER LEAGUE (TOP 6)</span>
@@ -188,7 +188,7 @@
                 </div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga + Deadline -->
+            <!-- 4. Vpravo: Živá FPL Mini-liga + Deadline -->
             <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
                     <span>🎮 FPL MINI-LIGA</span>
@@ -210,7 +210,7 @@
 
         </header>
 
-        <!-- HORNÝ RIADOK: Počasie + SHMÚ -->
+        <!-- HORNÝ RIADOK: Počasie + Priamy živý pohľad na SHMÚ Radar -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
             
             <!-- POČASIE DNES -->
@@ -238,13 +238,13 @@
                         <div class="flex items-start gap-2.5">
                             <span id="w-tip-icon" class="text-xl shrink-0">🧥</span>
                             <div id="w-tip-now" class="text-slate-200 leading-relaxed">
-                                <strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz:</strong> Príjemný deň v hlavnom meste.
+                                <strong class="text-red-400 uppercase tracking-wide text-xs">Aktuálne:</strong> Príjemný deň v hlavnom meste.
                             </div>
                         </div>
                         <div class="border-t border-white/10 pt-2 flex items-start gap-2.5">
                             <span class="text-lg shrink-0">📅</span>
                             <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
-                                <strong class="gold-text uppercase tracking-wide">Predpoveď:</strong> Sleduj oficiálne výstrahy.
+                                <strong class="gold-text uppercase tracking-wide">Predpoveď:</strong> Sleduj aktuálne zrážky v karte vedľa.
                             </div>
                         </div>
                     </div>
@@ -256,50 +256,34 @@
                 </div>
             </section>
 
-            <!-- SHMÚ MODELY & RADAR (S priamymi odkazmi pre istotu) -->
+            <!-- SHMÚ: PRIAMY ŽIVÝ NÁHĽAD (Zrážkový radar cez oficiálny obrázok SHMÚ) -->
             <section class="card p-5 sm:p-6 lg:col-span-7 flex flex-col justify-between">
                 <div>
-                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
-                        <div>
-                            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
-                            </h2>
-                            <p class="text-xs text-slate-400 mt-1">
-                                🌧️ Oficiálne numerické predpovede a meteorologický radar SHMÚ:
-                            </p>
-                        </div>
-                        <div class="flex gap-2">
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-xl text-xs bg-red-600/30 border border-red-500/40 text-red-200 hover:bg-red-600 hover:text-white transition font-bold shadow-sm">
-                                Meteogram ALADIN[cite: 1] ↗
-                            </a>
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-xl text-xs bg-black/40 border border-white/10 text-amber-300 hover:bg-white/10 transition font-bold shadow-sm">
-                                Radar SHMÚ[cite: 1] ↗
-                            </a>
-                        </div>
+                    <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                        <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                            📡 SHMÚ Zrážkový Radar <span class="text-sm font-normal text-slate-400">(Slovensko / Okolie)</span>
+                        </h2>
+                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="text-xs text-red-400 hover:underline font-bold">Otvoriť portál SHMÚ ↗</a>
                     </div>
+                    <p class="text-xs text-slate-400 mb-3">
+                        Aktuálny živý snímok zrážok (aktualizuje sa automaticky zo serverov SHMÚ):
+                    </p>
 
-                    <!-- Rýchly prehľad prepojený na oficiálne zdroje -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
-                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="p-4 rounded-xl bg-black/30 border border-white/10 hover:border-red-500/50 transition block">
-                            <div class="text-amber-300 font-bold text-sm mb-1">📍 Meteogram pre Bratislavu</div>
-                            <div class="text-slate-300 text-xs leading-relaxed">Kliknutím otvoríš detailný numerický model ALADIN (teploty, vietor, oblačnosť po hodinách)[cite: 1].</div>
-                        </a>
-                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="p-4 rounded-xl bg-black/30 border border-white/10 hover:border-red-500/50 transition block">
-                            <div class="text-amber-300 font-bold text-sm mb-1">📡 Zrážkový radar SHMÚ</div>
-                            <div class="text-slate-300 text-xs leading-relaxed">Sleduj aktuálny pohyb zrážok a búrok nad Slovenskom v reálnom čase[cite: 1].</div>
-                        </a>
+                    <!-- Živý obrázok radaru priamo zo SHMÚ -->
+                    <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 flex items-center justify-center p-1">
+                        <img src="https://www.shmu.sk/data/meteo_radar/latest_rad_sk.jpg" alt="SHMÚ Zrážkový radar" class="w-full h-auto object-cover rounded-lg max-h-[220px]" onerror="this.onerror=null; this.src='https://www.shmu.sk/file/img/shmu_logo.png';">
                     </div>
                 </div>
 
-                <div class="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center">
-                    <span>Zdroj: Slovenský hydrometeorologický ústav</span>
-                    <a href="https://www.shmu.sk/" target="_blank" class="text-red-400 hover:text-red-300 font-bold">shmu.sk ↗</a>
+                <div class="mt-4 pt-3 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center">
+                    <span>Slovenský hydrometeorologický ústav (SHMÚ)</span>
+                    <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="text-amber-300 hover:underline font-bold">Meteogram pre Bratislavu ↗</a>
                 </div>
             </section>
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed (S tlačidlom na priame otvorenie, ak by bol zablokovaný) -->
+        <!-- SPODNÝ RIADOK: Reddit Feed (S priamymi záložnými tlačidlami) -->
         <section class="card p-5 sm:p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div class="flex items-center gap-3">
