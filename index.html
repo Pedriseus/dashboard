@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v1.6)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v1.7)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -209,43 +209,28 @@
                 </div>
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-slate-400 flex justify-between items-center px-1">
                     <span>🏟️ Najbližšie:</span>
-                    <span class="text-white font-semibold">City Ground (Nottingham)</span>
+                    <span class="text-white font-semibold">Allianz Arena (Bayern)</span>
                 </div>
             </div>
 
-            <!-- 4. Vpravo: FPL Mini-liga + Deadline -->
+            <!-- 4. Vpravo: Živá FPL Mini-liga + Deadline -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
                     <span>🎮 FPL Mini-liga</span>
-                    <a href="https://fantasy.premierleague.com/en/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline">FPL ↗</a>
-                </div>
-                <div class="space-y-1.5 text-xs my-auto">
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded">
-                        <span class="text-slate-200">1. The Invincibles <span class="text-[10px] font-bold text-red-400 ml-1">(-23)</span></span>
-                        <span class="font-bold text-slate-300">411 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="text-slate-200">2. Fc ThisSeason <span class="text-[10px] font-bold text-red-400 ml-1">(-9)</span></span>
-                        <span class="font-bold text-slate-300">397 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">
-                        <span class="font-bold text-white flex items-center gap-1.5">
-                            <span>⭐</span> 3. Ødeargod
-                        </span>
-                        <span class="font-black gold-text">388 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="text-slate-200">4. Australobooster <span class="text-[10px] font-bold text-emerald-400 ml-1">(+4)</span></span>
-                        <span class="font-bold text-slate-300">384 b</span>
-                    </div>
-                    <div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded">
-                        <span class="text-slate-200">5. CFC Academy <span class="text-[10px] font-bold text-emerald-400 ml-1">(+13)</span></span>
-                        <span class="font-bold text-slate-300">375 b</span>
+                    <div class="flex items-center gap-2">
+                        <button onclick="updateLiveFPLLeague(true)" class="text-[10px] text-amber-300 hover:underline font-semibold">↻ Obnoviť</button>
+                        <a href="https://fantasy.premierleague.com/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline">FPL ↗</a>
                     </div>
                 </div>
+                
+                <!-- Dynamický kontajner pre živé poradie FPL Mini-ligy -->
+                <div id="fpl-minileague-rows" class="space-y-1.5 text-xs my-auto">
+                    <div class="text-slate-300 text-xs py-6 text-center">Načítavam živé poradie mini-ligy...</div>
+                </div>
+
                 <div class="mt-2 pt-2 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
                     <span>⏳ Najbližší deadline:</span>
-                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/en/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
+                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
                 </div>
             </div>
 
@@ -536,7 +521,6 @@
             return NaN;
         }
 
-        // Priame stiahnutie odohraných zápasov konkrétneho tímu z ESPN Team Schedule API (žiadna proxy, čistý CORS)
         function fetchTeamFormFromSchedule(teamId) {
             var schedUrl = 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/' + teamId + '/schedule';
             return fetch(schedUrl)
@@ -561,7 +545,7 @@
                         var myComp = null;
                         var oppComp = null;
                         for (var i = 0; i < comps.length; i++) {
-                            if ( comps[i].team && String(comps[i].team.id) === String(teamId) ) {
+                            if (comps[i].team && String(comps[i].team.id) === String(teamId)) {
                                 myComp = comps[i];
                             } else {
                                 oppComp = comps[i];
@@ -645,7 +629,7 @@
         }
 
         function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v16';
+            var cacheKey = 'arsenal_dash_pl_live_v17';
             
             if (!forceRefresh) {
                 try {
@@ -682,7 +666,6 @@
 
                         (entry.stats || []).forEach(function(s) {
                             if (s.value !== undefined) stats[s.name] = s.value;
-                            // Hľadáme prípadný reťazec formy priamo v štatistikách tímu (napr. "WWLWD" alebo "W-W-L-W-D")
                             var candidates = [s.displayValue, s.summary, s.value, s.description];
                             candidates.forEach(function(cand) {
                                 if (typeof cand === 'string' && /^[WDL](\s*[-,]\s*[WDL]){2,5}$/i.test(cand.trim())) {
@@ -717,10 +700,8 @@
                     });
 
                     var top6 = parsedTeams.slice(0, 6);
-                    // Hneď vykreslíme poradie a body
                     renderPLTable(top6, maxPlayed);
 
-                    // Pre každý tím z Top 6, ktorému chýba forma, dotiahneme jeho posledných 5 zápasov priamo z jeho ESPN Schedule
                     var schedulePromises = top6.map(function(teamObj) {
                         if (teamObj.form && teamObj.form.length >= 3) {
                             return Promise.resolve(teamObj);
@@ -750,6 +731,169 @@
         }
 
         updateLivePLStandings(false);
+    </script>
+
+    <!-- SKRIPT 1.6: 100% ŽIVÁ FPL MINI-LIGA (#28856) + AUTOMATICKÉ BODOVÉ ROZDIELY VOČI ØDEARGOD -->
+    <script>
+        var FPL_LEAGUE_ID = 28856;
+        var MY_FPL_TEAM_NAME = "Ødeargod";
+
+        function isMyFplTeam(entryName) {
+            if (!entryName) return false;
+            var n = String(entryName).toLowerCase();
+            return n.indexOf("deargod") !== -1 || n.indexOf("ødear") !== -1 || n.indexOf("odeargod") !== -1;
+        }
+
+        function renderFPLMiniLeague(entries) {
+            var container = document.getElementById('fpl-minileague-rows');
+            if (!Array.isArray(entries) || entries.length === 0) {
+                container.innerHTML = '<div class="text-amber-300 text-xs py-4 text-center">Žiadne dáta v mini-lige.</div>';
+                return;
+            }
+
+            // Nájdi môj tím (Ødeargod) na výpočet živých bodových rozdielov
+            var myEntry = null;
+            var myIndex = -1;
+            for (var i = 0; i < entries.length; i++) {
+                if (isMyFplTeam(entries[i].entry_name)) {
+                    myEntry = entries[i];
+                    myIndex = i;
+                    break;
+                }
+            }
+
+            var myTotal = myEntry ? myEntry.total : null;
+
+            // Zobrazíme Top 5, ale ak je Ødeargod nižšie ako na 5. mieste, dáme Top 4 + Ødeargod na 5. riadok
+            var displayList = entries.slice(0, 5);
+            if (myEntry && myIndex >= 5) {
+                displayList = entries.slice(0, 4).concat([myEntry]);
+            }
+
+            var html = "";
+            displayList.forEach(function(item, idx) {
+                var rank = item.rank || (idx + 1);
+                var teamName = item.entry_name || "Tím";
+                var totalPts = item.total !== undefined ? item.total : 0;
+                var isMe = isMyFplTeam(teamName);
+
+                if (isMe) {
+                    html += '<div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm">' +
+                        '<span class="font-bold text-white flex items-center gap-1.5 truncate max-w-[230px]">' +
+                            '<span>⭐</span> ' + rank + '. ' + teamName +
+                        '</span>' +
+                        '<span class="font-black gold-text shrink-0">' + totalPts + ' b</span>' +
+                    '</div>';
+                } else {
+                    var diffHtml = "";
+                    if (myTotal !== null) {
+                        var diff = myTotal - totalPts;
+                        if (diff < 0) {
+                            // Súper je pred tebou (tvoja strata)
+                            diffHtml = ' <span class="text-[10px] font-bold text-red-400 ml-1">(' + diff + ')</span>';
+                        } else if (diff > 0) {
+                            // Ty máš náskok pred súperom
+                            diffHtml = ' <span class="text-[10px] font-bold text-emerald-400 ml-1">(+' + diff + ')</span>';
+                        } else {
+                            diffHtml = ' <span class="text-[10px] font-bold text-slate-400 ml-1">(0)</span>';
+                        }
+                    }
+
+                    var padClass = (idx === 0) ? "py-1.5" : "py-1";
+                    html += '<div class="flex justify-between items-center bg-white/5 px-2.5 ' + padClass + ' rounded">' +
+                        '<span class="text-slate-200 truncate max-w-[230px]">' + rank + '. ' + teamName + diffHtml + '</span>' +
+                        '<span class="font-bold text-slate-300 shrink-0">' + totalPts + ' b</span>' +
+                    '</div>';
+                }
+            });
+
+            container.innerHTML = html;
+        }
+
+        function fetchFPLLeagueFromGateways() {
+            var targetUrl = 'https://fantasy.premierleague.com/api/leagues-classic/' + FPL_LEAGUE_ID + '/standings/';
+            
+            var gateways = [
+                function() {
+                    return fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl))
+                        .then(function(r) { if (!r.ok) throw new Error("AO get"); return r.json(); })
+                        .then(function(d) { return JSON.parse(d.contents); });
+                },
+                function() {
+                    return fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl))
+                        .then(function(r) { if (!r.ok) throw new Error("AO raw"); return r.json(); });
+                },
+                function() {
+                    return fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl))
+                        .then(function(r) { if (!r.ok) throw new Error("Codetabs"); return r.json(); });
+                },
+                function() {
+                    return fetch('https://corsproxy.io/?url=' + encodeURIComponent(targetUrl))
+                        .then(function(r) { if (!r.ok) throw new Error("Corsproxy"); return r.json(); });
+                }
+            ];
+
+            function tryNext(idx) {
+                if (idx >= gateways.length) {
+                    return Promise.reject(new Error("All FPL gateways failed"));
+                }
+                return gateways[idx]()
+                    .then(function(data) {
+                        var results = data && data.standings && data.standings.results;
+                        if (!Array.isArray(results) || results.length === 0) {
+                            throw new Error("Invalid standings structure");
+                        }
+                        return results;
+                    })
+                    .catch(function() {
+                        return tryNext(idx + 1);
+                    });
+            }
+
+            return tryNext(0);
+        }
+
+        function updateLiveFPLLeague(forceRefresh) {
+            var cacheKey = 'arsenal_dash_fpl_league_v17';
+            var container = document.getElementById('fpl-minileague-rows');
+
+            if (!forceRefresh) {
+                try {
+                    var cached = JSON.parse(localStorage.getItem(cacheKey));
+                    if (cached && Array.isArray(cached.results) && cached.results.length) {
+                        renderFPLMiniLeague(cached.results);
+                        if (Date.now() - cached.ts < 10 * 60 * 1000) return;
+                    }
+                } catch (e) {}
+            } else {
+                container.innerHTML = '<div class="text-slate-300 text-xs py-6 text-center">Aktualizujem živé body mini-ligy...</div>';
+            }
+
+            fetchFPLLeagueFromGateways()
+                .then(function(results) {
+                    renderFPLMiniLeague(results);
+                    try {
+                        localStorage.setItem(cacheKey, JSON.stringify({
+                            ts: Date.now(),
+                            results: results
+                        }));
+                    } catch (e) {}
+                })
+                .catch(function() {
+                    // Ak zlyhá pripojenie, skúsime aspoň staršiu keš z localStorage
+                    try {
+                        var backup = JSON.parse(localStorage.getItem(cacheKey));
+                        if (backup && Array.isArray(backup.results) && backup.results.length) {
+                            renderFPLMiniLeague(backup.results);
+                            return;
+                        }
+                    } catch (e) {}
+
+                    container.innerHTML = '<div class="text-amber-300 text-xs py-4 text-center">Nepodarilo sa načítať FPL ligu. Klikni na ↻ Obnoviť.</div>';
+                });
+        }
+
+        updateLiveFPLLeague(false);
     </script>
 
     <!-- SKRIPT 2: POČASIE -->
@@ -882,7 +1026,7 @@
 
         function loadReddit(subreddit, elementId, forceRefresh) {
             var container = document.getElementById(elementId);
-            var cacheKey = 'arsenal_dash_reddit_v16_' + subreddit.toLowerCase();
+            var cacheKey = 'arsenal_dash_reddit_v17_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
