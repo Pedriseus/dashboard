@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v1.9)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v2.0)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -180,7 +180,7 @@
             <!-- 4. Vpravo: Živá FPL Mini-liga + Deadline -->
             <div class="bg-black/40 backdrop-blur-sm border border-white/15 rounded-2xl p-3.5 exact-box shrink-0">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2 flex justify-between items-center px-1">
-                    <span>🎮 FPL Mini-liga</span>
+                    <span>🎮 FPL MINI-LIGA</span>
                     <div class="flex items-center gap-2">
                         <button onclick="updateLiveFPLLeague(true)" class="text-[10px] text-amber-300 hover:underline font-semibold">↻ Obnoviť</button>
                         <a href="https://fantasy.premierleague.com/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline">FPL ↗</a>
@@ -793,11 +793,11 @@
     <script>
         var FPL_LEAGUE_ID = 28856;
         var fallbackFplStandings = [
-            { rank: 1, entry_name: "The Invincibles", total: 411 },
-            { rank: 2, entry_name: "Fc ThisSeason",   total: 397 },
-            { rank: 3, entry_name: "Ødeargod",        total: 388 },
-            { rank: 4, entry_name: "Australobooster", total: 384 },
-            { rank: 5, entry_name: "CFC Academy",     total: 375 }
+            { rank: 1, entry_name: "The Invincibles", total: 471 },
+            { rank: 2, entry_name: "Fc ThisSeason",   total: 463 },
+            { rank: 3, entry_name: "Australobooster", total: 452 },
+            { rank: 4, entry_name: "Ødeargod",        total: 450 },
+            { rank: 5, entry_name: "CFC Academy",     total: 444 }
         ];
 
         function isMyFplTeam(entryName) {
