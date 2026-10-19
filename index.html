@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v2.1)</title>
-    <!-- Čistá ikona pre prehliadač -->
+    <title>Môj Denný Dashboard | Arsenal Edition (v2.2)</title>
     <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -141,14 +140,12 @@
 
     <div class="max-w-[95rem] mx-auto space-y-5 sm:space-y-6">
         
-        <!-- MODERNÁ HLAVIČKA V ŠTÝLE ARSENALU -->
+        <!-- HLAVIČKA V ŠTÝLE ARSENALU (LOGO BEZ POZADIA) -->
         <header class="arsenal-header p-5 sm:p-7 flex flex-col 2xl:flex-row justify-between items-stretch gap-5 sm:gap-6">
             
-            <!-- 1. Vľavo: Logo, pozdrav, dátum a čas -->
+            <!-- 1. Vľavo: Logo bez rámčeka, pozdrav, dátum a čas -->
             <div class="flex items-center gap-4 shrink-0">
-                <div class="p-2 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10 shadow-inner">
-                    <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-xl object-contain" onerror="handleBadgeError(this)">
-                </div>
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-2xl object-contain shrink-0" onerror="handleBadgeError(this)">
                 <div>
                     <div class="text-[10px] sm:text-xs uppercase tracking-widest font-extrabold text-amber-300 drop-shadow">Victoria Concordia Crescit</div>
                     <h1 id="greeting" class="text-xl sm:text-2xl font-black text-white tracking-wide mt-0.5">Dobrý deň! 👋</h1>
@@ -324,7 +321,7 @@
                     <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
                         🔥 Top upvotované posty na Reddite <span class="text-xs sm:text-sm font-normal text-slate-400">(za 24 hodín)</span>
                     </h2>
-                    <button onclick="reloadAllReddit(true)" class="text-xs text-red-400 hover:underline font-bold">↻ Obnoviť</button>
+                    <button onclick="reloadAllReddit()" class="text-xs text-red-400 hover:underline font-bold">↻ Obnoviť</button>
                 </div>
                 <div class="flex flex-wrap gap-2 w-full sm:w-auto">
                     <button onclick="showSub('all')" id="tab-all" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-active">Všetky vedľa seba</button>
@@ -356,7 +353,7 @@
 
     </div>
 
-    <!-- SKRIPTY -->
+    <!-- VŠETKY SKRIPTY -->
     <script>
         function updateDateTime() {
             try {
@@ -510,7 +507,7 @@
         }
 
         function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v21';
+            var cacheKey = 'arsenal_dash_pl_live_v22';
             if (!forceRefresh) {
                 try {
                     var cached = JSON.parse(localStorage.getItem(cacheKey));
@@ -559,7 +556,7 @@
         updateLivePLStandings(false);
     </script>
 
-    <!-- ZÁPASY ARSENALU & FPL & POČASIE & REDDIT -->
+    <!-- ZÁPASY ARSENALU, FPL, POČASIE (OPEN-METEO) & REDDIT -->
     <script>
         var arsenalSeasonFixtures = [
             { utc: "2026-10-21T19:00:00Z", opp: "Bayern",       comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)" },
@@ -589,7 +586,7 @@
         }
         updateArsenalFixtures();
 
-        // FPL Mini-liga render (zabezpečený zálohou)
+        // FPL Mini-liga render
         function renderFPLMiniLeague(entries) {
             var container = document.getElementById('fpl-minileague-rows');
             var myEntry = entries.find(function(x){ return x.entry_name && x.entry_name.toLowerCase().indexOf('deargod') !== -1; });
@@ -628,22 +625,25 @@
         }
         updateLiveWeather();
 
-        // Spoľahlivé načítanie Reddit feedu cez alternatívnu CORS bránu
+        // Opravené načítanie Redditu cez priamy a stabilný proxy endpoint
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
-            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
-            var feed2jsonApi = 'https://www.toptal.com/developers/feed2json/convert?url=' + encodeURIComponent(rssUrl);
-            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed2jsonApi);
+            var jsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
+            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(jsonUrl);
 
             fetch(proxyUrl)
                 .then(function(res){ return res.json(); })
                 .then(function(response){
                     var data = JSON.parse(response.contents);
-                    container.innerHTML = data.items.slice(0, 5).map(function(it, idx) {
-                        return '<a href="' + it.url + '" target="_blank" class="block p-3 rounded-xl bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 transition flex justify-between items-start gap-3"><div class="space-y-1.5 flex-1 min-w-0"><h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + it.title + '</h4></div><div class="flex flex-col items-center justify-center min-w-[50px] py-1 px-1.5 rounded-lg bg-red-950/60 border border-red-500/30 text-amber-300 font-bold text-xs shrink-0">TOP #' + (idx+1) + '</div></a>';
+                    var posts = data && data.data && data.data.children;
+                    if (!posts || !posts.length) throw new Error("No posts");
+                    container.innerHTML = posts.slice(0, 5).map(function(p, idx) {
+                        var it = p.data;
+                        var hoursAgo = Math.max(1, Math.floor((Date.now() - (it.created_utc * 1000)) / (1000 * 60 * 60)));
+                        return '<a href="https://www.reddit.com' + it.permalink + '" target="_blank" class="block p-3 rounded-xl bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 transition flex justify-between items-start gap-3"><div class="space-y-1.5 flex-1 min-w-0"><h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + it.title + '</h4><div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div></div><div class="flex flex-col items-center justify-center min-w-[50px] py-1 px-1.5 rounded-lg bg-red-950/60 border border-red-500/30 text-amber-300 font-bold text-xs shrink-0">TOP #' + (idx+1) + '</div></a>';
                     }).join('');
                 }).catch(function(){
-                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky.</p>';
+                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky. Skontroluj pripojenie.</p>';
                 });
         }
         loadReddit('Slovakia', 'list-slovakia');
