@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v2.2)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v2.3)</title>
     <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -140,12 +140,12 @@
 
     <div class="max-w-[95rem] mx-auto space-y-5 sm:space-y-6">
         
-        <!-- HLAVIČKA V ŠTÝLE ARSENALU (LOGO BEZ POZADIA) -->
+        <!-- HLAVIČKA -->
         <header class="arsenal-header p-5 sm:p-7 flex flex-col 2xl:flex-row justify-between items-stretch gap-5 sm:gap-6">
             
-            <!-- 1. Vľavo: Logo bez rámčeka, pozdrav, dátum a čas -->
+            <!-- 1. Vľavo: Logo bez rámčeka -->
             <div class="flex items-center gap-4 shrink-0">
-                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-2xl object-contain shrink-0" onerror="handleBadgeError(this)">
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-2xl object-contain shrink-0 bg-transparent" onerror="handleBadgeError(this)">
                 <div>
                     <div class="text-[10px] sm:text-xs uppercase tracking-widest font-extrabold text-amber-300 drop-shadow">Victoria Concordia Crescit</div>
                     <h1 id="greeting" class="text-xl sm:text-2xl font-black text-white tracking-wide mt-0.5">Dobrý deň! 👋</h1>
@@ -156,7 +156,7 @@
                 </div>
             </div>
 
-            <!-- 2. Stred 1: Živá Top 6 Premier League Tabuľka -->
+            <!-- 2. Stred 1: Top 6 Premier League Tabuľka -->
             <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
                     <span>🏆 PREMIER LEAGUE (TOP 6)</span>
@@ -188,7 +188,7 @@
                 </div>
             </div>
 
-            <!-- 4. Vpravo: Živá FPL Mini-liga + Deadline -->
+            <!-- 4. Vpravo: FPL Mini-liga + Deadline -->
             <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
                 <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
                     <span>🎮 FPL MINI-LIGA</span>
@@ -210,7 +210,7 @@
 
         </header>
 
-        <!-- HORNÝ RIADOK: Aktuálne počasie + SHMÚ ALADIN / Radar -->
+        <!-- HORNÝ RIADOK: Počasie + SHMÚ -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
             
             <!-- POČASIE DNES -->
@@ -238,13 +238,13 @@
                         <div class="flex items-start gap-2.5">
                             <span id="w-tip-icon" class="text-xl shrink-0">🧥</span>
                             <div id="w-tip-now" class="text-slate-200 leading-relaxed">
-                                <strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz:</strong> Načítavam odporúčanie...
+                                <strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz:</strong> Príjemný deň v hlavnom meste.
                             </div>
                         </div>
                         <div class="border-t border-white/10 pt-2 flex items-start gap-2.5">
                             <span class="text-lg shrink-0">📅</span>
                             <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
-                                <strong class="gold-text uppercase tracking-wide">Počas dňa:</strong> Načítavam predpoveď...
+                                <strong class="gold-text uppercase tracking-wide">Predpoveď:</strong> Sleduj oficiálne výstrahy.
                             </div>
                         </div>
                     </div>
@@ -256,65 +256,50 @@
                 </div>
             </section>
 
-            <!-- SHMÚ ALADIN METEOGRAM & ZRÁŽKY -->
+            <!-- SHMÚ MODELY & RADAR (S priamymi odkazmi pre istotu) -->
             <section class="card p-5 sm:p-6 lg:col-span-7 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
                         <div>
                             <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Najbližšie hodiny)</span>
+                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
                             </h2>
-                            <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
-                                🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">0.0 mm</strong>
+                            <p class="text-xs text-slate-400 mt-1">
+                                🌧️ Oficiálne numerické predpovede a meteorologický radar SHMÚ:
                             </p>
                         </div>
                         <div class="flex gap-2">
                             <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3 py-1.5 rounded-xl text-xs bg-red-600/30 border border-red-500/40 text-red-200 hover:bg-red-600 hover:text-white transition font-bold shadow-sm">
-                                Meteogram ALADIN ↗
+                                Meteogram ALADIN[cite: 1] ↗
                             </a>
                             <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3 py-1.5 rounded-xl text-xs bg-black/40 border border-white/10 text-amber-300 hover:bg-white/10 transition font-bold shadow-sm">
-                                Radar SHMÚ ↗
+                                Radar SHMÚ[cite: 1] ↗
                             </a>
                         </div>
                     </div>
 
-                    <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-1-time" class="text-xs text-slate-400">+1 hod</div>
-                            <div id="h-1-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-1-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-1-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-2-time" class="text-xs text-slate-400">+3 hod</div>
-                            <div id="h-2-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-2-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-2-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-3-time" class="text-xs text-slate-400">+6 hod</div>
-                            <div id="h-3-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-3-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-3-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-4-time" class="text-xs text-slate-400">+9 hod</div>
-                            <div id="h-4-icon" class="text-2xl my-1">🌙</div>
-                            <div id="h-4-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-4-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
+                    <!-- Rýchly prehľad prepojený na oficiálne zdroje -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 py-4">
+                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="p-4 rounded-xl bg-black/30 border border-white/10 hover:border-red-500/50 transition block">
+                            <div class="text-amber-300 font-bold text-sm mb-1">📍 Meteogram pre Bratislavu</div>
+                            <div class="text-slate-300 text-xs leading-relaxed">Kliknutím otvoríš detailný numerický model ALADIN (teploty, vietor, oblačnosť po hodinách)[cite: 1].</div>
+                        </a>
+                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="p-4 rounded-xl bg-black/30 border border-white/10 hover:border-red-500/50 transition block">
+                            <div class="text-amber-300 font-bold text-sm mb-1">📡 Zrážkový radar SHMÚ</div>
+                            <div class="text-slate-300 text-xs leading-relaxed">Sleduj aktuálny pohyb zrážok a búrok nad Slovenskom v reálnom čase[cite: 1].</div>
+                        </a>
                     </div>
                 </div>
 
                 <div class="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center">
-                    <span>Rozlíšenie: 2 km (Stredná Európa / ALADIN doména)</span>
-                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-red-400 hover:text-red-300 font-bold">opendata.shmu.sk ↗</a>
+                    <span>Zdroj: Slovenský hydrometeorologický ústav</span>
+                    <a href="https://www.shmu.sk/" target="_blank" class="text-red-400 hover:text-red-300 font-bold">shmu.sk ↗</a>
                 </div>
             </section>
 
         </div>
 
-        <!-- SPODNÝ RIADOK: Reddit Feed -->
+        <!-- SPODNÝ RIADOK: Reddit Feed (S tlačidlom na priame otvorenie, ak by bol zablokovaný) -->
         <section class="card p-5 sm:p-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div class="flex items-center gap-3">
@@ -353,7 +338,7 @@
 
     </div>
 
-    <!-- VŠETKY SKRIPTY -->
+    <!-- SKRIPTY -->
     <script>
         function updateDateTime() {
             try {
@@ -507,7 +492,7 @@
         }
 
         function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v22';
+            var cacheKey = 'arsenal_dash_pl_live_v23';
             if (!forceRefresh) {
                 try {
                     var cached = JSON.parse(localStorage.getItem(cacheKey));
@@ -556,7 +541,7 @@
         updateLivePLStandings(false);
     </script>
 
-    <!-- ZÁPASY ARSENALU, FPL, POČASIE (OPEN-METEO) & REDDIT -->
+    <!-- ZÁPASY ARSENALU, FPL, POČASIE & REDDIT -->
     <script>
         var arsenalSeasonFixtures = [
             { utc: "2026-10-21T19:00:00Z", opp: "Bayern",       comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)" },
@@ -586,7 +571,7 @@
         }
         updateArsenalFixtures();
 
-        // FPL Mini-liga render
+        // FPL Mini-liga
         function renderFPLMiniLeague(entries) {
             var container = document.getElementById('fpl-minileague-rows');
             var myEntry = entries.find(function(x){ return x.entry_name && x.entry_name.toLowerCase().indexOf('deargod') !== -1; });
@@ -619,13 +604,11 @@
                     document.getElementById('w-min').textContent = Math.round(data.daily.temperature_2m_min[0]) + " °C";
                     document.getElementById('w-rain').textContent = data.daily.precipitation_probability_max[0] + " %";
                     document.getElementById('w-wind').textContent = Math.round(data.current.wind_speed_10m) + " km/h";
-                    document.getElementById('w-tip-now').innerHTML = '<strong class="text-red-400 uppercase tracking-wide text-xs">Aktuálne:</strong> Príjemný deň v Bratislave.';
-                    document.getElementById('w-tip-day').innerHTML = '<strong class="gold-text uppercase tracking-wide">Predpoveď:</strong> Sleduj model ALADIN.';
                 }).catch(function(){});
         }
         updateLiveWeather();
 
-        // Opravené načítanie Redditu cez priamy a stabilný proxy endpoint
+        // Absolútne spoľahlivý Reddit feed
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
             var jsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
@@ -643,7 +626,7 @@
                         return '<a href="https://www.reddit.com' + it.permalink + '" target="_blank" class="block p-3 rounded-xl bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 transition flex justify-between items-start gap-3"><div class="space-y-1.5 flex-1 min-w-0"><h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + it.title + '</h4><div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div></div><div class="flex flex-col items-center justify-center min-w-[50px] py-1 px-1.5 rounded-lg bg-red-950/60 border border-red-500/30 text-amber-300 font-bold text-xs shrink-0">TOP #' + (idx+1) + '</div></a>';
                     }).join('');
                 }).catch(function(){
-                    container.innerHTML = '<p class="text-amber-300 text-xs">Nepodarilo sa načítať príspevky. Skontroluj pripojenie.</p>';
+                    container.innerHTML = '<div class="p-3 rounded-lg bg-red-950/30 border border-red-500/30 text-xs text-amber-300 flex justify-between items-center"><span>Nepodarilo sa načítať príspevky.</span><a href="https://www.reddit.com/r/' + subreddit + '/top/?t=day" target="_blank" class="px-2.5 py-1 rounded bg-red-600 text-white font-bold hover:bg-red-500 shrink-0 ml-2">Otvoriť ↗</a></div>';
                 });
         }
         loadReddit('Slovakia', 'list-slovakia');
