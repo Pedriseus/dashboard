@@ -1,0 +1,14 @@
+{
+  "standings": {
+    "results": [
+      { "rank": 1, "entry_name": "The Invincibles", "total": 471 },
+      { "rank": 2, "entry_name": "Fc ThisSeason",   "total": 463 },
+      { "rank": 3, "entry_name": "Australobooster", "total": 452 },
+      { "rank": 4, "entry_name": "Ødeargod",        "total": 450 },
+      { "rank": 5, "entry_name": "CFC Academy",     "total": 444 },
+      { "rank": 6, "entry_name": "Rovinkapool",     "total": 400 },
+      { "rank": 7, "entry_name": "Tesla Stropkov",  "total": 389 },
+      { "rank": 8, "entry_name": "Devil's of the pitch", "total": 379 }
+    ]
+  }
+}
