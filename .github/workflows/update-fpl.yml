@@ -1,0 +1,12 @@
+name: Update FPL Mini-League
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+  ...
