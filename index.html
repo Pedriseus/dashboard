@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (v2.0 Modern)</title>
+    <title>Môj Denný Dashboard | Arsenal Edition (v2.1)</title>
+    <!-- Čistá ikona pre prehliadač -->
+    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { 
@@ -15,7 +17,6 @@
             color: #f8fafc; 
             font-family: system-ui, -apple-system, sans-serif; 
         }
-        /* Moderné sklenené karty (Glassmorphism) */
         .card { 
             background: rgba(17, 24, 39, 0.7);
             backdrop-filter: blur(16px);
@@ -24,10 +25,6 @@
             border-top: 3px solid #EF0107;
             border-radius: 1.25rem; 
             box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
-            transition: transform 0.2s ease, border-color 0.2s ease;
-        }
-        .card:hover {
-            border-color: rgba(239, 1, 7, 0.3);
         }
         .arsenal-header {
             background: linear-gradient(135deg, #660004 0%, #990005 30%, #EF0107 75%, #111827 100%);
@@ -150,7 +147,7 @@
             <!-- 1. Vľavo: Logo, pozdrav, dátum a čas -->
             <div class="flex items-center gap-4 shrink-0">
                 <div class="p-2 rounded-2xl bg-black/30 backdrop-blur-md border border-white/10 shadow-inner">
-                    <img src="https://resources.premierleague.com/premierleague/badges/70/t3.png" alt="Arsenal FC" class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-xl object-contain" onerror="handleBadgeError(this)">
+                    <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-12 h-12 sm:w-14 sm:h-14 drop-shadow-xl object-contain" onerror="handleBadgeError(this)">
                 </div>
                 <div>
                     <div class="text-[10px] sm:text-xs uppercase tracking-widest font-extrabold text-amber-300 drop-shadow">Victoria Concordia Crescit</div>
@@ -314,7 +311,7 @@
 
                 <div class="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center">
                     <span>Rozlíšenie: 2 km (Stredná Európa / ALADIN doména)</span>
-                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-slate-400 hover:text-red-400 font-bold">opendata.shmu.sk ↗</a>
+                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-red-400 hover:text-red-300 font-bold">opendata.shmu.sk ↗</a>
                 </div>
             </section>
 
@@ -359,7 +356,7 @@
 
     </div>
 
-    <!-- VŠETKY FUNKČNÉ SKRIPTY (Zachované zo stable v1.9) -->
+    <!-- SKRIPTY -->
     <script>
         function updateDateTime() {
             try {
@@ -513,7 +510,7 @@
         }
 
         function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v20';
+            var cacheKey = 'arsenal_dash_pl_live_v21';
             if (!forceRefresh) {
                 try {
                     var cached = JSON.parse(localStorage.getItem(cacheKey));
@@ -615,10 +612,7 @@
             { rank: 4, entry_name: "Ødeargod",        total: 450 },
             { rank: 5, entry_name: "CFC Academy",     total: 444 }
         ]);
-    </script>
 
-    <!-- POČASIE & REDDIT -->
-    <script>
         function updateLiveWeather() {
             fetch("https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2")
                 .then(function(res){ return res.json(); })
@@ -634,9 +628,14 @@
         }
         updateLiveWeather();
 
+        // Spoľahlivé načítanie Reddit feedu cez alternatívnu CORS bránu
         function loadReddit(subreddit, elementId) {
             var container = document.getElementById(elementId);
-            fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://www.toptal.com/developers/feed2json/convert?url=' + encodeURIComponent('https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day')))
+            var rssUrl = 'https://www.reddit.com/r/' + subreddit + '/top/.rss?t=day';
+            var feed2jsonApi = 'https://www.toptal.com/developers/feed2json/convert?url=' + encodeURIComponent(rssUrl);
+            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed2jsonApi);
+
+            fetch(proxyUrl)
                 .then(function(res){ return res.json(); })
                 .then(function(response){
                     var data = JSON.parse(response.contents);
@@ -649,6 +648,11 @@
         }
         loadReddit('Slovakia', 'list-slovakia');
         loadReddit('Gunners', 'list-gunners');
+
+        function reloadAllReddit() {
+            loadReddit('Slovakia', 'list-slovakia');
+            loadReddit('Gunners', 'list-gunners');
+        }
 
         function showSub(target) {
             var cs = document.getElementById('col-slovakia'), cg = document.getElementById('col-gunners'), g = document.getElementById('reddit-grid');
