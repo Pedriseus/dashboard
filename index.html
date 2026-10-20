@@ -1,666 +1,248 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="sk" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Môj Denný Dashboard | Arsenal Edition (Stable Modern v2.6)</title>
-    <link rel="icon" href="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg">
+    <title>Arsenal Dashboard v1.9 Stable</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #050811; 
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0e14;
             background-image: 
-                radial-gradient(circle at 10% 20%, rgba(239, 1, 7, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(212, 175, 55, 0.08) 0%, transparent 40%),
-                radial-gradient(circle at top right, #1a050a 0%, #050811 60%);
-            color: #f8fafc; 
-            font-family: system-ui, -apple-system, sans-serif; 
+                radial-gradient(at 0% 0%, rgba(239, 1, 7, 0.16) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(156, 130, 74, 0.12) 0px, transparent 50%),
+                radial-gradient(at 50% 100%, rgba(6, 54, 114, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #f1f5f9;
         }
-        .card { 
-            background: rgba(17, 24, 39, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            border-top: 3px solid #EF0107;
-            border-radius: 1.25rem; 
-            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+
+        .glass {
+            background: rgba(20, 25, 35, 0.78);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
         }
-        .arsenal-header {
-            background: linear-gradient(135deg, #660004 0%, #990005 30%, #EF0107 75%, #111827 100%);
-            border: 1px solid rgba(255, 59, 65, 0.4);
-            border-bottom: 4px solid #d4af37;
-            border-radius: 1.25rem;
-            box-shadow: 0 20px 50px -10px rgba(239, 1, 7, 0.25);
-        }
-        .gold-text { color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
-        .arsenal-btn-active {
-            background: linear-gradient(135deg, #EF0107, #b30005);
-            color: #ffffff;
-            font-weight: 700;
-            border: 1px solid rgba(255, 77, 82, 0.6);
-            box-shadow: 0 4px 15px rgba(239, 1, 7, 0.4);
-        }
-        .arsenal-btn-inactive {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(8px);
-            color: #cbd5e1;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        .arsenal-btn-inactive:hover {
-            border-color: #d4af37;
-            color: #ffffff;
-            background: rgba(30, 41, 59, 0.9);
-        }
+
+        /* Pevne zjednotené rozmery 360px pre 3 horné tabuľky */
         .exact-box {
-            width: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
+            width: 360px;
+            min-width: 360px;
+            max-width: 360px;
+            height: 430px;
+            display: flex;
+            flex-direction: column;
         }
-        @media (min-width: 1536px) {
+
+        @media (max-width: 1160px) {
             .exact-box {
-                width: 360px !important;
-                min-width: 360px !important;
-                max-width: 360px !important;
-                align-self: stretch !important;
+                width: 100%;
+                min-width: unset;
+                max-width: 100%;
             }
         }
-        .form-dot {
-            width: 15px;
-            height: 15px;
+
+        /* Farebné odznaky súťaží */
+        .comp-pl {
+            background-color: #800020; /* Bordová - Premier League */
+            color: #ffd6e0;
+            border: 1px solid #a60029;
+        }
+        .comp-ucl {
+            background-color: #9C824A; /* Zlatá - Liga majstrov */
+            color: #fffbeb;
+            border: 1px solid #c5a663;
+        }
+        .comp-efl {
+            background-color: #063672; /* Modrá - EFL / FA Cup */
+            color: #dbeafe;
+            border: 1px solid #1d4ed8;
+        }
+
+        /* Vlastný scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.4);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(156, 130, 74, 0.5);
             border-radius: 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            font-weight: 800;
-            color: white;
-            line-height: 1;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        .form-v { background: linear-gradient(135deg, #22c55e, #16a34a); }
-        .form-r { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .form-p { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #EF0107;
+        }
     </style>
-    <script>
-        var CLUB_BADGES = {
-            "Manchester City": "https://resources.premierleague.com/premierleague/badges/70/t43.png",
-            "Man City": "https://resources.premierleague.com/premierleague/badges/70/t43.png",
-            "Man Cheaters": "https://resources.premierleague.com/premierleague/badges/70/t43.png",
-            "Arsenal": "https://resources.premierleague.com/premierleague/badges/70/t3.png",
-            "Brighton": "https://resources.premierleague.com/premierleague/badges/70/t36.png",
-            "Brighton & Hove Albion": "https://resources.premierleague.com/premierleague/badges/70/t36.png",
-            "Brentford": "https://resources.premierleague.com/premierleague/badges/70/t94.png",
-            "Everton": "https://resources.premierleague.com/premierleague/badges/70/t11.png",
-            "Chelsea": "https://resources.premierleague.com/premierleague/badges/70/t8.png",
-            "Liverpool": "https://resources.premierleague.com/premierleague/badges/70/t14.png",
-            "Aston Villa": "https://resources.premierleague.com/premierleague/badges/70/t7.png",
-            "Tottenham": "https://resources.premierleague.com/premierleague/badges/70/t6.png",
-            "Tottenham Hotspur": "https://resources.premierleague.com/premierleague/badges/70/t6.png",
-            "Spurs": "https://resources.premierleague.com/premierleague/badges/70/t6.png",
-            "Newcastle": "https://resources.premierleague.com/premierleague/badges/70/t4.png",
-            "Newcastle United": "https://resources.premierleague.com/premierleague/badges/70/t4.png",
-            "Man Utd": "https://resources.premierleague.com/premierleague/badges/70/t1.png",
-            "Manchester United": "https://resources.premierleague.com/premierleague/badges/70/t1.png",
-            "Fulham": "https://resources.premierleague.com/premierleague/badges/70/t54.png",
-            "West Ham": "https://resources.premierleague.com/premierleague/badges/70/t21.png",
-            "West Ham United": "https://resources.premierleague.com/premierleague/badges/70/t21.png",
-            "Crystal Palace": "https://resources.premierleague.com/premierleague/badges/70/t31.png",
-            "Bournemouth": "https://resources.premierleague.com/premierleague/badges/70/t91.png",
-            "AFC Bournemouth": "https://resources.premierleague.com/premierleague/badges/70/t91.png",
-            "Nott'm Forest": "https://resources.premierleague.com/premierleague/badges/70/t17.png",
-            "Nottingham Forest": "https://resources.premierleague.com/premierleague/badges/70/t17.png",
-            "Wolves": "https://resources.premierleague.com/premierleague/badges/70/t39.png",
-            "Wolverhampton Wanderers": "https://resources.premierleague.com/premierleague/badges/70/t39.png",
-            "Leicester": "https://resources.premierleague.com/premierleague/badges/70/t13.png",
-            "Leicester City": "https://resources.premierleague.com/premierleague/badges/70/t13.png",
-            "Leeds": "https://resources.premierleague.com/premierleague/badges/70/t2.png",
-            "Leeds United": "https://resources.premierleague.com/premierleague/badges/70/t2.png",
-            "Southampton": "https://resources.premierleague.com/premierleague/badges/70/t20.png",
-            "Ipswich": "https://resources.premierleague.com/premierleague/badges/70/t40.png",
-            "Ipswich Town": "https://resources.premierleague.com/premierleague/badges/70/t40.png",
-            "Burnley": "https://resources.premierleague.com/premierleague/badges/70/t90.png",
-            "Sunderland": "https://resources.premierleague.com/premierleague/badges/70/t56.png",
-            "Sheffield Utd": "https://resources.premierleague.com/premierleague/badges/70/t49.png"
-        };
-
-        function handleBadgeError(imgElement) {
-            var teamName = imgElement.getAttribute('alt') || 'Tím';
-            var initials = teamName.substring(0, 2).toUpperCase();
-            var fallbackSpan = document.createElement('span');
-            fallbackSpan.className = "w-4 h-4 inline-flex items-center justify-center bg-slate-800 text-[9px] font-bold text-amber-300 rounded shrink-0 border border-slate-700";
-            fallbackSpan.textContent = initials;
-            if (imgElement.parentNode) {
-                imgElement.parentNode.replaceChild(fallbackSpan, imgElement);
-            }
-        }
-    </script>
 </head>
-<body class="min-h-screen p-3 sm:p-6 md:p-10">
+<body class="min-h-screen p-4 md:p-6">
 
-    <div class="max-w-[95rem] mx-auto space-y-5 sm:space-y-6">
-        
-        <!-- HLAVIČKA -->
-        <header class="arsenal-header p-5 sm:p-7 flex flex-col 2xl:flex-row justify-between items-stretch gap-5 sm:gap-6">
-            
-            <!-- 1. Vľavo: Logo bez rámčeka -->
-            <div class="flex items-center gap-4 shrink-0">
-                <img src="https://upload.wikimedia.org/wikipedia/en/5/53/Arsenal_FC.svg" alt="Arsenal FC" class="w-14 h-14 sm:w-16 sm:h-16 drop-shadow-2xl object-contain shrink-0 bg-transparent" onerror="handleBadgeError(this)">
-                <div>
-                    <div class="text-[10px] sm:text-xs uppercase tracking-widest font-extrabold text-amber-300 drop-shadow">Victoria Concordia Crescit</div>
-                    <h1 id="greeting" class="text-xl sm:text-2xl font-black text-white tracking-wide mt-0.5">Dobrý deň! 👋</h1>
-                    <p id="current-date" class="text-red-100 text-xs sm:text-sm mt-0.5 font-medium">Načítavam dátum...</p>
-                    <div class="mt-1.5 text-left pl-0.5">
-                        <div id="current-time" class="text-2xl sm:text-3xl font-black text-white tracking-tight drop-shadow-md">--:--</div>
-                    </div>
-                </div>
-            </div>
+    <div class="max-w-[1140px] mx-auto space-y-6">
 
-            <!-- 2. Stred 1: Živá Top 6 Premier League Tabuľka -->
-            <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
-                    <span>🏆 PREMIER LEAGUE (TOP 6)</span>
-                    <span class="text-[10px] text-slate-300">SEZÓNA 26/27</span>
-                </div>
-                
-                <div id="pl-table-rows" class="space-y-1.5 text-xs my-auto">
-                    <div class="text-slate-300 text-xs py-6 text-center">Načítavam živú tabuľku...</div>
-                </div>
-
-                <div class="mt-3 pt-2.5 border-t border-white/10 text-[11px] text-slate-300 flex justify-between items-center px-1">
-                    <span>📊 Stav: <strong id="pl-round-status" class="text-white">Načítavam...</strong></span>
-                    <button onclick="updateLivePLStandings(true)" class="text-amber-300 hover:underline font-bold">↻ Obnoviť</button>
-                </div>
-            </div>
-
-            <!-- 3. Stred 2: Zápasy Arsenalu -->
-            <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
-                    <span>⚽ ZÁPASY ARSENALU</span>
-                    <span class="text-[10px] text-slate-300">VŠETKY SÚŤAŽE</span>
-                </div>
-                <div id="arsenal-fixtures-rows" class="space-y-2 text-xs my-auto">
-                    <div class="text-slate-300 text-xs py-6 text-center">Načítavam zápasy...</div>
-                </div>
-                <div class="mt-3 pt-2.5 border-t border-white/10 text-[11px] text-slate-300 flex justify-between items-center px-1">
-                    <span>🏟️ Najbližšie:</span>
-                    <span id="arsenal-next-venue" class="text-white font-bold truncate max-w-[210px]">Načítavam...</span>
-                </div>
-            </div>
-
-            <!-- 4. Vpravo: Živá FPL Mini-liga + Deadline -->
-            <div class="bg-black/30 backdrop-blur-xl border border-white/15 rounded-2xl p-4 exact-box shrink-0 shadow-lg">
-                <div class="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2.5 flex justify-between items-center px-1">
-                    <span>🎮 FPL MINI-LIGA</span>
+        <!-- HLAVIČKA: POZDRAV, ZAROVNANÝ ČAS A PREHĽAD -->
+        <header class="glass rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-l-4 border-l-[#EF0107]">
+            <div class="flex items-center gap-4">
+                <img src="https://resources.premierleague.com/premierleague/badges/t3.svg" alt="Arsenal" class="w-12 h-12 drop-shadow-[0_0_8px_rgba(239,1,7,0.5)]">
+                <div class="flex flex-col justify-center">
                     <div class="flex items-center gap-2.5">
-                        <button onclick="updateLiveFPLLeague(true)" class="text-[10px] text-amber-300 hover:underline font-bold">↻ Obnoviť</button>
-                        <a href="https://fantasy.premierleague.com/leagues/28856/standings/c" target="_blank" class="text-[10px] text-sky-400 hover:underline font-bold">FPL ↗</a>
+                        <h1 id="greeting" class="text-xl md:text-2xl font-extrabold tracking-tight text-white">Dobré ráno, Gunner!</h1>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded bg-[#9C824A]/20 text-[#d4b475] border border-[#9C824A]/40">v1.9</span>
                     </div>
-                </div>
-                
-                <div id="fpl-minileague-rows" class="space-y-2 text-xs my-auto">
-                    <div class="text-slate-300 text-xs py-6 text-center">Načítavam mini-ligu...</div>
-                </div>
-
-                <div class="mt-3 pt-2.5 border-t border-white/10 text-[11px] text-amber-300 flex justify-between items-center px-1">
-                    <span>⏳ Deadline:</span>
-                    <a id="fpl-deadline" href="https://fantasy.premierleague.com/fixtures" target="_blank" class="font-bold text-white hover:underline">Načítavam...</a>
+                    <!-- Zarovnaný čas a dátum presne pod pozdravom -->
+                    <div class="flex items-center gap-2 text-xs text-slate-400 mt-1 font-medium">
+                        <span id="current-date">--</span>
+                        <span>•</span>
+                        <span id="current-time" class="text-[#EF0107] font-bold font-mono text-sm">--:--:--</span>
+                    </div>
                 </div>
             </div>
 
+            <button onclick="initAll(true)" class="px-3.5 py-2 rounded-xl bg-[#EF0107] hover:bg-[#b80005] text-white text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-[#EF0107]/25 self-end sm:self-center">
+                <span id="global-spin" class="inline-block">↻</span> Obnoviť všetko
+            </button>
         </header>
 
-        <!-- HORNÝ RIADOK: Počasie + SHMÚ Hodinový prehľad -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-            
-            <!-- POČASIE DNES -->
-            <section class="card p-5 sm:p-6 lg:col-span-5 flex flex-col justify-between">
-                <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2 mb-4">
-                        🌤️ Počasie dnes <span class="text-sm font-normal text-slate-400">(Bratislava)</span>
-                    </h2>
-                    <div id="weather-box" class="flex flex-wrap items-center justify-between gap-3 py-2 text-slate-300">
-                        <div class="flex items-center gap-3 sm:gap-4">
-                            <span id="w-icon" class="text-4xl sm:text-5xl">⛅</span>
-                            <div>
-                                <div id="w-temp" class="text-3xl sm:text-4xl font-black text-white">16 °C</div>
-                                <div id="w-desc" class="text-slate-400 text-xs sm:text-sm mt-1">Polooblačno • pocitovo 15 °C</div>
-                            </div>
-                        </div>
-                        <div class="text-right text-xs sm:text-sm space-y-1 text-slate-300 ml-auto">
-                            <div>🔼 Max: <strong id="w-max" class="text-white">16 °C</strong> / 🔽 Min: <strong id="w-min" class="text-white">7 °C</strong></div>
-                            <div>💧 Zrážky: <strong id="w-rain" class="text-red-400">35 %</strong> <span id="w-rain-mm" class="text-xs text-slate-400">(0.0 mm)</span></div>
-                            <div>💨 Vietor: <strong id="w-wind" class="text-white">7 km/h</strong></div>
-                        </div>
-                    </div>
+        <!-- HORNÁ TROJICA TABULIEK (3x 360px = symetrický layout) -->
+        <section class="flex flex-wrap xl:flex-nowrap justify-between gap-6">
 
-                    <div class="mt-4 p-4 rounded-xl bg-black/30 border border-white/10 text-xs sm:text-sm space-y-2.5 backdrop-blur-md">
-                        <div class="flex items-start gap-2.5">
-                            <span id="w-tip-icon" class="text-xl shrink-0">🧥</span>
-                            <div id="w-tip-now" class="text-slate-200 leading-relaxed">
-                                <strong class="text-red-400 uppercase tracking-wide text-xs">Práve teraz:</strong> Načítavam odporúčanie...
-                            </div>
-                        </div>
-                        <div class="border-t border-white/10 pt-2 flex items-start gap-2.5">
-                            <span class="text-lg shrink-0">📅</span>
-                            <div id="w-tip-day" class="text-slate-300 text-xs leading-relaxed">
-                                <strong class="gold-text uppercase tracking-wide">Predpoveď:</strong> Načítavam predpoveď...
-                            </div>
-                        </div>
+            <!-- 1. PREMIER LEAGUE TABUĽKA (360px) -->
+            <div class="glass rounded-2xl p-4 exact-box">
+                <div class="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
+                    <span class="font-bold text-sm tracking-wide flex items-center gap-1.5">🏆 PREMIER LEAGUE</span>
+                    <button onclick="fetchPLTable()" class="text-[11px] text-slate-400 hover:text-white transition">↻ Obnoviť</button>
+                </div>
+                <div class="grid grid-cols-12 text-[10px] font-bold uppercase text-slate-400 pb-1.5 px-1 border-b border-white/5">
+                    <div class="col-span-1">#</div>
+                    <div class="col-span-5">Tím</div>
+                    <div class="col-span-1 text-center">Z</div>
+                    <div class="col-span-2 text-center">B</div>
+                    <div class="col-span-3 text-right">Forma</div>
+                </div>
+                <div id="pl-table-rows" class="overflow-y-auto flex-1 divide-y divide-white/5 text-xs pr-1">
+                    <div class="py-12 text-center text-slate-400">Načítavam živú tabuľku...</div>
+                </div>
+            </div>
+
+            <!-- 2. ZÁPASY ARSENALU (360px) -->
+            <div class="glass rounded-2xl p-4 exact-box">
+                <div class="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
+                    <span class="font-bold text-sm tracking-wide flex items-center gap-1.5">⚽ PROGRAM ARSENALU</span>
+                    <div class="flex gap-1 text-[9px] font-bold">
+                        <span class="px-1.5 py-0.5 rounded comp-pl">PL</span>
+                        <span class="px-1.5 py-0.5 rounded comp-ucl">UCL</span>
+                        <span class="px-1.5 py-0.5 rounded comp-efl">EFL</span>
+                    </div>
+                </div>
+                <div id="arsenal-fixtures-rows" class="overflow-y-auto flex-1 space-y-2 pr-1">
+                    <div class="py-12 text-center text-slate-400 text-xs">Načítavam rozpis zápasov...</div>
+                </div>
+            </div>
+
+            <!-- 3. 🎮 FPL MINI-LIGA (360px) -->
+            <div class="glass rounded-2xl p-4 exact-box">
+                <div class="flex items-center justify-between pb-3 mb-2 border-b border-white/10">
+                    <span class="font-bold text-sm tracking-wide flex items-center gap-1.5">🎮 FPL MINI-LIGA</span>
+                    <div class="flex items-center gap-2.5 text-[11px]">
+                        <button onclick="fetchFPLData(true)" class="text-slate-400 hover:text-white transition">↻ Obnoviť</button>
+                        <a href="https://fantasy.premierleague.com/leagues/28856/standings/c" target="_blank" class="text-emerald-400 hover:underline font-semibold">FPL ↗</a>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center">
-                    <span>Stanica Bratislava + numerický model</span>
-                    <button onclick="updateLiveWeather()" class="text-red-400 hover:underline font-bold">↻ Obnoviť</button>
+                <!-- Riadky FPL Mini-Ligy -->
+                <div id="fpl-minileague-rows" class="overflow-y-auto flex-1 space-y-1.5 pr-1 text-xs">
+                    <div class="py-12 text-center text-slate-400">Sťahujem živé dáta z FPL API...</div>
                 </div>
-            </section>
 
-            <!-- SHMÚ ALADIN / HODINOVÝ PREHĽAD (Pôvodný plne funkčný skript) -->
-            <section class="card p-5 sm:p-6 lg:col-span-7 flex flex-col justify-between">
+                <!-- Najbližší Deadline -->
+                <div class="mt-2 pt-2.5 border-t border-white/10 flex items-center justify-between text-xs">
+                    <span class="text-slate-400 font-medium">⏳ Deadline:</span>
+                    <a href="https://fantasy.premierleague.com/my-team" target="_blank" id="fpl-deadline" class="font-bold text-amber-400 hover:underline">
+                        Načítavam... ↗
+                    </a>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- SPODNÁ DVOJICA: POČASIE SHMÚ + REDDIT FEED -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+            <!-- POČASIE BRATISLAVA & SHMÚ ALADIN (5 stĺpcov) -->
+            <div class="lg:col-span-5 glass rounded-2xl p-5 flex flex-col justify-between">
                 <div>
-                    <div class="flex flex-wrap justify-between items-center gap-2 mb-4">
+                    <div class="flex items-center justify-between pb-3 mb-4 border-b border-white/10">
+                        <div class="flex items-center gap-2">
+                            <span class="text-lg">⛅</span>
+                            <h2 class="font-bold text-sm tracking-wide uppercase">Počasie Bratislava & SHMÚ</h2>
+                        </div>
+                        <button onclick="fetchWeather()" class="text-[11px] text-slate-400 hover:text-white transition">↻ Obnoviť</button>
+                    </div>
+
+                    <!-- Aktuálny stav + odporúčanie oblečenia -->
+                    <div class="bg-slate-900/70 border border-white/5 rounded-xl p-4 flex items-center justify-between mb-4">
                         <div>
-                            <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                                📊 SHMÚ Model ALADIN <span class="text-sm font-normal text-slate-400">(Najbližšie hodiny)</span>
-                            </h2>
-                            <p id="aladin-rain-summary" class="text-xs text-slate-400 mt-1">
-                                🌧️ Denný úhrn zrážok podľa modelu: <strong class="text-white">0.0 mm</strong>
-                            </p>
+                            <div class="text-[11px] text-slate-400 uppercase font-semibold">Aktuálne v Bratislave</div>
+                            <div class="flex items-baseline gap-2 mt-1">
+                                <span id="weather-temp" class="text-3xl font-extrabold text-white">--°C</span>
+                                <span id="weather-desc" class="text-xs text-sky-400 font-semibold">Načítavam...</span>
+                            </div>
+                            <div id="weather-meta" class="text-[11px] text-slate-400 mt-1">Pocitovo: --°C • Vietor: -- km/h</div>
                         </div>
-                        <div class="flex gap-2">
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram&nwp_mesto=32567" target="_blank" class="px-3.5 py-1.5 rounded-xl text-xs bg-red-600/30 border border-red-500/40 text-red-200 hover:bg-red-600 hover:text-white transition font-bold shadow-sm">
-                                Meteogram ↗
-                            </a>
-                            <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="px-3.5 py-1.5 rounded-xl text-xs bg-black/40 border border-white/10 text-amber-300 hover:bg-white/10 transition font-bold shadow-sm">
-                                Radar ↗
-                            </a>
-                        </div>
+                        <div id="weather-emoji" class="text-4xl">🌤️</div>
                     </div>
 
-                    <!-- Hodinový prehľad -->
-                    <div id="hourly-forecast" class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center py-2">
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-1-time" class="text-xs text-slate-400">+1 hod</div>
-                            <div id="h-1-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-1-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-1-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-2-time" class="text-xs text-slate-400">+3 hod</div>
-                            <div id="h-2-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-2-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-2-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-3-time" class="text-xs text-slate-400">+6 hod</div>
-                            <div id="h-3-icon" class="text-2xl my-1">⛅</div>
-                            <div id="h-3-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-3-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
-                        <div class="p-3 rounded-xl bg-black/30 border border-white/10 backdrop-blur-md">
-                            <div id="h-4-time" class="text-xs text-slate-400">+9 hod</div>
-                            <div id="h-4-icon" class="text-2xl my-1">🌙</div>
-                            <div id="h-4-temp" class="font-bold text-white text-base sm:text-lg">-- °C</div>
-                            <div id="h-4-rain" class="text-xs text-sky-400 mt-1">💧 -- mm</div>
-                        </div>
+                    <!-- Odporúčanie čo si obliecť -->
+                    <div id="weather-outfit" class="bg-emerald-950/30 border border-emerald-500/20 rounded-xl px-3.5 py-2.5 text-xs text-emerald-200 mb-4 flex items-center gap-2">
+                        <span>👕</span>
+                        <span>Načítavam odporúčanie oblečenia...</span>
+                    </div>
+
+                    <!-- 3-dňová predpoveď -->
+                    <div id="weather-forecast" class="grid grid-cols-3 gap-2.5 text-center mb-4">
+                        <!-- Dynamicky generované -->
                     </div>
                 </div>
 
-                <div class="mt-4 pt-4 border-t border-white/10 text-xs text-slate-400 flex justify-between items-center">
-                    <span>Rozlíšenie: 2 km (Stredná Európa / ALADIN doména)</span>
-                    <a href="https://opendata.shmu.sk/" target="_blank" class="text-red-400 hover:text-red-300 font-bold">opendata.shmu.sk ↗</a>
-                </div>
-            </section>
-
-        </div>
-
-        <!-- SPODNÝ RIADOK: Reddit Feed -->
-        <section class="card p-5 sm:p-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                <div class="flex items-center gap-3">
-                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
-                        🔥 Top upvotované posty na Reddite <span class="text-xs sm:text-sm font-normal text-slate-400">(za 24 hodín)</span>
-                    </h2>
-                    <button onclick="reloadAllReddit()" class="text-xs text-red-400 hover:underline font-bold">↻ Obnoviť</button>
-                </div>
-                <div class="flex flex-wrap gap-2 w-full sm:w-auto">
-                    <button onclick="showSub('all')" id="tab-all" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-active">Všetky vedľa seba</button>
-                    <button onclick="showSub('slovakia')" id="tab-slovakia" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-inactive">r/Slovakia</button>
-                    <button onclick="showSub('gunners')" id="tab-gunners" class="flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-inactive">r/Gunners</button>
+                <!-- SHMÚ ALADIN priamy meteogram & odkazy (verzia, ktorá nepadá na CORS) -->
+                <div class="pt-3 border-t border-white/10">
+                    <div class="flex items-center justify-between text-[11px] text-slate-400 mb-2">
+                        <span class="font-bold text-slate-300">📊 SHMÚ Model ALADIN (Bratislava)</span>
+                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram" target="_blank" class="text-sky-400 hover:underline">Otvoriť SHMÚ ↗</a>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram" target="_blank" class="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/5 text-xs flex items-center justify-between transition">
+                            <span>📈 Meteogram ALADIN</span>
+                            <span class="text-slate-400">↗</span>
+                        </a>
+                        <a href="https://www.shmu.sk/sk/?page=1&id=meteo_radar" target="_blank" class="p-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 border border-white/5 text-xs flex items-center justify-between transition">
+                            <span>🌧️ SHMÚ Radar zrážok</span>
+                            <span class="text-slate-400">↗</span>
+                        </a>
+                    </div>
                 </div>
             </div>
-            
-            <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- r/Slovakia -->
-                <div id="col-slovakia" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
-                        <h3 class="font-bold text-red-400 text-base sm:text-lg">r/Slovakia</h3>
-                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
+
+            <!-- REDDIT FEED (7 stĺpcov) -->
+            <div class="lg:col-span-7 glass rounded-2xl p-5 flex flex-col h-[420px]">
+                <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-3 border-b border-white/10">
+                    <div class="flex items-center gap-3">
+                        <span class="font-bold text-sm tracking-wide flex items-center gap-1.5">🔥 REDDIT FEED</span>
+                        <div class="flex bg-slate-900/90 p-0.5 rounded-lg border border-white/10 text-xs">
+                            <button id="tab-gunners" onclick="switchReddit('Gunners')" class="px-3 py-1 rounded-md font-bold bg-[#EF0107] text-white transition">r/Gunners</button>
+                            <button id="tab-slovakia" onclick="switchReddit('Slovakia')" class="px-3 py-1 rounded-md font-bold text-slate-400 hover:text-white transition">r/Slovakia</button>
+                        </div>
                     </div>
-                    <div id="list-slovakia" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Slovakia...</div>
+                    <button onclick="fetchReddit(activeSubreddit, true)" class="text-[11px] text-slate-400 hover:text-white transition">↻ Obnoviť</button>
                 </div>
 
-                <!-- r/Gunners -->
-                <div id="col-gunners" class="space-y-3">
-                    <div class="flex items-center justify-between border-b border-red-500/40 pb-2">
-                        <h3 class="font-bold text-red-400 text-base sm:text-lg flex items-center gap-2">🔴⚪ r/Gunners</h3>
-                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="text-xs text-slate-400 hover:text-white">Otvoriť Top ↗</a>
-                    </div>
-                    <div id="list-gunners" class="space-y-2.5 text-sm text-slate-400">Načítavam r/Gunners...</div>
+                <div id="reddit-list" class="overflow-y-auto flex-1 space-y-2 pr-1">
+                    <div class="py-12 text-center text-slate-400 text-xs">Načítavam príspevky z Redditu...</div>
                 </div>
             </div>
+
         </section>
 
     </div>
-
-    <!-- VŠETKY FUNKČNÉ SKRIPTY -->
-    <script>
-        function updateDateTime() {
-            try {
-                var now = new Date();
-                var hours = now.getHours();
-                var greetingText = "Dobrý deň! 👋";
-                if (hours >= 5 && hours < 9) {
-                    greetingText = "Dobré ráno! ☕";
-                } else if (hours >= 18 || hours < 5) {
-                    greetingText = "Dobrý večer! 🌙";
-                }
-                document.getElementById('greeting').textContent = greetingText;
-
-                var formattedDate = now.toLocaleDateString('sk-SK', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                document.getElementById('current-date').textContent = formattedDate.charAt(0).toUpperCase() + formattedDate.slice(1);
-                document.getElementById('current-time').textContent = now.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-            } catch (e) {}
-        }
-        updateDateTime();
-        setInterval(updateDateTime, 1000);
-
-        var fplScheduleUTC = [
-            { gw: 1,  utc: "2026-08-21T17:30:00Z" }, { gw: 2,  utc: "2026-08-28T17:30:00Z" }, { gw: 3,  utc: "2026-09-04T17:30:00Z" },
-            { gw: 4,  utc: "2026-09-12T12:30:00Z" }, { gw: 5,  utc: "2026-09-18T17:30:00Z" }, { gw: 6,  utc: "2026-10-10T10:00:00Z" },
-            { gw: 7,  utc: "2026-10-17T10:00:00Z" }, { gw: 8,  utc: "2026-10-23T17:30:00Z" }, { gw: 9,  utc: "2026-10-31T11:00:00Z" },
-            { gw: 10, utc: "2026-11-06T18:30:00Z" }, { gw: 11, utc: "2026-11-21T11:00:00Z" }, { gw: 12, utc: "2026-11-27T18:30:00Z" },
-            { gw: 13, utc: "2026-12-02T18:30:00Z" }, { gw: 14, utc: "2026-12-05T13:30:00Z" }, { gw: 15, utc: "2026-12-12T13:30:00Z" },
-            { gw: 16, utc: "2026-12-19T13:30:00Z" }, { gw: 17, utc: "2026-12-26T11:00:00Z" }, { gw: 18, utc: "2026-12-29T18:00:00Z" },
-            { gw: 19, utc: "2027-01-01T18:30:00Z" }, { gw: 20, utc: "2027-01-05T18:00:00Z" }, { gw: 21, utc: "2027-01-16T13:30:00Z" },
-            { gw: 22, utc: "2027-01-23T13:30:00Z" }, { gw: 23, utc: "2027-01-30T13:30:00Z" }, { gw: 24, utc: "2027-02-06T13:30:00Z" },
-            { gw: 25, utc: "2027-02-10T18:30:00Z" }, { gw: 26, utc: "2027-02-20T13:30:00Z" }, { gw: 27, utc: "2027-02-27T13:30:00Z" },
-            { gw: 28, utc: "2027-03-03T18:30:00Z" }, { gw: 29, utc: "2027-03-13T13:30:00Z" }, { gw: 30, utc: "2027-03-20T13:30:00Z" },
-            { gw: 31, utc: "2027-04-10T12:30:00Z" }, { gw: 32, utc: "2027-04-17T12:30:00Z" }, { gw: 33, utc: "2027-04-24T12:30:00Z" },
-            { gw: 34, utc: "2027-05-01T12:30:00Z" }, { gw: 35, utc: "2027-05-08T12:30:00Z" }, { gw: 36, utc: "2027-05-15T12:30:00Z" },
-            { gw: 37, utc: "2027-05-23T12:30:00Z" }, { gw: 38, utc: "2027-05-30T13:30:00Z" }
-        ];
-
-        function updateFPLDeadline() {
-            var nowMs = Date.now();
-            var nextItem = null;
-            for (var i = 0; i < fplScheduleUTC.length; i++) {
-                if (new Date(fplScheduleUTC[i].utc).getTime() > nowMs) {
-                    nextItem = fplScheduleUTC[i];
-                    break;
-                }
-            }
-            var el = document.getElementById('fpl-deadline');
-            if (!nextItem) { el.textContent = "Koniec sezóny"; return; }
-            var dl = new Date(nextItem.utc);
-            var p = {};
-            new Intl.DateTimeFormat('sk-SK', { timeZone: 'Europe/Bratislava', weekday: 'short', day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).formatToParts(dl).forEach(function(x){ p[x.type] = x.value; });
-            var wd = (p.weekday || '').replace('.', '');
-            el.textContent = (wd.charAt(0).toUpperCase() + wd.slice(1)) + ' ' + p.day + '.' + p.month + '. o ' + p.hour + ':' + p.minute + ' (GW' + nextItem.gw + ') ↗';
-        }
-        updateFPLDeadline();
-        setInterval(updateFPLDeadline, 60000);
-    </script>
-
-    <!-- ŽIVÁ PL TABUĽKA & FORMA -->
-    <script>
-        function getBadgeForTeam(name, code, explicitLogo) {
-            if (code) return "https://resources.premierleague.com/premierleague/badges/70/t" + code + ".png";
-            if (CLUB_BADGES[name]) return CLUB_BADGES[name];
-            return explicitLogo || "https://resources.premierleague.com/premierleague/badges/70/t3.png";
-        }
-
-        function convertWDLString(str) {
-            if (!str || typeof str !== 'string') return [];
-            var cl = str.replace(/[^WDLVRP]/gi, '').toUpperCase();
-            if (cl.length < 3) return [];
-            return cl.split('').slice(-5).map(function(ch) {
-                if (ch === 'W' || ch === 'V') return 'V';
-                if (ch === 'L' || ch === 'P') return 'P';
-                return 'R';
-            });
-        }
-
-        function extractScoreNumber(prop) {
-            if (prop === null || prop === undefined) return NaN;
-            if (typeof prop === 'number') return prop;
-            if (typeof prop === 'string') return parseInt(prop, 10);
-            if (typeof prop === 'object' && prop.value !== undefined) return Number(prop.value);
-            return NaN;
-        }
-
-        function fetchTeamFormFromSchedule(teamId) {
-            return fetch('https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/teams/' + teamId + '/schedule')
-                .then(function(r) { return r.json(); })
-                .then(function(data) {
-                    var evs = (data && Array.isArray(data.events)) ? data.events : [];
-                    var done = [];
-                    evs.forEach(function(ev) {
-                        var comp = ev.competitions && ev.competitions[0];
-                        if (!comp) return;
-                        var st = comp.status && comp.status.type;
-                        if (!st || !(st.completed === true || st.state === "post" || st.name === "STATUS_FULL_TIME")) return;
-                        var comps = comp.competitors || [];
-                        if (comps.length !== 2) return;
-                        var myC = null, oppC = null;
-                        for (var i = 0; i < comps.length; i++) {
-                            if (String(comps[i].team && comps[i].team.id) === String(teamId)) myC = comps[i];
-                            else oppC = comps[i];
-                        }
-                        if (!myC || !oppC) return;
-                        var res = null;
-                        if (myC.winner === true) res = 'V';
-                        else if (oppC.winner === true) res = 'P';
-                        else {
-                            var ms = extractScoreNumber(myC.score), os = extractScoreNumber(oppC.score);
-                            if (!isNaN(ms) && !isNaN(os)) res = (ms > os) ? 'V' : (ms < os) ? 'P' : 'R';
-                        }
-                        if (res) done.push({ dateMs: new Date(ev.date || 0).getTime(), result: res });
-                    });
-                    done.sort(function(a,b){ return a.dateMs - b.dateMs; });
-                    return done.slice(-5).map(function(x){ return x.result; });
-                }).catch(function(){ return []; });
-        }
-
-        function renderPLTable(teamsArray, maxPlayed) {
-            var container = document.getElementById('pl-table-rows');
-            var roundEl = document.getElementById('pl-round-status');
-            if (roundEl) roundEl.textContent = maxPlayed ? ("Po " + maxPlayed + ". kole") : "Aktuálne";
-
-            var html = "";
-            teamsArray.slice(0, 6).forEach(function(t, idx) {
-                var rank = idx + 1;
-                var displayName = (t.name === "Manchester City" || t.name === "Man City") ? "Man Cheaters" : t.name;
-                var isArsenal = (displayName === "Arsenal");
-                var badgeUrl = getBadgeForTeam(displayName, t.code, t.logo);
-                var rowStyle = isArsenal ? "bg-[#EF0107]/50 border border-[#ff3b41] shadow-sm font-bold text-white" : "bg-white/5 font-medium text-slate-200";
-
-                var formArr = Array.isArray(t.form) ? t.form.slice(-5) : [];
-                var formB = '';
-                formArr.forEach(function(res) {
-                    var cls = (res === 'V') ? 'form-v' : (res === 'P') ? 'form-p' : 'form-r';
-                    formB += '<span class="form-dot ' + cls + '">' + res + '</span>';
-                });
-
-                html += '<div class="flex justify-between items-center ' + rowStyle + ' px-2 py-1 rounded">' +
-                    '<span class="flex items-center gap-1.5 truncate max-w-[145px]">' +
-                        '<img src="' + badgeUrl + '" alt="' + displayName + '" class="w-4 h-4 object-contain shrink-0" onerror="handleBadgeError(this)">' +
-                        '<span class="truncate">' + rank + '. ' + displayName + '</span>' +
-                    '</span>' +
-                    '<div class="flex items-center gap-1.5 shrink-0">' +
-                        '<div class="flex gap-0.5">' + formB + '</div>' +
-                        '<span class="font-black ' + (isArsenal ? 'gold-text' : 'text-slate-300') + ' w-7 text-right">' + t.points + ' b</span>' +
-                    '</div>' +
-                '</div>';
-            });
-            container.innerHTML = html;
-        }
-
-        function updateLivePLStandings(forceRefresh) {
-            var cacheKey = 'arsenal_dash_pl_live_v26';
-            if (!forceRefresh) {
-                try {
-                    var cached = JSON.parse(localStorage.getItem(cacheKey));
-                    if (cached && Array.isArray(cached.standings) && cached.standings.length && cached.standings[0].form && cached.standings[0].form.length) {
-                        renderPLTable(cached.standings, cached.maxPlayed);
-                        if (Date.now() - cached.ts < 15 * 60 * 1000) return;
-                    }
-                } catch(e) {}
-            }
-            fetch('https://site.web.api.espn.com/apis/v2/sports/soccer/eng.1/standings')
-                .then(function(r){ return r.json(); })
-                .then(function(standData) {
-                    var entries = standData.children[0].standings.entries;
-                    var maxPlayed = 0;
-                    var parsed = entries.map(function(entry) {
-                        var id = String(entry.team.id);
-                        var rawName = entry.team.shortDisplayName || entry.team.displayName;
-                        var name = (rawName === "Manchester City" || rawName === "Man City") ? "Man Cheaters" : rawName;
-                        var logo = entry.team.logos ? entry.team.logos[0].href : null;
-                        var stats = {};
-                        var inlineForm = [];
-                        (entry.stats || []).forEach(function(s) {
-                            if (s.value !== undefined) stats[s.name] = s.value;
-                            var cand = [s.displayValue, s.summary, s.value];
-                            cand.forEach(function(c) {
-                                if (typeof c === 'string' && /^[WDLVRP]{3,6}$/i.test(c.trim())) inlineForm = convertWDLString(c);
-                            });
-                        });
-                        var played = stats.gamesPlayed || 0;
-                        if (played > maxPlayed) maxPlayed = played;
-                        return { id: id, name: name, logo: logo, points: stats.points || 0, played: played, gd: stats.pointDifferential || 0, gf: stats.pointsFor || 0, rank: stats.rank || 99, form: inlineForm };
-                    });
-                    parsed.sort(function(a,b){ return b.points - a.points || b.gd - a.gd || b.gf - a.gf; });
-                    var top6 = parsed.slice(0, 6);
-                    renderPLTable(top6, maxPlayed);
-
-                    Promise.all(top6.map(function(t) {
-                        if (t.form.length >= 3) return Promise.resolve(t);
-                        return fetchTeamFormFromSchedule(t.id).then(function(f){ if(f.length) t.form = f; return t; });
-                    })).then(function(upd) {
-                        renderPLTable(upd, maxPlayed);
-                        try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), standings: upd, maxPlayed: maxPlayed })); } catch(e){}
-                    });
-                }).catch(function(){});
-        }
-        updateLivePLStandings(false);
-    </script>
-
-    <!-- ZÁPASY ARSENALU, FPL, POČASIE & REDDIT -->
-    <script>
-        var arsenalSeasonFixtures = [
-            { utc: "2026-10-21T19:00:00Z", opp: "Bayern",       comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)" },
-            { utc: "2026-10-24T14:00:00Z", opp: "Everton",      comp: "PL",  isHome: true,  venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-10-27T19:45:00Z", opp: "Fleetwood",    comp: "EFL", isHome: false, venue: "Highbury Stadium (Fleetwood)" },
-            { utc: "2026-11-01T16:30:00Z", opp: "Liverpool",    comp: "PL",  isHome: false, venue: "Anfield (Liverpool)" },
-            { utc: "2026-11-04T20:00:00Z", opp: "Inter",        comp: "UCL", isHome: true,  venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-11-07T15:00:00Z", opp: "Newcastle",    comp: "PL",  isHome: true,  venue: "Emirates Stadium (Londýn)" }
-        ];
-
-        function updateArsenalFixtures() {
-            var nowMs = Date.now();
-            var valid = arsenalSeasonFixtures.filter(function(f){ return (new Date(f.utc).getTime() + 9000000) > nowMs; });
-            var container = document.getElementById('arsenal-fixtures-rows');
-            var venueEl = document.getElementById('arsenal-next-venue');
-            if (venueEl && valid[0]) venueEl.textContent = valid[0].venue;
-            container.innerHTML = valid.slice(0,5).map(function(fix) {
-                var d = new Date(fix.utc);
-                var p = {};
-                new Intl.DateTimeFormat('sk-SK', { timeZone: 'Europe/Bratislava', weekday: 'short', day: '2-digit', month: '2-digit' }).formatToParts(d).forEach(function(x){ p[x.type] = x.value; });
-                var wd = (p.weekday || '').replace('.','');
-                var dateStr = (wd.charAt(0).toUpperCase() + wd.slice(1)) + ' ' + p.day + '.' + p.month + '.';
-                var bgComp = fix.comp === 'UCL' ? 'bg-amber-400 text-slate-950' : fix.comp === 'EFL' ? 'bg-blue-600 text-white' : 'bg-[#a80024] text-white';
-                var ha = fix.isHome ? '<span class="text-[11px] font-semibold text-emerald-300 bg-emerald-950/60 px-1.5 py-0.5 rounded">Doma (H)</span>' : '<span class="text-[11px] font-semibold text-red-300 bg-red-950/60 px-1.5 py-0.5 rounded">Vonku (A)</span>';
-                return '<div class="flex justify-between items-center bg-white/5 px-2.5 py-1.5 rounded"><span class="text-slate-200 flex items-center gap-2 truncate pr-2"><span class="text-[10px] font-black px-1.5 py-0.5 rounded ' + bgComp + '">' + fix.comp + '</span><span class="truncate">' + dateStr + ' • <strong class="text-white">' + fix.opp + '</strong></span></span>' + ha + '</div>';
-            }).join('');
-        }
-        updateArsenalFixtures();
-
-        // FPL Mini-liga
-        function renderFPLMiniLeague(entries) {
-            var container = document.getElementById('fpl-minileague-rows');
-            var myEntry = entries.find(function(x){ return x.entry_name && x.entry_name.toLowerCase().indexOf('deargod') !== -1; });
-            var myTotal = myEntry ? myEntry.total : null;
-            container.innerHTML = entries.slice(0, 5).map(function(item, idx) {
-                var rank = item.rank || (idx + 1);
-                var isMe = item.entry_name && item.entry_name.toLowerCase().indexOf('deargod') !== -1;
-                if (isMe) {
-                    return '<div class="flex justify-between items-center bg-[#EF0107]/50 border border-[#ff3b41] px-2.5 py-1.5 rounded shadow-sm"><span class="font-bold text-white flex items-center gap-1.5 truncate"><span>⭐</span> ' + rank + '. ' + item.entry_name + '</span><span class="font-black gold-text">' + item.total + ' b</span></div>';
-                }
-                var diff = myTotal !== null ? (myTotal - item.total) : 0;
-                var diffHtml = diff < 0 ? ' <span class="text-[10px] font-bold text-red-400">(' + diff + ')</span>' : diff > 0 ? ' <span class="text-[10px] font-bold text-emerald-400">(+' + diff + ')</span>' : '';
-                return '<div class="flex justify-between items-center bg-white/5 px-2.5 py-1 rounded"><span class="text-slate-200 truncate">' + rank + '. ' + item.entry_name + diffHtml + '</span><span class="font-bold text-slate-300">' + item.total + ' b</span></div>';
-            }).join('');
-        }
-        renderFPLMiniLeague([
-            { rank: 1, entry_name: "The Invincibles", total: 471 },
-            { rank: 2, entry_name: "Fc ThisSeason",   total: 463 },
-            { rank: 3, entry_name: "Australobooster", total: 452 },
-            { rank: 4, entry_name: "Ødeargod",        total: 450 },
-            { rank: 5, entry_name: "CFC Academy",     total: 444 }
-        ]);
-
-        function updateLiveWeather() {
-            fetch("https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,precipitation_probability_max&timezone=Europe%2FBratislava&forecast_days=2")
-                .then(function(res){ return res.json(); })
-                .then(function(data){
-                    document.getElementById('w-temp').textContent = Math.round(data.current.temperature_2m) + " °C";
-                    document.getElementById('w-max').textContent = Math.round(data.daily.temperature_2m_max[0]) + " °C";
-                    document.getElementById('w-min').textContent = Math.round(data.daily.temperature_2m_min[0]) + " °C";
-                    document.getElementById('w-rain').textContent = data.daily.precipitation_probability_max[0] + " %";
-                    document.getElementById('w-wind').textContent = Math.round(data.current.wind_speed_10m) + " km/h";
-                }).catch(function(){});
-        }
-        updateLiveWeather();
-
-        // Absolútne spoľahlivý Reddit feed
-        function loadReddit(subreddit, elementId) {
-            var container = document.getElementById(elementId);
-            var jsonUrl = 'https://www.reddit.com/r/' + subreddit + '/top.json?t=day&limit=5&raw_json=1';
-            var proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(jsonUrl);
-
-            fetch(proxyUrl)
-                .then(function(res){ return res.json(); })
-                .then(function(response){
-                    var data = JSON.parse(response.contents);
-                    var posts = data && data.data && data.data.children;
-                    if (!posts || !posts.length) throw new Error("No posts");
-                    container.innerHTML = posts.slice(0, 5).map(function(p, idx) {
-                        var it = p.data;
-                        var hoursAgo = Math.max(1, Math.floor((Date.now() - (it.created_utc * 1000)) / (1000 * 60 * 60)));
-                        return '<a href="https://www.reddit.com' + it.permalink + '" target="_blank" class="block p-3 rounded-xl bg-slate-800/40 hover:bg-slate-800/80 border border-white/5 transition flex justify-between items-start gap-3"><div class="space-y-1.5 flex-1 min-w-0"><h4 class="text-white text-sm font-medium leading-snug hover:text-red-400 transition line-clamp-2">' + it.title + '</h4><div class="text-xs text-slate-400">🕒 pred ' + hoursAgo + ' hod</div></div><div class="flex flex-col items-center justify-center min-w-[50px] py-1 px-1.5 rounded-lg bg-red-950/60 border border-red-500/30 text-amber-300 font-bold text-xs shrink-0">TOP #' + (idx+1) + '</div></a>';
-                    }).join('');
-                }).catch(function(){
-                    container.innerHTML = '<div class="p-3 rounded-lg bg-red-950/30 border border-red-500/30 text-xs text-amber-300 flex justify-between items-center"><span>Nepodarilo sa načítať príspevky.</span><a href="https://www.reddit.com/r/' + subreddit + '/top/?t=day" target="_blank" class="px-2.5 py-1 rounded bg-red-600 text-white font-bold hover:bg-red-500 shrink-0 ml-2">Otvoriť ↗</a></div>';
-                });
-        }
-        loadReddit('Slovakia', 'list-slovakia');
-        loadReddit('Gunners', 'list-gunners');
-
-        function reloadAllReddit() {
-            loadReddit('Slovakia', 'list-slovakia');
-            loadReddit('Gunners', 'list-gunners');
-        }
-
-        function showSub(target) {
-            var cs = document.getElementById('col-slovakia'), cg = document.getElementById('col-gunners'), g = document.getElementById('reddit-grid');
-            var ba = document.getElementById('tab-all'), bs = document.getElementById('tab-slovakia'), bg = document.getElementById('tab-gunners');
-            [ba, bs, bg].forEach(function(b){ b.className = "flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-inactive"; });
-            if (target === 'all') { g.className = "grid grid-cols-1 lg:grid-cols-2 gap-6"; cs.style.display = "block"; cg.style.display = "block"; ba.className = "flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-active"; }
-            else if (target === 'slovakia') { g.className = "grid grid-cols-1 gap-6"; cs.style.display = "block"; cg.style.display = "none"; bs.className = "flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-active"; }
-            else if (target === 'gunners') { g.className = "grid grid-cols-1 gap-6"; cs.style.display = "none"; cg.style.display = "block"; bg.className = "flex-1 sm:flex-none px-3.5 py-2 rounded-xl text-xs sm:text-sm transition arsenal-btn-active"; }
-        }
-    </script>
-</body>
-</html>
