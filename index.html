@@ -235,7 +235,7 @@
                     </div>
                 </div>
 
-                <!-- PRAVÝ WIDGET (4 stĺpce): Najbližšie dni (reálne hodnoty bez vymyslených mm) -->
+                <!-- PRAVÝ WIDGET (4 stĺpce): Najbližšie dni -->
                 <div class="lg:col-span-4 bg-gray-900/70 border border-white/5 rounded-xl p-4 flex flex-col justify-between space-y-3">
                     <div>
                         <div class="text-[11px] uppercase tracking-wider text-amber-400 font-bold mb-2.5">📅 Výhľad na najbližšie dni</div>
@@ -258,7 +258,7 @@
             </div>
         </section>
 
-        <!-- 3. SEKČNÝ RIADOK: REDDIT FEED (r/Slovakia, r/Gunners & r/FantasyPL) -->
+        <!-- 3. SEKČNÝ RIADOK: REDDIT FEED -->
         <section class="card p-5">
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-white/10">
                 <div class="flex flex-wrap items-center gap-3">
@@ -398,27 +398,6 @@
             return '';
         }
 
-        function raceToSuccess(promises) {
-            return new Promise(function(resolve, reject) {
-                var failCount = 0;
-                var total = promises.length;
-                if (total === 0) return reject(new Error('No providers'));
-                promises.forEach(function(p) {
-                    Promise.resolve(p).then(function(val) {
-                        if (val && Array.isArray(val) && val.length > 0) {
-                            resolve(val);
-                        } else {
-                            failCount++;
-                            if (failCount === total) reject(new Error('All failed'));
-                        }
-                    }).catch(function() {
-                        failCount++;
-                        if (failCount === total) reject(new Error('All failed'));
-                    });
-                });
-            });
-        }
-
         // =================================================================
         // 1. HODINY A POZDRAV
         // =================================================================
@@ -441,7 +420,7 @@
         updateDateTime();
 
         // =================================================================
-        // 2. PREMIER LEAGUE TABUĽKA (FLASHSCORE MAPA)
+        // 2. PREMIER LEAGUE TABUĽKA
         // =================================================================
         const FLASHSCORE_EXACT_FORM = {
             'man city': ['V', 'V', 'V', 'V', 'V'],
@@ -662,7 +641,7 @@
         }
 
         // =================================================================
-        // 5. POČASIE (REÁLNE HODNOTY BEZ VYMYSLENÝCH MM)
+        // 5. POČASIE
         // =================================================================
         async function fetchWeather() {
             try {
@@ -690,7 +669,6 @@
                 document.getElementById('w-tip-now').textContent = tipNow;
                 document.getElementById('w-tip-day').textContent = `Aktuálna teplota v Bratislave je ${temp}°C, predpokladaný vývoj vyhovuje bežným aktivitám vonku.`;
 
-                // Hodinová predpoveď
                 const nowMs = Date.now();
                 let startIdx = data.hourly.time.findIndex(t => new Date(t).getTime() >= nowMs);
                 if (startIdx === -1) startIdx = 0;
@@ -718,7 +696,6 @@
                 });
                 document.getElementById('weather-hourly').innerHTML = hHtml;
 
-                // Najbližšie dni (bez 9.5 mm chýb)
                 let dHtml = '';
                 for (let i = 1; i <= 3; i++) {
                     if (data.daily.time[i]) {
@@ -757,7 +734,7 @@
         }
 
         // =================================================================
-        // 6. REDDIT FEED (STABILNÉ JSON SÚBORY Z GITHUB ACTIONS)
+        // 6. REDDIT FEED (S LOKÁLNYM JSON + AUTOMATICKÝM CORS FALLBACKOM)
         // =================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -799,29 +776,49 @@
             const container = document.getElementById(elementId);
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
+            // 1. Pokus načítať lokálny súbor z GitHub Actions
             try {
-                // Sťahuje priamo JSON súbor generovaný cez GitHub Actions (žiadne CORS bloky v prehliadači)
                 const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Lokálny súbor nenájdený');
-                const json = await res.json();
+                if (res.ok) {
+                    const json = await res.json();
+                    const children = json?.data?.children || [];
+                    if (children.length > 0) {
+                        const items = children.filter(c => !c.data.stickied).slice(0, 8).map(c => {
+                            const created = c.data.created_utc ? new Date(c.data.created_utc * 1000).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : '';
+                            return {
+                                title: c.data.title,
+                                link: `https://www.reddit.com${c.data.permalink}`,
+                                author: `u/${c.data.author}`,
+                                meta: `▲ ${c.data.ups}${created ? ' • ' + created : ''}`
+                            };
+                        });
+                        renderRedditItems(items, container);
+                        return;
+                    }
+                }
+            } catch (e) {}
+
+            // 2. Fallback: Živé načítanie cez stabilný AllOrigins proxy JSON pre r/Slovakia, r/Gunners aj r/FantasyPL
+            try {
+                const targetUrl = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10&raw_json=1`;
+                const proxyRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' });
+                if (!proxyRes.ok) throw new Error('Proxy error');
+                const wrapper = await proxyRes.json();
+                const json = JSON.parse(wrapper.contents);
                 const children = json?.data?.children || [];
 
-                const items = children
-                    .filter(c => !c.data.stickied)
-                    .slice(0, 8)
-                    .map(c => {
-                        const created = c.data.created_utc ? new Date(c.data.created_utc * 1000).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : '';
-                        return {
-                            title: c.data.title,
-                            link: `https://www.reddit.com${c.data.permalink}`,
-                            author: `u/${c.data.author}`,
-                            meta: `▲ ${c.data.ups}${created ? ' • ' + created : ''}`
-                        };
-                    });
-
+                const items = children.filter(c => !c.data.stickied).slice(0, 8).map(c => {
+                    const created = c.data.created_utc ? new Date(c.data.created_utc * 1000).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : '';
+                    return {
+                        title: c.data.title,
+                        link: `https://www.reddit.com${c.data.permalink}`,
+                        author: `u/${c.data.author}`,
+                        meta: `▲ ${c.data.ups}${created ? ' • ' + created : ''}`
+                    };
+                });
                 renderRedditItems(items, container);
             } catch (err) {
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Zatiaľ nie je k dispozícii lokálny export r/${subreddit}. Spustite GitHub Action workflow.</div>`;
+                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
             }
         }
 
