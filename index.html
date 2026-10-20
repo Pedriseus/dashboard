@@ -672,7 +672,6 @@
                 const minT = Math.round(data.daily.temperature_2m_min[0]);
                 document.getElementById('w-tip-day').textContent = `Dnešné maximum ${maxT}°C (minimum ${minT}°C). Aktuálne je ${info.desc.toLowerCase()}, vietor ${wind} km/h.`;
 
-                // Hodinová predpoveď (+1h, +3h, +6h, +9h)
                 const nowMs = Date.now();
                 let startIdx = data.hourly.time.findIndex(t => new Date(t).getTime() >= nowMs);
                 if (startIdx === -1) startIdx = 0;
@@ -700,7 +699,7 @@
                 });
                 document.getElementById('weather-hourly').innerHTML = hHtml;
 
-                // Najbližšie 3 dni (výpočet z denného okna 08:00 - 20:00, aby nočné fronty neskresľovali deň)
+                // Najbližšie 3 dni (výpočet z denného okna 08:00 - 20:00)
                 let dHtml = '';
                 for (let i = 1; i <= 3; i++) {
                     const dayStr = data.daily.time[i];
@@ -710,7 +709,6 @@
                         const dMax = Math.round(data.daily.temperature_2m_max[i]);
                         const dMin = Math.round(data.daily.temperature_2m_min[i]);
 
-                        // Vyberieme len denné hodiny (08:00 až 20:00) pre daný deň
                         let dayRainMm = 0;
                         let dayProbSum = 0;
                         let dayCount = 0;
@@ -760,7 +758,7 @@
         }
 
         // =================================================================
-        // 6. REDDIT FEED (BEZ ČASOV, VŠETKY 3 SUBREDDITY FUNKČNÉ)
+        // 6. REDDIT FEED (SEKVENČNÝ RSS2JSON S PRESNOU URL "/hot/.rss" A BEZ ČASOV)
         // =================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -786,59 +784,31 @@
             }
         }
 
-        // Vykreslenie Reddit položiek (ÚPLNE BEZ ČASU)
+        // Vykreslenie príspevkov (ÚPLNE BEZ ČASU)
         function renderRedditItems(items, container) {
             container.innerHTML = items.map(p => `
                 <a href="${p.link}" target="_blank" class="block p-3 rounded-xl bg-gray-900/75 hover:bg-gray-800 border border-white/5 transition group">
                     <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
-                        <span class="truncate pr-2">${p.author || 'u/redditor'}</span>
-                        ${p.score ? `<span class="text-amber-400 font-bold shrink-0">${p.score}</span>` : ''}
+                        <span class="truncate pr-2 font-medium text-gray-400">${p.author || 'u/redditor'}</span>
                     </div>
                     <div class="text-xs font-semibold text-gray-200 group-hover:text-white leading-snug">${p.title}</div>
                 </a>
             `).join('');
         }
 
-        function parseRedditJsonData(json) {
-            const children = json?.data?.children;
-            if (!Array.isArray(children) || children.length === 0) throw new Error('Invalid JSON');
-            return children
-                .filter(c => !c.data.stickied)
-                .slice(0, 8)
-                .map(c => ({
-                    title: c.data.title,
-                    link: `https://www.reddit.com${c.data.permalink}`,
-                    author: `u/${c.data.author}`,
-                    score: `▲ ${c.data.ups} • 💬 ${c.data.num_comments}`
-                }));
-        }
-
-        function parseRedditAtomXml(xmlText) {
-            if (!xmlText || !xmlText.includes('<entry>')) throw new Error('Invalid XML');
-            const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-            const entries = Array.from(doc.querySelectorAll('entry'));
-            if (!entries.length) throw new Error('Empty XML');
-            return entries.slice(0, 8).map(entry => {
-                const title = entry.querySelector('title')?.textContent || 'Bez názvu';
-                const linkEl = entry.querySelector('link');
-                const link = linkEl ? (linkEl.getAttribute('href') || '#') : '#';
-                const author = entry.querySelector('author > name')?.textContent || 'u/redditor';
-                return { title, link, author, score: '' };
-            });
-        }
-
-        async function loadReddit(subreddit, elementId, forceRefresh = false) {
+        async function fetchSubredditViaRss2Json(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_no_time_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_rss2json_v5_' + subreddit.toLowerCase();
 
+            // Ak máme platnú cache (menej ako 15 minút) a netlačíme manuálne Obnoviť, zobrazíme okamžite
             if (!forceRefresh) {
                 try {
                     const cached = localStorage.getItem(cacheKey);
                     if (cached) {
                         const parsed = JSON.parse(cached);
-                        if (Date.now() - parsed.ts < 10 * 60 * 1000 && parsed.items?.length) {
+                        if (Date.now() - parsed.ts < 15 * 60 * 1000 && parsed.items?.length) {
                             renderRedditItems(parsed.items, container);
-                            return;
+                            return false; // netreba čakať v rade, použila sa cache
                         }
                     }
                 } catch (e) {}
@@ -846,89 +816,63 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
-            // 1. Skúsime lokálny JSON súbor alebo lokálny XML súbor z GitHub Actions
-            try {
-                const localRes = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
-                if (localRes.ok) {
-                    const text = await localRes.text();
-                    let items = [];
-                    if (text.trim().startsWith('{')) {
-                        items = parseRedditJsonData(JSON.parse(text));
-                    } else if (text.includes('<entry>')) {
-                        items = parseRedditAtomXml(text);
-                    }
-                    if (items.length > 0) {
-                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
-                        renderRedditItems(items, container);
-                        return;
-                    }
-                }
-            } catch (e) {}
-
-            // 2. Viacstupňová kaskáda verejných zdrojov (keďže rss2json má limit 1 req/s, skúšame najprv rýchle proxy a potom rss2json)
-            const rssTarget = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
-            const jsonTarget = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10&raw_json=1`;
-
-            const sources = [
-                // A: AllOrigins JSON wrapper (RSS XML)
-                async () => {
-                    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssTarget)}`, { cache: 'no-store' });
-                    const d = await r.json();
-                    return parseRedditAtomXml(d.contents);
-                },
-                // B: AllOrigins JSON wrapper (JSON)
-                async () => {
-                    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(jsonTarget)}`, { cache: 'no-store' });
-                    const d = await r.json();
-                    return parseRedditJsonData(JSON.parse(d.contents));
-                },
-                // C: CodeTabs Proxy (RSS XML)
-                async () => {
-                    const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssTarget)}`);
-                    return parseRedditAtomXml(await r.text());
-                },
-                // D: rss2json (bez zobrazovania času!)
-                async () => {
-                    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(`https://www.reddit.com/r/${subreddit}/.rss`)}`);
-                    const d = await r.json();
-                    if (d.status !== 'ok' || !d.items?.length) throw new Error('rss2json limit');
-                    return d.items.slice(0, 8).map(i => ({
-                        title: i.title,
-                        link: i.link,
-                        author: i.author || 'u/redditor',
-                        score: ''
-                    }));
-                }
+            // Presne tá URL so znakom "/hot/.rss", ktorú rss2json vyžaduje a ktorá fungovala pre r/Gunners!
+            const urlsToTry = [
+                `https://www.reddit.com/r/${subreddit}/hot/.rss`,
+                `https://www.reddit.com/r/${subreddit}/.rss`,
+                `https://old.reddit.com/r/${subreddit}/hot/.rss`
             ];
 
-            for (const sourceFn of sources) {
+            for (const rssUrl of urlsToTry) {
                 try {
-                    const items = await sourceFn();
-                    if (items && items.length > 0) {
+                    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+                    const res = await fetch(apiUrl);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+
+                    if (data.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
+                        const items = data.items.slice(0, 8).map(item => ({
+                            title: item.title,
+                            link: item.link,
+                            author: item.author || `r/${subreddit}`
+                        }));
                         localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
                         renderRedditItems(items, container);
-                        return;
+                        return true; // úspešne stiahnuté zo siete
                     }
                 } catch (e) {}
             }
 
-            // Ak zlyhali online zdroje, zobrazíme aspoň staršiu cache
+            // Ak rss2json dočasne vrátil limit, skúsime staršiu cache z localStorage
             const oldCache = localStorage.getItem(cacheKey);
             if (oldCache) {
                 try {
                     renderRedditItems(JSON.parse(oldCache).items, container);
-                    return;
+                    return true;
                 } catch (e) {}
             }
 
             container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
+            return true;
         }
 
-        // Spustenie s jemným 350ms rozostupom, aby ani rss2json ani proxy servery nehodili Too Many Requests (429)
-        function loadAllReddit(force = false) {
-            loadReddit('Slovakia', 'list-slovakia', force);
-            setTimeout(() => loadReddit('Gunners', 'list-gunners', force), 350);
-            setTimeout(() => loadReddit('FantasyPL', 'list-fantasypl', force), 700);
+        // Sekvenčné načítanie s 1.2s pauzou, aby rss2json nikdy nezablokoval 2. a 3. subreddit kvôli rate-limitu!
+        let isRedditLoading = false;
+        async function loadAllReddit(force = false) {
+            if (isRedditLoading) return;
+            isRedditLoading = true;
+
+            try {
+                const didNet1 = await fetchSubredditViaRss2Json('Gunners', 'list-gunners', force);
+                if (didNet1) await new Promise(r => setTimeout(r, 1250));
+
+                const didNet2 = await fetchSubredditViaRss2Json('Slovakia', 'list-slovakia', force);
+                if (didNet2) await new Promise(r => setTimeout(r, 1250));
+
+                await fetchSubredditViaRss2Json('FantasyPL', 'list-fantasypl', force);
+            } finally {
+                isRedditLoading = false;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
