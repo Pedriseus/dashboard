@@ -21,13 +21,15 @@ jobs:
           "https://fantasy.premierleague.com/api/leagues-classic/28856/standings/?page_standings=1" \
           -o fpl-league.json
 
-      - name: Stiahnutie Reddit feedov (Slovakia, Gunners, FantasyPL)
+      - name: Stiahnutie Reddit feedov (RSS XML odolné voči blokovaniu)
         run: |
-          curl -s -L -A "script:arsenal.dashboard:v1.9 (by /u/gunner)" "https://www.reddit.com/r/Slovakia/hot.json?limit=10&raw_json=1" -o reddit-slovakia.json || true
-          curl -s -L -A "script:arsenal.dashboard:v1.9 (by /u/gunner)" "https://www.reddit.com/r/Gunners/hot.json?limit=10&raw_json=1" -o reddit-gunners.json || true
-          curl -s -L -A "script:arsenal.dashboard:v1.9 (by /u/gunner)" "https://www.reddit.com/r/FantasyPL/hot.json?limit=10&raw_json=1" -o reddit-fantasypl.json || true
+          curl -s -L -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" "https://www.reddit.com/r/Slovakia/hot/.rss?limit=10" -o reddit-slovakia.json || true
+          sleep 2
+          curl -s -L -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" "https://www.reddit.com/r/Gunners/hot/.rss?limit=10" -o reddit-gunners.json || true
+          sleep 2
+          curl -s -L -A "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" "https://www.reddit.com/r/FantasyPL/hot/.rss?limit=10" -o reddit-fantasypl.json || true
 
-      - name: Commit a Push aktualizovaných JSON súborov
+      - name: Commit a Push aktualizovaných súborov
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
