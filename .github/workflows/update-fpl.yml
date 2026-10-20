@@ -1,4 +1,4 @@
-name: Aktualizácia FPL Mini-ligy
+name: Aktualizácia FPL a Reddit dát
 
 on:
   schedule:
@@ -9,7 +9,7 @@ permissions:
   contents: write
 
 jobs:
-  fetch-fpl:
+  fetch-data:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repozitára
@@ -21,10 +21,16 @@ jobs:
           "https://fantasy.premierleague.com/api/leagues-classic/28856/standings/?page_standings=1" \
           -o fpl-league.json
 
-      - name: Commit a Push fpl-league.json
+      - name: Stiahnutie Reddit feedov (Slovakia, Gunners, FantasyPL)
+        run: |
+          curl -s -L -A "script:arsenal.dashboard:v1.9 (by /u/gunner)" "https://www.reddit.com/r/Slovakia/hot.json?limit=10&raw_json=1" -o reddit-slovakia.json || true
+          curl -s -L -A "script:arsenal.dashboard:v1.9 (by /u/gunner)" "https://www.reddit.com/r/Gunners/hot.json?limit=10&raw_json=1" -o reddit-gunners.json || true
+          curl -s -L -A "script:arsenal.dashboard:v1.9 (by /u/gunner)" "https://www.reddit.com/r/FantasyPL/hot.json?limit=10&raw_json=1" -o reddit-fantasypl.json || true
+
+      - name: Commit a Push aktualizovaných JSON súborov
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add fpl-league.json
-          git diff --staged --quiet || git commit -m "Auto-update FPL mini-league standings"
+          git add fpl-league.json reddit-*.json
+          git diff --staged --quiet || git commit -m "Auto-update FPL & Reddit feeds"
           git push
