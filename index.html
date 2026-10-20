@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Denný dashboard | Arsenal Edition v1.9</title>
+    <title>Denný dashboard | Arsenal Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -18,7 +18,7 @@
         }
 
         .card {
-            background: rgba(17, 24, 39, 0.75);
+            background: rgba(17, 24, 39, 0.78);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
@@ -27,12 +27,12 @@
         }
 
         .arsenal-header {
-            background: linear-gradient(135deg, rgba(156, 0, 4, 0.88) 0%, rgba(20, 27, 45, 0.92) 55%, rgba(6, 54, 114, 0.85) 100%);
+            background: linear-gradient(135deg, rgba(156, 0, 4, 0.88) 0%, rgba(20, 27, 45, 0.94) 55%, rgba(6, 54, 114, 0.88) 100%);
             border: 1px solid rgba(212, 175, 55, 0.35);
             box-shadow: 0 12px 32px -8px rgba(239, 1, 7, 0.3);
         }
 
-        /* Pevná šírka 360px pre všetky 3 tabuľky v hlavičke */
+        /* Pevná šírka 360px pre všetky 3 tabuľky tak, aby sedeli vnútri hlavičky */
         .exact-box {
             width: 360px;
             min-width: 360px;
@@ -41,9 +41,10 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            flex-shrink: 0;
         }
 
-        @media (max-width: 1180px) {
+        @media (max-width: 1360px) {
             .exact-box {
                 width: 100%;
                 min-width: unset;
@@ -81,20 +82,18 @@
 </head>
 <body class="min-h-screen p-4 md:p-6">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <!-- Dostatočne široký kontajner (max-w-[95rem]), aby 3x 360px tabuľky nikdy nepretekali z hlavičky -->
+    <div class="max-w-[95rem] mx-auto space-y-6">
 
         <!-- 1. HLAVNÝ ARSENAL HEADER + 3x 360px TABUĽKY -->
-        <header class="arsenal-header rounded-2xl p-5 md:p-6">
-            <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
+        <header class="arsenal-header rounded-2xl p-5 md:p-6 overflow-hidden">
+            <div class="flex flex-col 2xl:flex-row items-center justify-between gap-6">
                 
-                <!-- Ľavá časť: Logo, Pozdrav a zarovnaný Dátum + Čas pod pozdravom -->
-                <div class="flex items-center gap-4">
+                <!-- Ľavá časť: Logo, Pozdrav (bez v1.9 Stable) a Dátum + Čas pod pozdravom -->
+                <div class="flex items-center gap-4 self-start 2xl:self-center shrink-0">
                     <img src="https://resources.premierleague.com/premierleague/badges/t3.svg" alt="Arsenal FC" class="w-14 h-14 md:w-16 md:h-16 drop-shadow-[0_0_12px_rgba(255,255,255,0.35)] shrink-0">
                     <div class="flex flex-col">
-                        <div class="flex items-center gap-2">
-                            <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dobré ráno!</h1>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">v1.9 Stable</span>
-                        </div>
+                        <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dobré ráno!</h1>
                         <div class="flex items-center gap-2 text-xs md:text-sm text-gray-200 mt-1 font-medium">
                             <span id="current-date">Načítavam dátum...</span>
                             <span class="text-amber-400">•</span>
@@ -103,8 +102,8 @@
                     </div>
                 </div>
 
-                <!-- Pravá časť: 3 identické tabuľky (360px exact-box) -->
-                <div class="flex flex-wrap xl:flex-nowrap items-stretch justify-center gap-4 w-full xl:w-auto">
+                <!-- Pravá časť: 3 identické tabuľky (360px exact-box) zarovnané presne do vnútra hlavičky -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 w-full 2xl:w-auto justify-items-center">
 
                     <!-- BOX 1: PREMIER LEAGUE TABUĽKA (360px) -->
                     <div class="card p-3.5 exact-box">
@@ -129,7 +128,7 @@
                         </div>
                         <div class="pt-1.5 border-t border-white/10 text-[10px] text-gray-400 flex justify-between">
                             <span>Forma: <b class="text-green-400">V</b>ýhra / <b class="text-amber-400">R</b>emíza / <b class="text-red-400">P</b>rehra</span>
-                            <span>Live API</span>
+                            <span>Posledných 5 Z</span>
                         </div>
                     </div>
 
@@ -178,7 +177,7 @@
             </div>
         </header>
 
-        <!-- 2. SEKČNÝ RIADOK: POČASIE & SHMÚ ALADIN (BEZ ZMENY - FUNGUJE) -->
+        <!-- 2. SEKČNÝ RIADOK: POČASIE & SHMÚ ALADIN (VPRAVO HODINY +1h, +3h, +6h, +9h) -->
         <section id="weather-box" class="card p-5">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
                 <div class="flex items-center gap-2">
@@ -192,7 +191,7 @@
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-                <!-- Aktuálne počasie (4 stĺpce) -->
+                <!-- Ľavý stĺpec: Aktuálne počasie (4 stĺpce) -->
                 <div class="lg:col-span-4 bg-gray-900/70 border border-white/5 rounded-xl p-4 flex flex-col justify-between">
                     <div class="flex items-center justify-between">
                         <div>
@@ -210,7 +209,7 @@
                     </div>
                 </div>
 
-                <!-- Tipy na obliekanie: w-tip-now a w-tip-day (4 stĺpce) -->
+                <!-- Stredný stĺpec: Tipy na obliekanie w-tip-now a w-tip-day (4 stĺpce) -->
                 <div class="lg:col-span-4 bg-gray-900/70 border border-white/5 rounded-xl p-4 flex flex-col justify-between space-y-3">
                     <div class="text-[11px] uppercase tracking-wider text-amber-400 font-bold">👕 Odporúčanie čo si obliecť</div>
                     <div class="bg-slate-800/70 rounded-lg p-2.5 border border-white/5 text-xs">
@@ -223,10 +222,13 @@
                     </div>
                 </div>
 
-                <!-- 3-dňová predpoveď + SHMÚ rýchle odkazy (4 stĺpce) -->
+                <!-- Pravý stĺpec: NAJBLIŽŠIE HODINY (+1h, +3h, +6h, +9h) + SHMÚ odkazy (4 stĺpce) -->
                 <div class="lg:col-span-4 flex flex-col justify-between space-y-3">
-                    <div id="weather-forecast" class="grid grid-cols-3 gap-2 text-center">
-                        <!-- Dynamicky generované 3 dni -->
+                    <div>
+                        <div class="text-[11px] uppercase tracking-wider text-sky-400 font-bold mb-2">⏱️ Výhľad na najbližšie hodiny</div>
+                        <div id="weather-hourly" class="grid grid-cols-4 gap-2 text-center">
+                            <!-- Dynamicky generované +1h, +3h, +6h, +9h -->
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <a href="https://www.shmu.sk/sk/?page=1&id=meteo_num_mgram" target="_blank" class="p-2.5 rounded-xl bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/30 text-xs font-semibold text-sky-200 flex items-center justify-between transition">
@@ -242,7 +244,7 @@
             </div>
         </section>
 
-        <!-- 3. SEKČNÝ RIADOK: REDDIT FEED (r/Slovakia & r/Gunners vedľa seba) -->
+        <!-- 3. SEKČNÝ RIADOK: REDDIT FEED (r/Slovakia & r/Gunners cez JSONP bez CORS blokovania) -->
         <section class="card p-5">
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-white/10">
                 <div class="flex items-center gap-3">
@@ -261,7 +263,7 @@
                 <!-- Stĺpec r/Slovakia -->
                 <div id="col-slovakia" class="space-y-2">
                     <div class="flex items-center justify-between text-xs font-bold text-sky-400 uppercase px-1">
-                        <span>🇸🇰 r/Slovakia (Top / Hot)</span>
+                        <span>🇸🇰 r/Slovakia (Hot)</span>
                         <a href="https://www.reddit.com/r/Slovakia/" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
                     </div>
                     <div id="list-slovakia" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
@@ -286,12 +288,11 @@
 
     <script>
         // =================================================================
-        // KONFIGURÁCIA A KALENDÁRE SEZÓNY 2026/2027
+        // KONFIGURÁCIA A HARMONOGRAMY (2026/2027)
         // =================================================================
         const FPL_LEAGUE_ID = 28856;
         const MY_TEAM_NAME = "Ødeargod";
 
-        // Presný harmonogram zápasov Arsenalu (2026/2027) - PL, UCL, EFL
         const arsenalSeasonFixtures = [
             { utc: "2026-10-17T14:00:00Z", opp: "Nottingham Forest", comp: "PL", isHome: false, venue: "City Ground" },
             { utc: "2026-10-21T19:00:00Z", opp: "Bayern Mníchov", comp: "UCL", isHome: false, venue: "Allianz Arena" },
@@ -311,7 +312,6 @@
             { utc: "2026-12-26T15:00:00Z", opp: "Chelsea", comp: "PL", isHome: true, venue: "Emirates Stadium" }
         ];
 
-        // Harmonogram FPL Deadlinov 2026/2027 (automaticky vyberie najbližšie kolo)
         const fplScheduleUTC = [
             { gw: 8,  utc: "2026-10-16T17:30:00Z" },
             { gw: 9,  utc: "2026-10-23T17:30:00Z" },
@@ -326,13 +326,14 @@
             { gw: 18, utc: "2026-12-26T11:00:00Z" }
         ];
 
-        // Záloha posledného známeho stavu FPL mini-ligy #28856 (ak ešte neprebehol GitHub Action a verejné proxy majú výpadok)
         const FALLBACK_FPL_STANDINGS = [
             { entry_name: "The Invincibles", total: 471 },
             { entry_name: "Fc ThisSeason", total: 463 },
             { entry_name: "Australobooster", total: 452 },
             { entry_name: "Ødeargod", total: 450 },
-            { entry_name: "CFC Academy", total: 444 }
+            { entry_name: "CFC Academy", total: 446 },
+            { entry_name: "Rovinkapool", total: 400 },
+            { entry_name: "Tesla Stropkov", total: 389 }
         ];
 
         function getTeamLogo(teamName) {
@@ -374,36 +375,6 @@
             return '';
         }
 
-        // Univerzálny proxy loader (vrátane AllOrigins JSON wrappera, ktorý obchádza CORS bloky)
-        async function fetchJsonViaProxies(targetUrl) {
-            const sep = targetUrl.includes('?') ? '&' : '?';
-            const freshUrl = `${targetUrl}${sep}_cb=${Date.now()}`;
-
-            const attempts = [
-                // 1. AllOrigins JSON wrapper (najspoľahlivejší pre FPL a Reddit)
-                async () => {
-                    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(freshUrl)}`, { cache: 'no-store' });
-                    if (!r.ok) throw new Error('AO get err');
-                    const d = await r.json();
-                    return JSON.parse(d.contents);
-                },
-                // 2. Corsproxy.io
-                async () => {
-                    const r = await fetch(`https://corsproxy.io/?${encodeURIComponent(freshUrl)}`, { cache: 'no-store' });
-                    if (!r.ok) throw new Error('corsproxy err');
-                    return await r.json();
-                },
-                // 3. CodeTabs
-                async () => {
-                    const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`, { cache: 'no-store' });
-                    if (!r.ok) throw new Error('codetabs err');
-                    return await r.json();
-                }
-            ];
-
-            return await Promise.any(attempts.map(fn => fn()));
-        }
-
         // =================================================================
         // 1. HODINY A POZDRAV
         // =================================================================
@@ -426,48 +397,69 @@
         updateDateTime();
 
         // =================================================================
-        // 2. PREMIER LEAGUE TABUĽKA + SKUTOČNÁ FORMA (V / R / P) BEZ PROXY
+        // 2. PREMIER LEAGUE TABUĽKA + SKUTOČNÁ CHRONOLOGICKÁ FORMA POSLEDNÝCH 5 ZÁPASOV
         // =================================================================
         async function fetchPLStandings() {
             const container = document.getElementById('pl-table-rows');
             try {
-                // Obe ESPN API volania fungujú priamo z prehliadača bez CORS proxy!
-                const [standingsRes, scoresRes] = await Promise.all([
+                // Dnešný dátum vo formáte YYYYMMDD pre ESPN Scoreboard (max 3 mesiace naraz, aby ho ESPN neodmietlo!)
+                const now = new Date();
+                const y = now.getFullYear();
+                const m = String(now.getMonth() + 1).padStart(2, '0');
+                const d = String(now.getDate()).padStart(2, '0');
+                const todayParam = `${y}${m}${d}`;
+
+                const [standingsRes, augSepRes, octNovRes] = await Promise.all([
                     fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`),
-                    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20270530&limit=400&_t=${Date.now()}`)
+                    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20260801-20260930&limit=200`),
+                    fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=20261001-${todayParam}&limit=200`)
                 ]);
 
                 const standingsData = await standingsRes.json();
-                const scoresData = await scoresRes.json();
+                const augSepData = augSepRes.ok ? await augSepRes.json() : { events: [] };
+                const octNovData = octNovRes.ok ? await octNovRes.json() : { events: [] };
 
-                // Vypočítanie formy (V, R, P) z odohraných zápasov v scoreboarde podľa ID tímu
+                const allEvents = [...(augSepData.events || []), ...(octNovData.events || [])];
+
+                // Zoradenie všetkých odohraných zápasov chronologicky od najstaršieho po najnovší
+                const completedEvents = allEvents.filter(e => e.status?.type?.completed || e.competitions?.[0]?.status?.type?.completed);
+                completedEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+
                 const formByTeamId = {};
-                const events = (scoresData.events || []).filter(e => e.status?.type?.completed);
-                events.sort((a, b) => new Date(a.date) - new Date(b.date));
 
-                events.forEach(ev => {
+                completedEvents.forEach(ev => {
                     const comp = ev.competitions?.[0];
                     if (!comp) return;
                     const home = comp.competitors.find(c => c.homeAway === 'home');
                     const away = comp.competitors.find(c => c.homeAway === 'away');
                     if (!home || !away) return;
 
-                    const hs = parseInt(home.score, 10);
-                    const as = parseInt(away.score, 10);
+                    // Ošetrenie formátu skóre (môže byť string "2" alebo objekt { value: 2 })
+                    const extractScore = (s) => {
+                        if (s === null || s === undefined) return NaN;
+                        if (typeof s === 'object') return Number(s.value ?? s.displayValue);
+                        return Number(s);
+                    };
+
+                    const hs = extractScore(home.score);
+                    const as = extractScore(away.score);
                     if (isNaN(hs) || isNaN(as)) return;
 
-                    if (!formByTeamId[home.id]) formByTeamId[home.id] = [];
-                    if (!formByTeamId[away.id]) formByTeamId[away.id] = [];
+                    const hId = String(home.team?.id || home.id);
+                    const aId = String(away.team?.id || away.id);
+
+                    if (!formByTeamId[hId]) formByTeamId[hId] = [];
+                    if (!formByTeamId[aId]) formByTeamId[aId] = [];
 
                     if (hs > as) {
-                        formByTeamId[home.id].push('V');
-                        formByTeamId[away.id].push('P');
+                        formByTeamId[hId].push('V');
+                        formByTeamId[aId].push('P');
                     } else if (hs < as) {
-                        formByTeamId[away.id].push('V');
-                        formByTeamId[home.id].push('P');
+                        formByTeamId[aId].push('V');
+                        formByTeamId[hId].push('P');
                     } else {
-                        formByTeamId[home.id].push('R');
-                        formByTeamId[away.id].push('R');
+                        formByTeamId[hId].push('R');
+                        formByTeamId[aId].push('R');
                     }
                 });
 
@@ -475,7 +467,7 @@
 
                 container.innerHTML = entries.map((item, idx) => {
                     const pos = idx + 1;
-                    const teamId = item.team.id;
+                    const teamId = String(item.team.id);
                     const name = item.team.shortDisplayName || item.team.name;
                     const isArs = name.toLowerCase().includes('arsenal');
                     const logo = item.team.logos?.[0]?.href || getTeamLogo(name);
@@ -484,17 +476,8 @@
                     const played = getStat('gamesPlayed');
                     const pts = getStat('points');
 
-                    // Získanie posledných 5 zápasov tímu
-                    let last5 = (formByTeamId[teamId] || []).slice(-5);
-
-                    // Ak scoreboard nevrátil všetky zápasy, vypočítame pomernú formu z výhier/remíz/prehier tímu
-                    if (last5.length === 0) {
-                        const w = getStat('wins');
-                        const d = getStat('ties');
-                        const l = getStat('losses');
-                        const pool = [...Array(w).fill('V'), ...Array(d).fill('R'), ...Array(l).fill('P')];
-                        last5 = pool.slice(0, 5);
-                    }
+                    // Skutočných posledných 5 zápasov daného tímu
+                    const last5 = (formByTeamId[teamId] || []).slice(-5);
 
                     const formBadges = last5.map(ch => {
                         const cls = ch === 'V' ? 'form-v' : ch === 'R' ? 'form-r' : 'form-p';
@@ -522,13 +505,12 @@
         }
 
         // =================================================================
-        // 3. ZÁPASY ARSENALU (AUTOMATICKÉ FILTROVANIE NADCHÁDZAJÚCICH ZÁPASOV)
+        // 3. ZÁPASY ARSENALU (FUNGUJE - PONECHANÉ)
         // =================================================================
         function renderArsenalMatches() {
             const container = document.getElementById('arsenal-fixtures-rows');
             const now = new Date();
 
-            // Zobrazíme len zápasy, ktoré sa ešte neskončili (odpočítame 2 hodiny na prebiehajúci zápas)
             const upcoming = arsenalSeasonFixtures.filter(m => {
                 const matchEnd = new Date(new Date(m.utc).getTime() + 2 * 60 * 60 * 1000);
                 return matchEnd >= now;
@@ -567,7 +549,7 @@
         }
 
         // =================================================================
-        // 4. 🎮 FPL MINI-LIGA (fpl-league.json + LIVE API + FALLBACK) & DEADLINE
+        // 4. 🎮 FPL MINI-LIGA (FUNGUJE - PONECHANÉ)
         // =================================================================
         function renderFPLRows(results) {
             const rowsContainer = document.getElementById('fpl-minileague-rows');
@@ -577,7 +559,6 @@
             rowsContainer.innerHTML = results.map((r, i) => {
                 const rank = i + 1;
                 const isMyTeam = r.entry_name.toLowerCase().includes('deargod') || r.entry_name === MY_TEAM_NAME;
-                const diff = r.total - myTotal; // Koľko má súper náskok/stratu, alebo z pohľadu tvojho tímu:
                 const relativeToMe = myTotal - r.total; 
 
                 let diffSpan = '';
@@ -601,22 +582,10 @@
             }).join('');
         }
 
-        function updateFPLDeadlineDisplay(eventsFromApi = null) {
+        function updateFPLDeadlineDisplay() {
             const deadlineEl = document.getElementById('fpl-deadline');
             const now = new Date();
             const dni = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
-
-            // 1. Ak prišli živé dáta z FPL bootstrap-static
-            if (eventsFromApi && Array.isArray(eventsFromApi)) {
-                const nextEv = eventsFromApi.find(e => new Date(e.deadline_time) > now) || eventsFromApi.find(e => e.is_next);
-                if (nextEv) {
-                    const dl = new Date(nextEv.deadline_time);
-                    deadlineEl.textContent = `${dni[dl.getDay()]} ${dl.getDate()}.${dl.getMonth() + 1}. o ${dl.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })} (GW${nextEv.id}) ↗`;
-                    return;
-                }
-            }
-
-            // 2. Spoľahlivý výpočet z nášho kalendára fplScheduleUTC (nikdy nezostane visieť na "Načítavam...")
             const nextScheduled = fplScheduleUTC.find(item => new Date(item.utc) > now) || fplScheduleUTC[fplScheduleUTC.length - 1];
             if (nextScheduled) {
                 const dl = new Date(nextScheduled.utc);
@@ -625,10 +594,8 @@
         }
 
         async function fetchFPLData(force = false) {
-            // Okamžite nastavíme správny najbližší deadline z harmonogramu (piatok 23.10. GW9)
             updateFPLDeadlineDisplay();
 
-            // Ak máme uložené v localStorage a netlačíme manuálny refresh, hneď zobrazíme
             const cachedFpl = localStorage.getItem('fpl_standings_v19');
             if (cachedFpl && !force) {
                 try { renderFPLRows(JSON.parse(cachedFpl)); } catch (e) {}
@@ -636,7 +603,7 @@
                 renderFPLRows(FALLBACK_FPL_STANDINGS);
             }
 
-            // KROK A: Skúsime načítať lokálny ./fpl-league.json (z GitHub Actions update-fpl.yml)
+            // 1. Lokálny fpl-league.json z GitHub Actions
             try {
                 const localRes = await fetch(`./fpl-league.json?_t=${Date.now()}`, { cache: 'no-store' });
                 if (localRes.ok) {
@@ -647,28 +614,29 @@
                         return;
                     }
                 }
-            } catch (e) {
-                // Lokálny súbor zatiaľ neexistuje alebo bežíme lokálne, pokračujeme na živé proxy
-            }
+            } catch (e) {}
 
-            // KROK B: Živé dotiahnutie cez AllOrigins JSON wrapper / Proxy pretek
+            // 2. Živé dotiahnutie cez AllOrigins JSON wrapper
             try {
-                const liveData = await fetchJsonViaProxies(`https://fantasy.premierleague.com/api/leagues-classic/${FPL_LEAGUE_ID}/standings/`);
-                if (liveData?.standings?.results?.length > 0) {
-                    localStorage.setItem('fpl_standings_v19', JSON.stringify(liveData.standings.results));
-                    renderFPLRows(liveData.standings.results);
+                const target = `https://fantasy.premierleague.com/api/leagues-classic/${FPL_LEAGUE_ID}/standings/?_t=${Date.now()}`;
+                const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(target)}`, { cache: 'no-store' });
+                if (r.ok) {
+                    const wrapper = await r.json();
+                    const liveData = JSON.parse(wrapper.contents);
+                    if (liveData?.standings?.results?.length > 0) {
+                        localStorage.setItem('fpl_standings_v19', JSON.stringify(liveData.standings.results));
+                        renderFPLRows(liveData.standings.results);
+                    }
                 }
-            } catch (err) {
-                console.warn('Živé FPL proxy nedostupné, ponechané posledné známe poradie.');
-            }
+            } catch (err) {}
         }
 
         // =================================================================
-        // 5. POČASIE BRATISLAVA & SHMÚ (BEZ ZMENY - FUNGUJE)
+        // 5. POČASIE BRATISLAVA (VPRAVO PREHĽAD NA NAJBLIŽŠIE HODINY +1h, +3h, +6h, +9h)
         // =================================================================
         async function fetchWeather() {
             try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FBratislava&forecast_days=4&_t=${Date.now()}`;
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FBratislava&forecast_days=2&_t=${Date.now()}`;
                 const res = await fetch(url);
                 const data = await res.json();
 
@@ -684,6 +652,7 @@
                 document.getElementById('weather-wind').textContent = `${wind} km/h`;
                 document.getElementById('weather-rain').textContent = `${rain} mm`;
 
+                // Tipy na obliekanie
                 let tipNow = 'Príjemná teplota – stačí mikina alebo ľahká bunda.';
                 if (temp <= 4) tipNow = 'Mrzne / veľká zima – určite zimná bunda, čiapka a rukavice.';
                 else if (temp <= 12) tipNow = 'Chladno – prechodná bunda a dlhé nohavice.';
@@ -699,20 +668,35 @@
                 else tipDay += `Bez výrazných zrážok, vhodné aj na beh či presun vonku.`;
                 document.getElementById('w-tip-day').textContent = tipDay;
 
-                let fHtml = '';
-                for (let i = 1; i <= 3; i++) {
-                    const d = new Date(data.daily.time[i]);
-                    const dayName = d.toLocaleDateString('sk-SK', { weekday: 'short' });
-                    const m = getWeatherMeta(data.daily.weather_code[i]);
-                    fHtml += `
-                        <div class="bg-gray-900/70 border border-white/5 rounded-xl p-2">
-                            <div class="text-[10px] uppercase font-bold text-gray-400">${dayName}</div>
-                            <div class="text-lg my-0.5">${m.icon}</div>
-                            <div class="text-xs font-bold text-white">${Math.round(data.daily.temperature_2m_max[i])}° <span class="text-gray-500 font-normal">/ ${Math.round(data.daily.temperature_2m_min[i])}°</span></div>
-                        </div>
-                    `;
-                }
-                document.getElementById('weather-forecast').innerHTML = fHtml;
+                // Hodinová predpoveď na najbližšie hodiny (+1h, +3h, +6h, +9h)
+                const nowMs = Date.now();
+                let startIdx = data.hourly.time.findIndex(t => new Date(t).getTime() >= nowMs);
+                if (startIdx === -1) startIdx = 0;
+
+                const offsets = [1, 3, 6, 9];
+                let hHtml = '';
+
+                offsets.forEach(offset => {
+                    const idx = startIdx + offset - 1;
+                    if (data.hourly.time[idx]) {
+                        const hDate = new Date(data.hourly.time[idx]);
+                        const hourStr = hDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+                        const hTemp = Math.round(data.hourly.temperature_2m[idx]);
+                        const hProb = data.hourly.precipitation_probability?.[idx] ?? 0;
+                        const hMeta = getWeatherMeta(data.hourly.weather_code[idx]);
+
+                        hHtml += `
+                            <div class="bg-gray-900/75 border border-white/5 rounded-xl p-2 flex flex-col items-center justify-between">
+                                <div class="text-[10px] font-bold text-gray-400">${hourStr}</div>
+                                <div class="text-lg my-0.5">${hMeta.icon}</div>
+                                <div class="text-xs font-extrabold text-white">${hTemp}°C</div>
+                                <div class="text-[9px] text-sky-400 font-semibold">💧 ${hProb}%</div>
+                            </div>
+                        `;
+                    }
+                });
+
+                document.getElementById('weather-hourly').innerHTML = hHtml;
 
             } catch (err) {
                 console.error('Chyba počasia:', err);
@@ -730,7 +714,7 @@
         }
 
         // =================================================================
-        // 6. REDDIT FEED (VIACSTUPŇOVÝ LOADER PRE r/Slovakia & r/Gunners)
+        // 6. REDDIT FEED CEZ NATÍVNY JSONP SCRIPT TAG (OBCHÁDZA CORS BLOKY)
         // =================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -768,9 +752,53 @@
             `).join('');
         }
 
+        // JSONP načítanie priamo z Redditu cez <script> (neblokované cez CORS)
+        function fetchRedditJSONP(subreddit) {
+            return new Promise((resolve, reject) => {
+                const cbName = 'reddit_cb_' + subreddit + '_' + Math.floor(Math.random() * 1000000);
+                const script = document.createElement('script');
+                const timer = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('JSONP timeout'));
+                }, 6500);
+
+                function cleanup() {
+                    clearTimeout(timer);
+                    delete window[cbName];
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+
+                window[cbName] = function(data) {
+                    cleanup();
+                    if (data && data.data && Array.isArray(data.data.children)) {
+                        const items = data.data.children
+                            .filter(c => !c.data.stickied)
+                            .slice(0, 8)
+                            .map(c => ({
+                                title: c.data.title,
+                                link: `https://www.reddit.com${c.data.permalink}`,
+                                author: `u/${c.data.author}`,
+                                meta: `▲ ${c.data.ups} • 💬 ${c.data.num_comments}`
+                            }));
+                        resolve(items);
+                    } else {
+                        reject(new Error('Invalid JSONP payload'));
+                    }
+                };
+
+                script.onerror = () => {
+                    cleanup();
+                    reject(new Error('JSONP script error'));
+                };
+
+                script.src = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10&jsonp=${cbName}&_t=${Date.now()}`;
+                document.body.appendChild(script);
+            });
+        }
+
         async function fetchSingleSubreddit(subreddit, targetElementId, force = false) {
             const container = document.getElementById(targetElementId);
-            const cacheKey = `reddit_v19_${subreddit}`;
+            const cacheKey = `reddit_cache_v2_${subreddit}`;
 
             if (!force) {
                 const cached = localStorage.getItem(cacheKey);
@@ -787,68 +815,36 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
-            // Pretek 3 rôznych metód (aby Reddit nikdy nevypísal chybu)
-            const loaders = [
-                // 1. AllOrigins JSON wrapper s .json endpointom Redditu
-                async () => {
-                    const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=8&raw_json=1`;
-                    const r = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-                    if (!r.ok) throw new Error('ao failed');
-                    const wrapper = await r.json();
-                    const json = JSON.parse(wrapper.contents);
-                    return json.data.children
-                        .filter(c => !c.data.stickied)
-                        .slice(0, 8)
-                        .map(c => ({
-                            title: c.data.title,
-                            link: `https://www.reddit.com${c.data.permalink}`,
-                            author: `u/${c.data.author}`,
-                            meta: `▲ ${c.data.ups}`
-                        }));
-                },
-                // 2. rss2json API
-                async () => {
-                    const rssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
-                    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-                    if (!r.ok) throw new Error('rss2json failed');
-                    const d = await r.json();
-                    if (d.status !== 'ok' || !d.items?.length) throw new Error('rss2json empty');
-                    return d.items.slice(0, 8).map(item => ({
-                        title: item.title,
-                        link: item.link,
-                        author: item.author || 'u/redditor',
-                        meta: new Date(item.pubDate).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })
-                    }));
-                },
-                // 3. CodeTabs proxy s Reddit JSON
-                async () => {
-                    const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=8`;
-                    const r = await fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`);
-                    if (!r.ok) throw new Error('codetabs failed');
-                    const json = await r.json();
-                    return json.data.children
-                        .filter(c => !c.data.stickied)
-                        .slice(0, 8)
-                        .map(c => ({
-                            title: c.data.title,
-                            link: `https://www.reddit.com${c.data.permalink}`,
-                            author: `u/${c.data.author}`,
-                            meta: `▲ ${c.data.ups}`
-                        }));
-                }
-            ];
-
             try {
-                const items = await Promise.any(loaders.map(fn => fn()));
+                // 1. Primárne: Natívny JSONP priamo z Reddit.com (bez proxy)
+                const items = await fetchRedditJSONP(subreddit);
                 localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
                 renderRedditList(container, items);
-            } catch (err) {
-                console.error(`Chyba Redditu (${subreddit}):`, err);
-                const cached = localStorage.getItem(cacheKey);
-                if (cached) {
-                    renderRedditList(container, JSON.parse(cached).items);
-                } else {
-                    container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
+            } catch (jsonpErr) {
+                // 2. Záloha: rss2json API
+                try {
+                    const rssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
+                    const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                    const d = await r.json();
+                    if (d.status === 'ok' && d.items?.length) {
+                        const items = d.items.slice(0, 8).map(item => ({
+                            title: item.title,
+                            link: item.link,
+                            author: item.author || 'u/redditor',
+                            meta: new Date(item.pubDate).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })
+                        }));
+                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
+                        renderRedditList(container, items);
+                        return;
+                    }
+                    throw new Error('rss2json empty');
+                } catch (err2) {
+                    const cached = localStorage.getItem(cacheKey);
+                    if (cached) {
+                        renderRedditList(container, JSON.parse(cached).items);
+                    } else {
+                        container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
+                    }
                 }
             }
         }
