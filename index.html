@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Denný dashboard | Arsenal Edition</title>
+    <!-- Favicon - Znak Arsenalu v záložkách Chrome -->
+    <link rel="icon" type="image/svg+xml" href="https://resources.premierleague.com/premierleague/badges/t3.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -88,7 +90,7 @@
         <header class="arsenal-header rounded-2xl p-5 md:p-6 overflow-hidden">
             <div class="flex flex-col 2xl:flex-row items-center justify-between gap-6">
                 
-                <!-- Ľavá časť: Logo, Victoria Concordia Crescit, Pozdrav, Dátum a pod ním Čas rovnakou farbou -->
+                <!-- Ľavá časť: Logo, Heslo, Pozdrav, Dátum a zväčšený hrubší čas pod ním -->
                 <div class="flex items-center gap-4 self-start 2xl:self-center shrink-0">
                     <img src="https://resources.premierleague.com/premierleague/badges/t3.svg" alt="Arsenal FC" class="w-14 h-14 md:w-16 md:h-16 drop-shadow-[0_0_12px_rgba(255,255,255,0.35)] shrink-0">
                     <div class="flex flex-col">
@@ -98,7 +100,8 @@
                         <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dobrý deň!</h1>
                         <div class="flex flex-col text-xs md:text-sm text-gray-200 mt-1 font-medium leading-snug">
                             <span id="current-date">Načítavam dátum...</span>
-                            <span id="current-time" class="font-mono text-gray-200 mt-0.5">--:--:--</span>
+                            <!-- Zväčšený a hrubší čas v rovnakej farbe pod dátumom -->
+                            <span id="current-time" class="font-mono text-base md:text-lg font-extrabold text-gray-200 mt-0.5">--:--:--</span>
                         </div>
                     </div>
                 </div>
@@ -194,7 +197,7 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
                 
-                <!-- ĽAVÝ WIDGET (4 stĺpce): Aktuálne počasie + Výhľad na najbližšie hodiny SPOLU v jednom widgete -->
+                <!-- ĽAVÝ WIDGET (4 stĺpce): Aktuálne počasie + Výhľad na najbližšie hodiny SPOLU -->
                 <div class="lg:col-span-4 bg-gray-900/70 border border-white/5 rounded-xl p-4 flex flex-col justify-between space-y-3">
                     <div>
                         <div class="flex items-center justify-between">
@@ -214,7 +217,7 @@
                         </div>
                     </div>
 
-                    <!-- Výhľad na najbližšie hodiny priamo v tom istom widgete pod aktuálnym počasím -->
+                    <!-- Výhľad na najbližšie hodiny priamo v tom istom widgete -->
                     <div class="pt-2.5 border-t border-white/10">
                         <div class="text-[10px] uppercase tracking-wider text-sky-400 font-bold mb-2">⏱️ Výhľad na najbližšie hodiny</div>
                         <div id="weather-hourly" class="grid grid-cols-4 gap-1.5 text-center">
@@ -320,7 +323,6 @@
         const FPL_LEAGUE_ID = 28856;
         const MY_TEAM_NAME = "Ødeargod";
 
-        // Zápasy Arsenalu vrátane presných názvov štadiónov
         const arsenalSeasonFixtures = [
             { utc: "2026-10-17T14:00:00Z", opp: "Nottingham Forest", comp: "PL", isHome: false, venue: "City Ground (Nottingham)" },
             { utc: "2026-10-21T19:00:00Z", opp: "Bayern Mníchov", comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)" },
@@ -446,7 +448,7 @@
         updateDateTime();
 
         // =================================================================
-        // 2. PREMIER LEAGUE TABUĽKA (THESPORTSDB API + FLASHSCORE FORMA)
+        // 2. PREMIER LEAGUE TABUĽKA (THESPORTSDB + PRESNÁ MAPA FLASHSCORE)
         // =================================================================
         function convertWDLString(str) {
             if (!str || typeof str !== 'string') return [];
@@ -459,7 +461,6 @@
             });
         }
 
-        // Presná forma z Flashscore.sk (zľava doprava presne ako na tvojom screenshote)
         const FLASHSCORE_EXACT_FORM = {
             'man city': ['V', 'V', 'V', 'V', 'V'],
             'manchester city': ['V', 'V', 'V', 'V', 'V'],
@@ -490,21 +491,15 @@
 
         function getFlashscoreForm(teamName, sportsDbFormMap, wins, ties, losses) {
             const lower = (teamName || '').toLowerCase();
-
-            // 1. Overená presná forma z Flashscore
             for (const key in FLASHSCORE_EXACT_FORM) {
                 if (lower.includes(key)) return FLASHSCORE_EXACT_FORM[key];
             }
-
-            // 2. Forma z TheSportsDB API (ak je dostupná pre daný tím)
             for (const sKey in sportsDbFormMap) {
                 if (lower.includes(sKey) || sKey.includes(lower)) {
                     const parsed = convertWDLString(sportsDbFormMap[sKey]);
                     if (parsed.length === 5) return parsed;
                 }
             }
-
-            // 3. Výpočet pre zvyšné tímy podľa W/D/L
             const res = [];
             let w = wins, d = ties, l = losses;
             while (res.length < 5 && (w > 0 || d > 0 || l > 0)) {
@@ -518,7 +513,6 @@
         async function updateLivePLStandings() {
             const container = document.getElementById('pl-table-rows');
             try {
-                // Paralelne sťahujeme ESPN Standings + TheSportsDB LookupTable (ktoré obsahuje strForm)
                 const [espnRes, sportsDbRes] = await Promise.allSettled([
                     fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`),
                     fetch(`https://www.thesportsdb.com/api/v1/json/3/lookuptable.php?l=4328&_t=${Date.now()}`)
@@ -538,9 +532,7 @@
                     } catch (e) {}
                 }
 
-                if (espnRes.status !== 'fulfilled' || !espnRes.value.ok) {
-                    throw new Error('ESPN standings error');
-                }
+                if (espnRes.status !== 'fulfilled' || !espnRes.value.ok) throw new Error('ESPN error');
 
                 const data = await espnRes.value.json();
                 const entries = data.children[0].standings.entries;
@@ -598,11 +590,9 @@
                 return matchEnd >= now;
             }).slice(0, 7);
 
-            // Aktualizácia pätičky: Najbližší zápas + názov štadióna
             if (upcoming.length > 0 && nextVenueEl) {
                 const nextMatch = upcoming[0];
                 nextVenueEl.textContent = `🏟️ ${nextMatch.opp} • ${nextMatch.venue}`;
-                nextVenueEl.title = `Najbližší zápas: ${nextMatch.opp} (${nextMatch.venue})`;
             }
 
             container.innerHTML = upcoming.map(m => {
@@ -737,7 +727,7 @@
         }
 
         // =================================================================
-        // 5. POČASIE: VĽAVO AKTUÁLNE + HODINY, VPRAVO NAJBLIŽŠIE DNI SO ZRÁŽKAMI
+        // 5. POČASIE: AKTUÁLNE + HODINY V JEDNOM WIDGETE, NAJBLIŽŠIE DNI V PRAVOM
         // =================================================================
         async function fetchWeather() {
             try {
@@ -773,7 +763,7 @@
                 else tipDay += `Bez výrazných zrážok, vhodné aj na beh či presun vonku.`;
                 document.getElementById('w-tip-day').textContent = tipDay;
 
-                // 1. Hodinová predpoveď v ľavom widgete pod aktuálnym počasím (+1h, +3h, +6h, +9h)
+                // 1. Hodinová predpoveď v ľavom widgete (+1h, +3h, +6h, +9h)
                 const nowMs = Date.now();
                 let startIdx = data.hourly.time.findIndex(t => new Date(t).getTime() >= nowMs);
                 if (startIdx === -1) startIdx = 0;
@@ -802,7 +792,7 @@
                 });
                 document.getElementById('weather-hourly').innerHTML = hHtml;
 
-                // 2. Najbližšie dni v pravom widgete (vždy vrátane počtu zrážok v mm a %)
+                // 2. Najbližšie dni v pravom widgete (vrátane mm a % zrážok)
                 let dHtml = '';
                 for (let i = 1; i <= 3; i++) {
                     if (data.daily.time[i]) {
@@ -842,7 +832,7 @@
         }
 
         // =================================================================
-        // 6. REDDIT FEED (LOKÁLNY JSON Z GITHUB ACTIONS + 7 ZÁLOŽNÝCH BRÁN)
+        // 6. REDDIT FEED (LOKÁLNY JSON + ROBUSTNÁ REDLIB/CORS SYNCHRONIZÁCIA)
         // =================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -891,6 +881,7 @@
                 const link = linkEl ? (linkEl.getAttribute('href') || linkEl.textContent) : '#';
                 const author = entry.querySelector('author > name')?.textContent || 'u/redditor';
                 const updated = entry.querySelector('updated')?.textContent;
+                // Prevod času na slovensky formát
                 const timeStr = updated ? new Date(updated).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : '';
                 return { title, link, author, meta: timeStr };
             });
@@ -902,17 +893,20 @@
             return children
                 .filter(c => !c.data.stickied)
                 .slice(0, 8)
-                .map(c => ({
-                    title: c.data.title,
-                    link: `https://www.reddit.com${c.data.permalink}`,
-                    author: `u/${c.data.author}`,
-                    meta: `▲ ${c.data.ups} • 💬 ${c.data.num_comments}`
-                }));
+                .map(c => {
+                    const created = c.data.created_utc ? new Date(c.data.created_utc * 1000).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : '';
+                    return {
+                        title: c.data.title,
+                        link: `https://www.reddit.com${c.data.permalink}`,
+                        author: `u/${c.data.author}`,
+                        meta: `▲ ${c.data.ups}${created ? ' • ' + created : ''}`
+                    };
+                });
         }
 
         async function loadReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_dash_reddit_v3_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_dash_reddit_v4_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -929,7 +923,7 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
-            // KROK 1: Ak existuje lokálny ./reddit-${subreddit.toLowerCase()}.json z GitHub Actions, načíta sa za 0.1s bez blokovania
+            // 1. Lokálny JSON súbor z GitHub Actions (reddit-slovakia.json atď.)
             try {
                 const localRes = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
                 if (localRes.ok) {
@@ -941,12 +935,11 @@
                 }
             } catch (e) {}
 
-            // KROK 2: Paralelný pretek 7 verejných brán (old.reddit.com, rss2json, corsproxy, allorigins, codetabs)
+            // 2. Paralelný pretek 7 verejných brán pre obídenie CORS
             const rssUrl = `https://old.reddit.com/r/${subreddit}/hot/.rss?limit=10`;
             const jsonUrl = `https://old.reddit.com/r/${subreddit}/hot.json?limit=10&raw_json=1`;
 
             const providers = [
-                // 1. rss2json s čistou URL bez query parametrov (rss2json inak hádže chybu!)
                 fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(`https://www.reddit.com/r/${subreddit}/hot.rss`)}`)
                     .then(r => r.json())
                     .then(d => {
@@ -958,27 +951,21 @@
                             meta: i.pubDate ? new Date(i.pubDate).toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' }) : ''
                         }));
                     }),
-                // 2. AllOrigins JSON wrapper -> old.reddit JSON
                 fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(jsonUrl)}`)
                     .then(r => r.json())
                     .then(d => parseRedditJson(JSON.parse(d.contents))),
-                // 3. AllOrigins JSON wrapper -> old.reddit RSS
                 fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`)
                     .then(r => r.json())
                     .then(d => parseAtomXml(d.contents)),
-                // 4. CodeTabs -> old.reddit JSON
                 fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://www.reddit.com/r/${subreddit}/hot.json?limit=8`)}`)
                     .then(r => r.json())
                     .then(parseRedditJson),
-                // 5. CodeTabs -> old.reddit RSS
                 fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://www.reddit.com/r/${subreddit}/hot/.rss`)}`)
                     .then(r => r.text())
                     .then(parseAtomXml),
-                // 6. corsproxy.io -> old.reddit RSS
                 fetch(`https://corsproxy.io/?${encodeURIComponent(rssUrl)}`)
                     .then(r => r.text())
                     .then(parseAtomXml),
-                // 7. cors.eu.org -> old.reddit RSS
                 fetch(`https://cors.eu.org/${rssUrl}`)
                     .then(r => r.text())
                     .then(parseAtomXml)
