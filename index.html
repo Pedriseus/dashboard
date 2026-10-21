@@ -632,13 +632,13 @@
             } catch (e) {}
         }
 
-        // POČASIE: AKTUÁLNE Z YR.NO (PETRŽALKA) + DENNÉ MAX/MIN Z OPEN-METEO
+        // POČASIE: PETRŽALKA (YR.NO AKTUÁLNE + OPEN-METEO PRE DENNÉ MAX/MIN A ZRÁŽKY)
         async function fetchWeather() {
             const lat = 48.11508;
             const lon = 17.10279;
 
             try {
-                // 1. Yr.no pre presnú aktuálnu teplotu a hodinovú predpoveď (Petržalka)
+                // 1. Yr.no pre presnú aktuálnu teplotu (Petržalka)
                 const yrUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
                 const yrRes = await fetch(yrUrl, { headers: { 'User-Agent': 'ArsenalDashboardPetrzalka/1.0 github.com/pedriseus' } });
                 
@@ -692,8 +692,8 @@
                     document.getElementById('weather-hourly').innerHTML = hHtml;
                 }
 
-                // 2. Open-Meteo pre spoľahlivé denné max/min teploty na ďalšie dni
-                const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBratislava&forecast_days=4&_t=${Date.now()}`;
+                // 2. Open-Meteo pre denné max/min teploty a úhrn zrážok (mm)
+                const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FBratislava&forecast_days=4&_t=${Date.now()}`;
                 const omRes = await fetch(omUrl);
                 
                 if (omRes.ok) {
@@ -710,6 +710,7 @@
                             const dayLabel = i === 1 ? 'Zajtra' : dObj.toLocaleDateString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
                             const dMax = Math.round(omData.daily.temperature_2m_max[i]);
                             const dMin = Math.round(omData.daily.temperature_2m_min[i]);
+                            const dRainSum = omData.daily.precipitation_sum?.[i] ?? 0;
                             const dMeta = getWeatherMeta(omData.daily.weather_code[i]);
 
                             dHtml += `
@@ -717,7 +718,7 @@
                                     <div class="text-[10px] uppercase font-bold text-amber-300">${dayLabel}</div>
                                     <div class="text-2xl my-1">${dMeta.icon}</div>
                                     <div class="text-xs font-extrabold text-white">${dMax}° <span class="text-gray-400 font-normal">/ ${dMin}°C</span></div>
-                                    <div class="text-[10px] text-sky-400 font-semibold mt-1">Petržalka</div>
+                                    <div class="text-[10px] text-sky-400 font-semibold mt-1">💧 ${dRainSum.toFixed(1)} mm</div>
                                 </div>
                             `;
                         }
@@ -750,7 +751,7 @@
             return { desc: 'Oblačno', icon: '☁️' };
         }
 
-        // REDDIT FEED LOGIC
+        // REDDIT FEED LOGIC (LOKÁLNE JSON SÚBORY Z GITHUB ACTIONS)
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
             const colGu = document.getElementById('col-gunners');
@@ -788,26 +789,11 @@
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v12_' + subreddit.toLowerCase();
-
-            if (!forceRefresh) {
-                try {
-                    const cached = localStorage.getItem(cacheKey);
-                    if (cached) {
-                        const parsed = JSON.parse(cached);
-                        if (Date.now() - parsed.ts < 20 * 60 * 1000 && parsed.items?.length) {
-                            renderRedditItems(parsed.items, container);
-                            return;
-                        }
-                    }
-                } catch (e) {}
-            }
-
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
             try {
-                const rssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&_t=${Date.now()}`);
+                const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) throw new Error('Lokálny súbor nedostupný');
                 const data = await res.json();
 
                 if (data.status === 'ok' && data.items && data.items.length > 0) {
@@ -816,27 +802,19 @@
                         link: item.link,
                         author: item.author ? `u/${item.author.replace('/u/', '')}` : `r/${subreddit}`
                     }));
-                    localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
                     renderRedditItems(items, container);
                 } else {
-                    throw new Error('RSS empty');
+                    throw new Error('Chybná štruktúra dát');
                 }
             } catch (err) {
-                const oldCache = localStorage.getItem(cacheKey);
-                if (oldCache) {
-                    try {
-                        renderRedditItems(JSON.parse(oldCache).items, container);
-                        return;
-                    } catch (e) {}
-                }
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} - momentálne nedostupné.</div>`;
+                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} - čaká sa na aktualizáciu GitHub Actions.</div>`;
             }
         }
 
         function loadAllReddit(force = false) {
             loadSingleReddit('Gunners', 'list-gunners', force);
-            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 1000);
-            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 2000);
+            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 500);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 1000);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
