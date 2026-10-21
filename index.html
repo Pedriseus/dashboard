@@ -173,12 +173,12 @@
             </div>
         </header>
 
-        <!-- 2. SEKČNÝ RIADOK: POČASIE & SHMÚ ALADIN -->
+        <!-- 2. SEKČNÝ RIADOK: POČASIE PETRŽALKA -->
         <section id="weather-box" class="card p-5">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
                 <div class="flex items-center gap-2">
                     <span class="text-lg">🌦️</span>
-                    <h2 class="text-base font-extrabold tracking-wide uppercase text-white">Počasie Bratislava (Yr.no) & Model SHMÚ ALADIN</h2>
+                    <h2 class="text-base font-extrabold tracking-wide uppercase text-white">Počasie Bratislava - Petržalka</h2>
                 </div>
                 <div class="flex items-center gap-3 text-xs">
                     <button onclick="fetchWeather()" class="text-gray-400 hover:text-white transition">↻ Obnoviť počasie</button>
@@ -192,7 +192,7 @@
                     <div>
                         <div class="flex items-center justify-between">
                             <div>
-                                <span class="text-[11px] uppercase tracking-wider text-gray-400 font-bold">Aktuálne • Bratislava</span>
+                                <span class="text-[11px] uppercase tracking-wider text-gray-400 font-bold">Aktuálne • Petržalka</span>
                                 <div class="flex items-baseline gap-2 mt-1">
                                     <span id="weather-temp" class="text-4xl font-extrabold text-white">--°C</span>
                                     <span id="weather-desc" class="text-xs font-semibold text-sky-400">Načítavam...</span>
@@ -220,7 +220,7 @@
                         <span id="w-tip-now" class="text-white font-medium leading-relaxed">Načítavam odporúčanie...</span>
                     </div>
                     <div class="bg-slate-800/70 rounded-lg p-3 border border-white/5 text-xs flex-1 flex flex-col justify-center">
-                        <span class="text-gray-400 font-semibold block mb-1">Počas dňa / SHMÚ výhľad:</span>
+                        <span class="text-gray-400 font-semibold block mb-1">Predpoveď na deň:</span>
                         <span id="w-tip-day" class="text-white font-medium leading-relaxed">Načítavam denný prehľad...</span>
                     </div>
                 </div>
@@ -632,88 +632,101 @@
             } catch (e) {}
         }
 
-        // POČASIE Z YR.NO
+        // POČASIE: AKTUÁLNE Z YR.NO (PETRŽALKA) + DENNÉ MAX/MIN Z OPEN-METEO
         async function fetchWeather() {
+            const lat = 48.11508;
+            const lon = 17.10279;
+
             try {
-                const url = 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=48.1486&lon=17.1077';
-                const res = await fetch(url, {
-                    headers: { 'User-Agent': 'ArsenalDashboardApp/1.0 github.com/pedriseus' }
-                });
-                if (!res.ok) throw new Error('Yr.no API error');
-                const data = await res.json();
+                // 1. Yr.no pre presnú aktuálnu teplotu a hodinovú predpoveď (Petržalka)
+                const yrUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
+                const yrRes = await fetch(yrUrl, { headers: { 'User-Agent': 'ArsenalDashboardPetrzalka/1.0 github.com/pedriseus' } });
+                
+                if (yrRes.ok) {
+                    const yrData = await yrRes.json();
+                    const timeseries = yrData.properties.timeseries;
+                    const current = timeseries[0].data.instant.details;
+                    const next1Hour = timeseries[0].data.next_1_hours;
 
-                const timeseries = data.properties.timeseries;
-                const current = timeseries[0].data.instant.details;
-                const next1Hour = timeseries[0].data.next_1_hours;
+                    const temp = Math.round(current.air_temperature);
+                    const wind = Math.round(current.wind_speed * 3.6);
+                    const rain = next1Hour ? next1Hour.details.precipitation_amount : 0;
+                    const symbolCode = next1Hour ? next1Hour.summary.symbol_code : 'clearsky_day';
+                    const info = getYrWeatherMeta(symbolCode);
 
-                const temp = Math.round(current.air_temperature);
-                const wind = Math.round(current.wind_speed * 3.6);
-                const rain = next1Hour ? next1Hour.details.precipitation_amount : 0;
-                const symbolCode = next1Hour ? next1Hour.summary.symbol_code : 'clearsky_day';
-                const info = getYrWeatherMeta(symbolCode);
+                    document.getElementById('weather-temp').textContent = `${temp}°C`;
+                    document.getElementById('weather-desc').textContent = info.desc;
+                    document.getElementById('weather-icon').textContent = info.icon;
+                    document.getElementById('weather-wind').textContent = `${wind} km/h`;
+                    document.getElementById('weather-rain').textContent = `${rain} mm`;
 
-                document.getElementById('weather-temp').textContent = `${temp}°C`;
-                document.getElementById('weather-desc').textContent = info.desc;
-                document.getElementById('weather-icon').textContent = info.icon;
-                document.getElementById('weather-wind').textContent = `${wind} km/h`;
-                document.getElementById('weather-rain').textContent = `${rain} mm`;
+                    let tipNow = 'Príjemná teplota – stačí mikina alebo ľahká bunda.';
+                    if (temp <= 4) tipNow = 'Mrzne / veľká zima – určite zimná bunda, čiapka a rukavice.';
+                    else if (temp <= 12) tipNow = 'Chladno – prechodná bunda a dlhé nohavice.';
+                    else if (temp >= 22) tipNow = 'Teplo – stačí krátke tričko.';
+                    if (rain > 0) tipNow += ' Prší, vezmi si nepremokavú bundu alebo dáždnik!';
+                    document.getElementById('w-tip-now').textContent = tipNow;
 
-                let tipNow = 'Príjemná teplota – stačí mikina alebo ľahká bunda.';
-                if (temp <= 4) tipNow = 'Mrzne / veľká zima – určite zimná bunda, čiapka a rukavice.';
-                else if (temp <= 12) tipNow = 'Chladno – prechodná bunda a dlhé nohavice.';
-                else if (temp >= 22) tipNow = 'Teplo – stačí krátke tričko.';
-                if (rain > 0) tipNow += ' Prší, vezmi si nepremokavú bundu alebo dáždnik!';
-                document.getElementById('w-tip-now').textContent = tipNow;
-                document.getElementById('w-tip-day').textContent = `Aktuálna teplota v Bratislave je ${temp}°C, stav: ${info.desc.toLowerCase()}, vietor ${wind} km/h.`;
+                    // Hodinový výhľad z Yr.no
+                    let hHtml = '';
+                    [2, 4, 6, 8].forEach(offset => {
+                        if (timeseries[offset]) {
+                            const item = timeseries[offset];
+                            const hDate = new Date(item.time);
+                            const hourStr = hDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+                            const hTemp = Math.round(item.data.instant.details.air_temperature);
+                            const hSym = item.data.next_1_hours ? item.data.next_1_hours.summary.symbol_code : 'clearsky_day';
+                            const hMeta = getYrWeatherMeta(hSym);
+                            const hRain = item.data.next_1_hours ? item.data.next_1_hours.details.precipitation_amount : 0;
 
-                let hHtml = '';
-                [2, 4, 6, 8].forEach(offset => {
-                    if (timeseries[offset]) {
-                        const item = timeseries[offset];
-                        const hDate = new Date(item.time);
-                        const hourStr = hDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-                        const hTemp = Math.round(item.data.instant.details.air_temperature);
-                        const hSym = item.data.next_1_hours ? item.data.next_1_hours.summary.symbol_code : 'clearsky_day';
-                        const hMeta = getYrWeatherMeta(hSym);
-                        const hRain = item.data.next_1_hours ? item.data.next_1_hours.details.precipitation_amount : 0;
+                            hHtml += `
+                                <div class="bg-slate-800/80 border border-white/5 rounded-lg p-1.5 flex flex-col items-center justify-between">
+                                    <div class="text-[10px] font-bold text-gray-400">${hourStr}</div>
+                                    <div class="text-base my-0.5">${hMeta.icon}</div>
+                                    <div class="text-xs font-extrabold text-white">${hTemp}°C</div>
+                                    <div class="text-[9px] text-sky-400 font-semibold">💧 ${hRain} mm</div>
+                                </div>
+                            `;
+                        }
+                    });
+                    document.getElementById('weather-hourly').innerHTML = hHtml;
+                }
 
-                        hHtml += `
-                            <div class="bg-slate-800/80 border border-white/5 rounded-lg p-1.5 flex flex-col items-center justify-between">
-                                <div class="text-[10px] font-bold text-gray-400">${hourStr}</div>
-                                <div class="text-base my-0.5">${hMeta.icon}</div>
-                                <div class="text-xs font-extrabold text-white">${hTemp}°C</div>
-                                <div class="text-[9px] text-sky-400 font-semibold">💧 ${hRain} mm</div>
-                            </div>
-                        `;
+                // 2. Open-Meteo pre spoľahlivé denné max/min teploty na ďalšie dni
+                const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBratislava&forecast_days=4&_t=${Date.now()}`;
+                const omRes = await fetch(omUrl);
+                
+                if (omRes.ok) {
+                    const omData = await omRes.json();
+                    const maxT = Math.round(omData.daily.temperature_2m_max[0]);
+                    const minT = Math.round(omData.daily.temperature_2m_min[0]);
+                    document.getElementById('w-tip-day').textContent = `Dnešné maximum ${maxT}°C (minimum ${minT}°C) v Petržalke.`;
+
+                    let dHtml = '';
+                    for (let i = 1; i <= 3; i++) {
+                        const dayStr = omData.daily.time[i];
+                        if (dayStr) {
+                            const dObj = new Date(dayStr);
+                            const dayLabel = i === 1 ? 'Zajtra' : dObj.toLocaleDateString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
+                            const dMax = Math.round(omData.daily.temperature_2m_max[i]);
+                            const dMin = Math.round(omData.daily.temperature_2m_min[i]);
+                            const dMeta = getWeatherMeta(omData.daily.weather_code[i]);
+
+                            dHtml += `
+                                <div class="bg-slate-800/80 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-between">
+                                    <div class="text-[10px] uppercase font-bold text-amber-300">${dayLabel}</div>
+                                    <div class="text-2xl my-1">${dMeta.icon}</div>
+                                    <div class="text-xs font-extrabold text-white">${dMax}° <span class="text-gray-400 font-normal">/ ${dMin}°C</span></div>
+                                    <div class="text-[10px] text-sky-400 font-semibold mt-1">Petržalka</div>
+                                </div>
+                            `;
+                        }
                     }
-                });
-                document.getElementById('weather-hourly').innerHTML = hHtml;
-
-                let dHtml = '';
-                [12, 36, 60].forEach((idx, i) => {
-                    if (timeseries[idx]) {
-                        const item = timeseries[idx];
-                        const dObj = new Date(item.time);
-                        const dayLabel = i === 0 ? 'Zajtra' : dObj.toLocaleDateString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
-                        const dTemp = Math.round(item.data.instant.details.air_temperature);
-                        const dSym = item.data.next_6_hours ? item.data.next_6_hours.summary.symbol_code : 'clearsky_day';
-                        const dMeta = getYrWeatherMeta(dSym);
-                        const dRain = item.data.next_6_hours ? item.data.next_6_hours.details.precipitation_amount : 0;
-
-                        dHtml += `
-                            <div class="bg-slate-800/80 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-between">
-                                <div class="text-[10px] uppercase font-bold text-amber-300">${dayLabel}</div>
-                                <div class="text-2xl my-1">${dMeta.icon}</div>
-                                <div class="text-xs font-extrabold text-white">${dTemp}°C</div>
-                                <div class="text-[10px] text-sky-400 font-semibold mt-1">💧 ${dRain} mm</div>
-                            </div>
-                        `;
-                    }
-                });
-                document.getElementById('weather-daily').innerHTML = dHtml;
+                    document.getElementById('weather-daily').innerHTML = dHtml;
+                }
 
             } catch (err) {
-                console.error('Chyba Yr.no počasia:', err);
+                console.error('Chyba počasia:', err);
             }
         }
 
@@ -724,6 +737,16 @@
             if (symbolCode.includes('rain') || symbolCode.includes('sleet')) return { desc: 'Dážď', icon: '🌧️' };
             if (symbolCode.includes('snow')) return { desc: 'Sneženie', icon: '❄️' };
             if (symbolCode.includes('thunder')) return { desc: 'Búrka', icon: '⛈️' };
+            return { desc: 'Oblačno', icon: '☁️' };
+        }
+
+        function getWeatherMeta(code) {
+            if (code === 0) return { desc: 'Jasno', icon: '☀️' };
+            if ([1, 2, 3].includes(code)) return { desc: 'Polooblačno', icon: '⛅' };
+            if ([45, 48].includes(code)) return { desc: 'Hmlisto', icon: '🌫️' };
+            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return { desc: 'Dážď', icon: '🌧️' };
+            if ([71, 73, 75, 85, 86].includes(code)) return { desc: 'Sneženie', icon: '❄️' };
+            if ([95, 96, 99].includes(code)) return { desc: 'Búrka', icon: '⛈️' };
             return { desc: 'Oblačno', icon: '☁️' };
         }
 
@@ -757,48 +780,63 @@
                 <a href="${p.link}" target="_blank" class="block p-3 rounded-xl bg-gray-900/75 hover:bg-gray-800 border border-white/5 transition group">
                     <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
                         <span class="truncate pr-2 font-medium text-gray-400">${p.author || 'u/redditor'}</span>
-                        ${p.score ? `<span class="text-amber-400 font-bold shrink-0">${p.score}</span>` : ''}
                     </div>
                     <div class="text-xs font-semibold text-gray-200 group-hover:text-white leading-snug">${p.title}</div>
                 </a>
             `).join('');
         }
 
-        function parseRssJsonFeed(data, subreddit) {
-            if (data?.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
-                return data.items.slice(0, 8).map(i => ({
-                    title: i.title,
-                    link: i.link,
-                    author: i.author || `u/redditor`,
-                    score: ''
-                }));
-            }
-            throw new Error('Invalid rss2json structure');
-        }
-
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v10_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_v12_' + subreddit.toLowerCase();
+
+            if (!forceRefresh) {
+                try {
+                    const cached = localStorage.getItem(cacheKey);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Date.now() - parsed.ts < 20 * 60 * 1000 && parsed.items?.length) {
+                            renderRedditItems(parsed.items, container);
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
             try {
-                // Načítanie lokálneho JSON súboru, ktorý vygeneroval GitHub Actions cez rss2json
-                const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Network response not ok');
+                const rssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
+                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&_t=${Date.now()}`);
                 const data = await res.json();
-                
-                const items = parseRssJsonFeed(data, subreddit);
-                renderRedditItems(items, container);
+
+                if (data.status === 'ok' && data.items && data.items.length > 0) {
+                    const items = data.items.slice(0, 8).map(item => ({
+                        title: item.title,
+                        link: item.link,
+                        author: item.author ? `u/${item.author.replace('/u/', '')}` : `r/${subreddit}`
+                    }));
+                    localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
+                    renderRedditItems(items, container);
+                } else {
+                    throw new Error('RSS empty');
+                }
             } catch (err) {
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} - nepodarilo sa načítať dáta.</div>`;
+                const oldCache = localStorage.getItem(cacheKey);
+                if (oldCache) {
+                    try {
+                        renderRedditItems(JSON.parse(oldCache).items, container);
+                        return;
+                    } catch (e) {}
+                }
+                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} - momentálne nedostupné.</div>`;
             }
         }
 
         function loadAllReddit(force = false) {
             loadSingleReddit('Gunners', 'list-gunners', force);
-            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 800);
-            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 1600);
+            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 1000);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 2000);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
