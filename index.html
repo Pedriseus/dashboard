@@ -300,23 +300,24 @@
         const FPL_LEAGUE_ID = 28856;
         const MY_TEAM_NAME = "Ødeargod";
 
+        // Rozpis zápasov Arsenalu vrátane štadiónov a SK/CZ vysielateľov
         const arsenalSeasonFixtures = [
-            { utc: "2026-10-17T14:00:00Z", opp: "Nottingham Forest", comp: "PL", isHome: false, venue: "City Ground (Nottingham)" },
-            { utc: "2026-10-21T19:00:00Z", opp: "Bayern Mníchov", comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)" },
-            { utc: "2026-10-24T14:00:00Z", opp: "Everton", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-10-27T19:45:00Z", opp: "Fleetwood", comp: "EFL", isHome: false, venue: "Highbury Stadium (Fleetwood)" },
-            { utc: "2026-11-01T16:30:00Z", opp: "Liverpool", comp: "PL", isHome: false, venue: "Anfield (Liverpool)" },
-            { utc: "2026-11-04T20:00:00Z", opp: "Inter Miláno", comp: "UCL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-11-07T15:00:00Z", opp: "Newcastle", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-11-21T12:30:00Z", opp: "Tottenham", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-11-25T20:00:00Z", opp: "Sporting CP", comp: "UCL", isHome: false, venue: "Estádio José Alvalade (Lisabon)" },
-            { utc: "2026-11-28T15:00:00Z", opp: "Fulham", comp: "PL", isHome: false, venue: "Craven Cottage (Londýn)" },
-            { utc: "2026-12-02T20:15:00Z", opp: "Manchester United", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-12-05T17:30:00Z", opp: "Aston Villa", comp: "PL", isHome: false, venue: "Villa Park (Birmingham)" },
-            { utc: "2026-12-09T20:00:00Z", opp: "AS Monaco", comp: "UCL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-12-12T15:00:00Z", opp: "Brighton", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)" },
-            { utc: "2026-12-19T15:00:00Z", opp: "Brentford", comp: "PL", isHome: false, venue: "Gtech Community Stadium" },
-            { utc: "2026-12-26T15:00:00Z", opp: "Chelsea", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)" }
+            { utc: "2026-10-17T14:00:00Z", opp: "Nottingham Forest", comp: "PL", isHome: false, venue: "City Ground (Nottingham)", tv: "CANAL+ Sport" },
+            { utc: "2026-10-21T19:00:00Z", opp: "Bayern Mníchov", comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)", tv: "Nova Sport 3 / Voyo" },
+            { utc: "2026-10-24T14:00:00Z", opp: "Everton", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
+            { utc: "2026-10-27T19:45:00Z", opp: "Fleetwood", comp: "EFL", isHome: false, venue: "Highbury Stadium (Fleetwood)", tv: "Nova Sport 2 / Voyo" },
+            { utc: "2026-11-01T16:30:00Z", opp: "Liverpool", comp: "PL", isHome: false, venue: "Anfield (Liverpool)", tv: "CANAL+ Sport" },
+            { utc: "2026-11-04T20:00:00Z", opp: "Inter Miláno", comp: "UCL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "Nova Sport 3 / Voyo" },
+            { utc: "2026-11-07T15:00:00Z", opp: "Newcastle", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
+            { utc: "2026-11-21T12:30:00Z", opp: "Tottenham", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
+            { utc: "2026-11-25T20:00:00Z", opp: "Sporting CP", comp: "UCL", isHome: false, venue: "Estádio José Alvalade (Lisabon)", tv: "Nova Sport 4 / Voyo" },
+            { utc: "2026-11-28T15:00:00Z", opp: "Fulham", comp: "PL", isHome: false, venue: "Craven Cottage (Londýn)", tv: "CANAL+ Sport" },
+            { utc: "2026-12-02T20:15:00Z", opp: "Manchester United", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
+            { utc: "2026-12-05T17:30:00Z", opp: "Aston Villa", comp: "PL", isHome: false, venue: "Villa Park (Birmingham)", tv: "CANAL+ Sport" },
+            { utc: "2026-12-09T20:00:00Z", opp: "AS Monaco", comp: "UCL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "Nova Sport 3 / Voyo" },
+            { utc: "2026-12-12T15:00:00Z", opp: "Brighton", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
+            { utc: "2026-12-19T15:00:00Z", opp: "Brentford", comp: "PL", isHome: false, venue: "Gtech Community Stadium", tv: "CANAL+ Sport" },
+            { utc: "2026-12-26T15:00:00Z", opp: "Chelsea", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" }
         ];
 
         const fplScheduleUTC = [
@@ -359,6 +360,7 @@
                 'Leicester': 'https://resources.premierleague.com/premierleague/badges/t13.svg',
                 'Liverpool': 'https://resources.premierleague.com/premierleague/badges/t14.svg',
                 'Man City': 'https://resources.premierleague.com/premierleague/badges/t43.svg',
+                'Man Cheaters': 'https://resources.premierleague.com/premierleague/badges/t43.svg',
                 'Manchester City': 'https://resources.premierleague.com/premierleague/badges/t43.svg',
                 'Man Utd': 'https://resources.premierleague.com/premierleague/badges/t1.svg',
                 'Manchester United': 'https://resources.premierleague.com/premierleague/badges/t1.svg',
@@ -383,6 +385,27 @@
             return '';
         }
 
+        function raceToSuccess(promises) {
+            return new Promise(function(resolve, reject) {
+                var failCount = 0;
+                var total = promises.length;
+                if (total === 0) return reject(new Error('No providers'));
+                promises.forEach(function(p) {
+                    Promise.resolve(p).then(function(val) {
+                        if (val && Array.isArray(val) && val.length > 0) {
+                            resolve(val);
+                        } else {
+                            failCount++;
+                            if (failCount === total) reject(new Error('All failed'));
+                        }
+                    }).catch(function() {
+                        failCount++;
+                        if (failCount === total) reject(new Error('All failed'));
+                    });
+                });
+            });
+        }
+
         function updateDateTime() {
             const now = new Date();
             const h = now.getHours();
@@ -403,6 +426,7 @@
 
         const FLASHSCORE_EXACT_FORM = {
             'man city': ['V', 'V', 'V', 'V', 'V'],
+            'man cheaters': ['V', 'V', 'V', 'V', 'V'],
             'manchester city': ['V', 'V', 'V', 'V', 'V'],
             'arsenal': ['V', 'V', 'P', 'V', 'V'],
             'brighton': ['V', 'V', 'V', 'V', 'R'],
@@ -453,9 +477,14 @@
 
                 container.innerHTML = entries.map((item, idx) => {
                     const pos = idx + 1;
-                    const name = item.team.shortDisplayName || item.team.name;
-                    const isArs = name.toLowerCase().includes('arsenal');
-                    const logo = item.team.logos?.[0]?.href || getTeamLogo(name);
+                    const rawName = item.team.shortDisplayName || item.team.name;
+                    // Vždy premenovať Man City / Manchester City na Man Cheaters
+                    const name = (rawName.toLowerCase().includes('man city') || rawName.toLowerCase().includes('manchester city'))
+                        ? 'Man Cheaters'
+                        : rawName;
+
+                    const isArs = rawName.toLowerCase().includes('arsenal');
+                    const logo = item.team.logos?.[0]?.href || getTeamLogo(rawName);
 
                     const getStat = (n) => item.stats.find(s => s.name === n)?.value ?? 0;
                     const played = getStat('gamesPlayed');
@@ -464,7 +493,7 @@
                     const ties = getStat('ties');
                     const losses = getStat('losses');
 
-                    const formArr = getFlashscoreForm(name, wins, ties, losses);
+                    const formArr = getFlashscoreForm(rawName, wins, ties, losses);
 
                     const formBadges = formArr.map(ch => {
                         const cls = ch === 'V' ? 'form-v' : ch === 'R' ? 'form-r' : 'form-p';
@@ -490,13 +519,16 @@
             }
         }
 
+        // =================================================================
+        // 3. ZÁPASY ARSENALU (AK JE DNES -> "DNES O ČASE" + TV STANICA SK/CZ)
+        // =================================================================
         function renderArsenalMatches() {
             const container = document.getElementById('arsenal-fixtures-rows');
             const nextVenueEl = document.getElementById('arsenal-next-venue');
             const now = new Date();
 
             const upcoming = arsenalSeasonFixtures.filter(m => {
-                const matchEnd = new Date(new Date(m.utc).getTime() + 2 * 60 * 60 * 1000);
+                const matchEnd = new Date(new Date(m.utc).getTime() + 2.5 * 60 * 60 * 1000);
                 return matchEnd >= now;
             }).slice(0, 7);
 
@@ -509,22 +541,36 @@
                 const badgeClass = m.comp === 'UCL' ? 'badge-ucl' : m.comp === 'EFL' ? 'badge-efl' : 'badge-pl';
                 const d = new Date(m.utc);
                 const dni = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
-                const dateStr = `${dni[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}. ${d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' })}`;
+                const timeStr = d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
+
+                // Kontrola, či sa zápas odohráva dnes
+                const isToday = d.getFullYear() === now.getFullYear() &&
+                                d.getMonth() === now.getMonth() &&
+                                d.getDate() === now.getDate();
+
+                const dateLabel = isToday
+                    ? `<span class="text-[10px] font-extrabold text-amber-300 bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-400/40 animate-pulse">🔥 DNES o ${timeStr}</span>`
+                    : `<span class="text-[10px] text-gray-300 font-medium">${dni[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}. ${timeStr}</span>`;
+
+                const tvChannel = m.tv || (m.comp === 'UCL' ? 'Nova Sport / Voyo' : m.comp === 'PL' ? 'CANAL+ Sport' : 'Nova Sport');
                 const logo = getTeamLogo(m.opp);
 
                 return `
-                    <div class="p-2 rounded-lg bg-gray-900/75 border border-white/5 flex items-center justify-between gap-2 hover:border-white/15 transition">
+                    <div class="p-2 rounded-lg ${isToday ? 'bg-amber-950/35 border border-amber-400/40' : 'bg-gray-900/75 border border-white/5'} flex items-center justify-between gap-2 hover:border-white/15 transition">
                         <div class="flex items-center gap-2.5 min-w-0">
                             ${logo 
                                 ? `<img src="${logo}" class="w-5 h-5 object-contain shrink-0" onerror="this.style.display='none'">` 
                                 : `<span class="w-5 h-5 rounded-full bg-gray-700 text-[9px] flex items-center justify-center font-bold shrink-0">${m.opp.slice(0,2).toUpperCase()}</span>`
                             }
                             <div class="truncate">
-                                <div class="flex items-center gap-1.5">
+                                <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="text-[9px] font-extrabold px-1.5 py-0.2 rounded ${badgeClass}">${m.comp}</span>
-                                    <span class="text-[10px] text-gray-300 font-medium">${dateStr}</span>
+                                    ${dateLabel}
                                 </div>
-                                <div class="font-bold text-white truncate text-xs mt-0.5">${m.opp}</div>
+                                <div class="flex items-center gap-2 mt-0.5 truncate">
+                                    <span class="font-bold text-white truncate text-xs">${m.opp}</span>
+                                    <span class="text-[9px] text-sky-300 font-medium shrink-0">📺 ${tvChannel}</span>
+                                </div>
                             </div>
                         </div>
                         <div class="shrink-0 text-right">
@@ -727,7 +773,7 @@
         }
 
         // =================================================================
-        // 6. REDDIT FEED (NEPRIESTRELNÝ 4-VRSTVOVÝ SYSTÉM BEZ ČASOV)
+        // 6. REDDIT FEED (NÁVRAT K PRESNEJ URL S LOMKOU "/hot/.rss" + PARALELNÝ PRETEK)
         // =================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -753,7 +799,6 @@
             }
         }
 
-        // Vykreslenie príspevkov (bez časov)
         function renderRedditItems(items, container) {
             container.innerHTML = items.map(p => `
                 <a href="${p.link}" target="_blank" class="block p-3 rounded-xl bg-gray-900/75 hover:bg-gray-800 border border-white/5 transition group">
@@ -766,12 +811,21 @@
             `).join('');
         }
 
-        // Univerzálny parser pre rss2json formát, natívny Reddit JSON aj PullPush API
-        function extractPostsFromAnyFormat(data, subreddit) {
-            if (!data) return [];
+        function parseXmlFeed(xmlText, subreddit) {
+            if (!xmlText || !xmlText.includes('<entry>')) throw new Error('Not Atom XML');
+            const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+            const entries = Array.from(doc.querySelectorAll('entry'));
+            if (!entries.length) throw new Error('No entries');
+            return entries.slice(0, 8).map(entry => ({
+                title: entry.querySelector('title')?.textContent || 'Bez názvu',
+                link: entry.querySelector('link')?.getAttribute('href') || '#',
+                author: entry.querySelector('author > name')?.textContent || `r/${subreddit}`,
+                score: ''
+            }));
+        }
 
-            // Formát A: rss2json ({ status: 'ok', items: [...] })
-            if (data.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
+        function parseJsonFeed(data, subreddit) {
+            if (data?.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
                 return data.items.slice(0, 8).map(i => ({
                     title: i.title,
                     link: i.link,
@@ -779,36 +833,21 @@
                     score: ''
                 }));
             }
-
-            // Formát B: Natívny Reddit JSON ({ data: { children: [...] } })
-            if (data.data && Array.isArray(data.data.children) && data.data.children.length > 0) {
-                return data.data.children
-                    .filter(c => !c.data.stickied)
-                    .slice(0, 8)
-                    .map(c => ({
-                        title: c.data.title,
-                        link: `https://www.reddit.com${c.data.permalink}`,
-                        author: `u/${c.data.author}`,
-                        score: c.data.ups ? `▲ ${c.data.ups}` : ''
-                    }));
-            }
-
-            // Formát C: PullPush Reddit API ({ data: [ { title, full_link, author, score } ] })
-            if (Array.isArray(data.data) && data.data.length > 0) {
-                return data.data.slice(0, 8).map(post => ({
-                    title: post.title,
-                    link: post.full_link || `https://www.reddit.com${post.permalink || '/r/' + subreddit}`,
-                    author: `u/${post.author || 'redditor'}`,
-                    score: ''
+            const children = data?.data?.children;
+            if (Array.isArray(children) && children.length > 0) {
+                return children.filter(c => !c.data.stickied).slice(0, 8).map(c => ({
+                    title: c.data.title,
+                    link: `https://www.reddit.com${c.data.permalink}`,
+                    author: `u/${c.data.author}`,
+                    score: c.data.ups ? `▲ ${c.data.ups}` : ''
                 }));
             }
-
-            return [];
+            throw new Error('Invalid JSON structure');
         }
 
-        async function fetchSingleSubreddit(subreddit, elementId, forceRefresh = false) {
+        async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v7_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_v8_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -817,7 +856,7 @@
                         const parsed = JSON.parse(cached);
                         if (Date.now() - parsed.ts < 15 * 60 * 1000 && parsed.items?.length) {
                             renderRedditItems(parsed.items, container);
-                            return false;
+                            return;
                         }
                     }
                 } catch (e) {}
@@ -825,98 +864,63 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
-            // VRSTVA 1: Lokálny súbor ./reddit-{subreddit}.json z GitHub Actions
-            try {
-                const localRes = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
-                if (localRes.ok) {
-                    const localData = await localRes.json();
-                    const posts = extractPostsFromAnyFormat(localData, subreddit);
-                    if (posts.length > 0) {
-                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
-                        renderRedditItems(posts, container);
-                        return false;
-                    }
-                }
-            } catch (e) {}
+            // Presne tá URL s lomkou "/hot/.rss", ktorá prechádza cez rss2json a nevracia 301 redirect!
+            const slashRssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
+            const jsonUrl = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10&raw_json=1`;
 
-            // VRSTVA 2: rss2json s čistou URL "https://www.reddit.com/r/{subreddit}.rss" (nepadá na 422!)
-            try {
-                const rssUrl = `https://www.reddit.com/r/${subreddit}.rss`;
-                const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
-                if (r.ok) {
-                    const d = await r.json();
-                    const posts = extractPostsFromAnyFormat(d, subreddit);
-                    if (posts.length > 0) {
-                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
-                        renderRedditItems(posts, container);
-                        return true;
-                    }
-                }
-            } catch (e) {}
+            const providers = [
+                // 1. Lokálny súbor z GitHubu (ak obsahuje platný JSON alebo XML)
+                fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' })
+                    .then(r => r.text())
+                    .then(txt => txt.trim().startsWith('{') ? parseJsonFeed(JSON.parse(txt), subreddit) : parseXmlFeed(txt, subreddit)),
 
-            // VRSTVA 3: PullPush Reddit API (natívne CORS v prehliadači, neblokuje IP adresy)
-            try {
-                const ppRes = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=8&sort=desc&sort_type=created_utc`);
-                if (ppRes.ok) {
-                    const ppData = await ppRes.json();
-                    const posts = extractPostsFromAnyFormat(ppData, subreddit);
-                    if (posts.length > 0) {
-                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
-                        renderRedditItems(posts, container);
-                        return false;
-                    }
-                }
-            } catch (e) {}
+                // 2. rss2json s presnou URL "/hot/.rss" (s lomkou!)
+                fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(slashRssUrl)}`)
+                    .then(r => r.json())
+                    .then(d => parseJsonFeed(d, subreddit)),
 
-            // VRSTVA 4: AllOrigins XML parser
-            try {
-                const aoRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://www.reddit.com/r/${subreddit}.rss`)}`);
-                if (aoRes.ok) {
-                    const aoData = await aoRes.json();
-                    const doc = new DOMParser().parseFromString(aoData.contents, 'text/xml');
-                    const entries = Array.from(doc.querySelectorAll('entry'));
-                    if (entries.length > 0) {
-                        const posts = entries.slice(0, 8).map(entry => ({
-                            title: entry.querySelector('title')?.textContent || 'Bez názvu',
-                            link: entry.querySelector('link')?.getAttribute('href') || '#',
-                            author: entry.querySelector('author > name')?.textContent || `r/${subreddit}`,
-                            score: ''
-                        }));
-                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
-                        renderRedditItems(posts, container);
-                        return false;
-                    }
-                }
-            } catch (e) {}
+                // 3. cors.eu.org -> RSS XML
+                fetch(`https://cors.eu.org/${slashRssUrl}`)
+                    .then(r => r.text())
+                    .then(txt => parseXmlFeed(txt, subreddit)),
 
-            // Staršia cache ak je k dispozícii
-            const oldCache = localStorage.getItem(cacheKey);
-            if (oldCache) {
-                try {
-                    renderRedditItems(JSON.parse(oldCache).items, container);
-                    return false;
-                } catch (e) {}
+                // 4. cors.eu.org -> JSON
+                fetch(`https://cors.eu.org/${jsonUrl}`)
+                    .then(r => r.json())
+                    .then(d => parseJsonFeed(d, subreddit)),
+
+                // 5. AllOrigins JSON wrapper -> RSS XML
+                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(slashRssUrl)}`)
+                    .then(r => r.json())
+                    .then(d => parseXmlFeed(d.contents, subreddit)),
+
+                // 6. CodeTabs Proxy -> RSS XML
+                fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(slashRssUrl)}`)
+                    .then(r => r.text())
+                    .then(txt => parseXmlFeed(txt, subreddit))
+            ];
+
+            try {
+                const items = await raceToSuccess(providers);
+                localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
+                renderRedditItems(items, container);
+            } catch (err) {
+                const oldCache = localStorage.getItem(cacheKey);
+                if (oldCache) {
+                    try {
+                        renderRedditItems(JSON.parse(oldCache).items, container);
+                        return;
+                    } catch (e) {}
+                }
+                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
             }
-
-            container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
-            return false;
         }
 
-        let redditBusy = false;
-        async function loadAllReddit(force = false) {
-            if (redditBusy) return;
-            redditBusy = true;
-            try {
-                const usedRss1 = await fetchSingleSubreddit('Slovakia', 'list-slovakia', force);
-                if (usedRss1) await new Promise(r => setTimeout(r, 1200));
-
-                const usedRss2 = await fetchSingleSubreddit('Gunners', 'list-gunners', force);
-                if (usedRss2) await new Promise(r => setTimeout(r, 1200));
-
-                await fetchSingleSubreddit('FantasyPL', 'list-fantasypl', force);
-            } finally {
-                redditBusy = false;
-            }
+        // Rozložené spustenie s 1.3s odstupom, aby rss2json vybavil všetky 3 subreddity bez rate-limitu
+        function loadAllReddit(force = false) {
+            loadSingleReddit('Gunners', 'list-gunners', force);
+            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 1300);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 2600);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
