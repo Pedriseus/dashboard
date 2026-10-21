@@ -19,11 +19,13 @@ jobs:
         run: |
           curl -s -L -A "Mozilla/5.0" "https://fantasy.premierleague.com/api/leagues-classic/28856/standings/?page_standings=1" -o fpl-league.json
 
-      - name: Stiahnutie Reddit feedov (Slovakia, Gunners, FantasyPL)
+      - name: Stiahnutie Reddit feedov (cez rss2json API, ktoré neblokuje GitHub IP)
         run: |
-          curl -s -L -A "Mozilla/5.0" "https://www.reddit.com/r/Slovakia/hot.json?limit=10&raw_json=1" -o reddit-slovakia.json || true
-          curl -s -L -A "Mozilla/5.0" "https://www.reddit.com/r/Gunners/hot.json?limit=10&raw_json=1" -o reddit-gunners.json || true
-          curl -s -L -A "Mozilla/5.0" "https://www.reddit.com/r/FantasyPL/hot.json?limit=10&raw_json=1" -o reddit-fantasypl.json || true
+          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/Slovakia.rss" -o reddit-slovakia.json || true
+          sleep 2
+          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/Gunners.rss" -o reddit-gunners.json || true
+          sleep 2
+          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/FantasyPL.rss" -o reddit-fantasypl.json || true
 
       - name: Commit a Push dát do repozitára
         run: |
