@@ -300,7 +300,6 @@
         const FPL_LEAGUE_ID = 28856;
         const MY_TEAM_NAME = "Ødeargod";
 
-        // Rozpis zápasov Arsenalu vrátane štadiónov a SK/CZ vysielateľov
         const arsenalSeasonFixtures = [
             { utc: "2026-10-17T14:00:00Z", opp: "Nottingham Forest", comp: "PL", isHome: false, venue: "City Ground (Nottingham)", tv: "CANAL+ Sport" },
             { utc: "2026-10-21T19:00:00Z", opp: "Bayern Mníchov", comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)", tv: "Nova Sport 3 / Voyo" },
@@ -478,7 +477,6 @@
                 container.innerHTML = entries.map((item, idx) => {
                     const pos = idx + 1;
                     const rawName = item.team.shortDisplayName || item.team.name;
-                    // Vždy premenovať Man City / Manchester City na Man Cheaters
                     const name = (rawName.toLowerCase().includes('man city') || rawName.toLowerCase().includes('manchester city'))
                         ? 'Man Cheaters'
                         : rawName;
@@ -519,9 +517,6 @@
             }
         }
 
-        // =================================================================
-        // 3. ZÁPASY ARSENALU (AK JE DNES -> "DNES O ČASE" + TV STANICA SK/CZ)
-        // =================================================================
         function renderArsenalMatches() {
             const container = document.getElementById('arsenal-fixtures-rows');
             const nextVenueEl = document.getElementById('arsenal-next-venue');
@@ -543,7 +538,6 @@
                 const dni = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
                 const timeStr = d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
 
-                // Kontrola, či sa zápas odohráva dnes
                 const isToday = d.getFullYear() === now.getFullYear() &&
                                 d.getMonth() === now.getMonth() &&
                                 d.getDate() === now.getDate();
@@ -772,9 +766,7 @@
             return { desc: 'Oblačno', icon: '☁️' };
         }
 
-        // =================================================================
-        // 6. REDDIT FEED (NÁVRAT K PRESNEJ URL S LOMKOU "/hot/.rss" + PARALELNÝ PRETEK)
-        // =================================================================
+        // REDDIT FEED LOGIC
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
             const colGu = document.getElementById('col-gunners');
@@ -812,16 +804,24 @@
         }
 
         function parseXmlFeed(xmlText, subreddit) {
-            if (!xmlText || !xmlText.includes('<entry>')) throw new Error('Not Atom XML');
+            if (!xmlText || (!xmlText.includes('<entry>') && !xmlText.includes('<item>'))) throw new Error('Not Valid XML');
             const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-            const entries = Array.from(doc.querySelectorAll('entry'));
+            let entries = Array.from(doc.querySelectorAll('entry'));
+            if (!entries.length) entries = Array.from(doc.querySelectorAll('item'));
             if (!entries.length) throw new Error('No entries');
-            return entries.slice(0, 8).map(entry => ({
-                title: entry.querySelector('title')?.textContent || 'Bez názvu',
-                link: entry.querySelector('link')?.getAttribute('href') || '#',
-                author: entry.querySelector('author > name')?.textContent || `r/${subreddit}`,
-                score: ''
-            }));
+            return entries.slice(0, 8).map(entry => {
+                let link = entry.querySelector('link')?.textContent || entry.querySelector('link')?.getAttribute('href') || '#';
+                if (!link.startsWith('http')) {
+                    const linkEl = entry.getElementsByTagName('link')[0];
+                    link = linkEl?.getAttribute('href') || '#';
+                }
+                return {
+                    title: entry.querySelector('title')?.textContent || 'Bez názvu',
+                    link: link,
+                    author: entry.querySelector('author > name')?.textContent || `r/${subreddit}`,
+                    score: ''
+                };
+            });
         }
 
         function parseJsonFeed(data, subreddit) {
@@ -847,14 +847,14 @@
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v8_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_v9_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
                     const cached = localStorage.getItem(cacheKey);
                     if (cached) {
                         const parsed = JSON.parse(cached);
-                        if (Date.now() - parsed.ts < 15 * 60 * 1000 && parsed.items?.length) {
+                        if (Date.now() - parsed.ts < 30 * 60 * 1000 && parsed.items?.length) {
                             renderRedditItems(parsed.items, container);
                             return;
                         }
@@ -864,40 +864,29 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
-            // Presne tá URL s lomkou "/hot/.rss", ktorá prechádza cez rss2json a nevracia 301 redirect!
             const slashRssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
             const jsonUrl = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10&raw_json=1`;
 
             const providers = [
-                // 1. Lokálny súbor z GitHubu (ak obsahuje platný JSON alebo XML)
+                // 1. Lokálny JSON súbor (z GitHub Actions)
                 fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' })
                     .then(r => r.text())
                     .then(txt => txt.trim().startsWith('{') ? parseJsonFeed(JSON.parse(txt), subreddit) : parseXmlFeed(txt, subreddit)),
 
-                // 2. rss2json s presnou URL "/hot/.rss" (s lomkou!)
+                // 2. rss2json API
                 fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(slashRssUrl)}`)
                     .then(r => r.json())
                     .then(d => parseJsonFeed(d, subreddit)),
 
-                // 3. cors.eu.org -> RSS XML
-                fetch(`https://cors.eu.org/${slashRssUrl}`)
+                // 3. CodeTabs Proxy na RSS
+                fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(slashRssUrl)}`)
                     .then(r => r.text())
                     .then(txt => parseXmlFeed(txt, subreddit)),
 
-                // 4. cors.eu.org -> JSON
-                fetch(`https://cors.eu.org/${jsonUrl}`)
+                // 4. AllOrigins Proxy na JSON
+                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(jsonUrl)}`)
                     .then(r => r.json())
-                    .then(d => parseJsonFeed(d, subreddit)),
-
-                // 5. AllOrigins JSON wrapper -> RSS XML
-                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(slashRssUrl)}`)
-                    .then(r => r.json())
-                    .then(d => parseXmlFeed(d.contents, subreddit)),
-
-                // 6. CodeTabs Proxy -> RSS XML
-                fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(slashRssUrl)}`)
-                    .then(r => r.text())
-                    .then(txt => parseXmlFeed(txt, subreddit))
+                    .then(d => parseJsonFeed(JSON.parse(d.contents), subreddit))
             ];
 
             try {
@@ -912,15 +901,14 @@
                         return;
                     } catch (e) {}
                 }
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
+                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} je momentálne obmedzený Redditom. Skús ↻ Obnoviť neskôr.</div>`;
             }
         }
 
-        // Rozložené spustenie s 1.3s odstupom, aby rss2json vybavil všetky 3 subreddity bez rate-limitu
         function loadAllReddit(force = false) {
             loadSingleReddit('Gunners', 'list-gunners', force);
-            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 1300);
-            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 2600);
+            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 1000);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 2000);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
