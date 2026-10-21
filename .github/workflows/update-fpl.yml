@@ -19,13 +19,13 @@ jobs:
         run: |
           curl -s -L -A "Mozilla/5.0" "https://fantasy.premierleague.com/api/leagues-classic/28856/standings/?page_standings=1" -o fpl-league.json
 
-      - name: Stiahnutie Reddit feedov (cez rss2json API, ktoré neblokuje GitHub IP)
+      - name: Stiahnutie Reddit feedov cez rss2json (s lomkou /hot/.rss)
         run: |
-          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/Slovakia.rss" -o reddit-slovakia.json || true
-          sleep 2
-          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/Gunners.rss" -o reddit-gunners.json || true
-          sleep 2
-          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/FantasyPL.rss" -o reddit-fantasypl.json || true
+          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/Slovakia/hot/.rss" -o reddit-slovakia.json || true
+          sleep 3
+          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/Gunners/hot/.rss" -o reddit-gunners.json || true
+          sleep 3
+          curl -s -L "https://api.rss2json.com/v1/api.json?rss_url=https://www.reddit.com/r/FantasyPL/hot/.rss" -o reddit-fantasypl.json || true
 
       - name: Commit a Push dát do repozitára
         run: |
