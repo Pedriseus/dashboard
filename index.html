@@ -81,7 +81,7 @@
 
     <div class="max-w-[95rem] mx-auto space-y-6">
 
-        <!-- HLAVIČKA -->
+        <!-- 1. HLAVNÝ ARSENAL HEADER + 3x 360px TABUĽKY -->
         <header class="arsenal-header rounded-2xl p-5 md:p-6 overflow-hidden">
             <div class="flex flex-col 2xl:flex-row items-center justify-between gap-6">
                 
@@ -91,7 +91,7 @@
                         <span class="text-[10px] md:text-[11px] uppercase tracking-[0.2em] text-amber-400 font-bold mb-0.5">
                             Victoria Concordia Crescit
                         </span>
-                        <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dobrý deň!</h1>
+                        <h1 id="greeting" class="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Dobrý večer!</h1>
                         <div class="flex flex-col text-xs md:text-sm text-gray-200 mt-1 font-medium leading-snug">
                             <span id="current-date">Načítavam dátum...</span>
                             <span id="current-time" class="font-mono text-base md:text-lg font-extrabold text-gray-200 mt-0.5">--:--:--</span>
@@ -101,7 +101,7 @@
 
                 <div class="grid grid-cols-1 xl:grid-cols-3 gap-4 w-full 2xl:w-auto justify-items-center">
 
-                    <!-- PL TABUĽKA -->
+                    <!-- BOX 1: PREMIER LEAGUE TABUĽKA (360px) -->
                     <div class="card p-3.5 exact-box">
                         <div>
                             <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
@@ -128,7 +128,7 @@
                         </div>
                     </div>
 
-                    <!-- ZÁPASY ARSENALU -->
+                    <!-- BOX 2: ZÁPASY ARSENALU (360px) -->
                     <div class="card p-3.5 exact-box">
                         <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
                             <span class="text-xs font-extrabold tracking-wider uppercase text-amber-400">📅 Zápasy Arsenalu</span>
@@ -147,7 +147,7 @@
                         </div>
                     </div>
 
-                    <!-- FPL MINI-LIGA -->
+                    <!-- BOX 3: 🎮 FPL MINI-LIGA (360px) -->
                     <div class="card p-3.5 exact-box">
                         <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
                             <span class="text-xs font-extrabold tracking-wider uppercase text-amber-400">🎮 FPL MINI-LIGA</span>
@@ -173,7 +173,7 @@
             </div>
         </header>
 
-        <!-- POČASIE -->
+        <!-- 2. SEKČNÝ RIADOK: POČASIE & SHMÚ ALADIN -->
         <section id="weather-box" class="card p-5">
             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
                 <div class="flex items-center gap-2">
@@ -245,7 +245,7 @@
             </div>
         </section>
 
-        <!-- REDDIT -->
+        <!-- 3. SEKČNÝ RIADOK: REDDIT FEED -->
         <section class="card p-5">
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-white/10">
                 <div class="flex flex-wrap items-center gap-3">
@@ -258,7 +258,7 @@
                         <button id="tab-fantasypl" onclick="switchRedditTab('fantasypl')" class="px-3 py-1 rounded-md font-bold text-gray-400 hover:text-white transition">⚽ r/FantasyPL</button>
                     </div>
                 </div>
-                <button onclick="loadAllReddit()" class="text-xs text-gray-400 hover:text-white transition">↻ Obnoviť Reddit</button>
+                <button onclick="loadAllReddit(true)" class="text-xs text-gray-400 hover:text-white transition">↻ Obnoviť Reddit</button>
             </div>
 
             <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -339,8 +339,8 @@
             { entry_name: "Australobooster", total: 452 },
             { entry_name: "Ødeargod", total: 450 },
             { entry_name: "CFC Academy", total: 446 },
-            { entry_name: "Rovinkapool", total: 400 },
-            { entry_name: "Tesla Stropkov", total: 389 }
+            { entry_name: "Rovinkapool", total: 410 },
+            { entry_name: "Tesla Stropkov", total: 402 }
         ];
 
         function getTeamLogo(teamName) {
@@ -370,6 +370,7 @@
                 'West Ham': 'https://resources.premierleague.com/premierleague/badges/t21.svg',
                 'Wolves': 'https://resources.premierleague.com/premierleague/badges/t39.svg',
                 'Hull': 'https://resources.premierleague.com/premierleague/badges/t88.svg',
+                'Coventry': 'https://resources.premierleague.com/premierleague/badges/t9.svg',
                 'Bayern': 'https://a.espncdn.com/i/teamlogos/soccer/500/132.png',
                 'Inter': 'https://a.espncdn.com/i/teamlogos/soccer/500/110.png',
                 'Sporting': 'https://a.espncdn.com/i/teamlogos/soccer/500/2250.png',
@@ -726,7 +727,7 @@
         }
 
         // =================================================================
-        // 6. REDDIT FEED (STABILNÝ JSONP PRENOS BEZ CHÝB)
+        // 6. REDDIT FEED (NEPRIESTRELNÝ 4-VRSTVOVÝ SYSTÉM BEZ ČASOV)
         // =================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -752,66 +753,170 @@
             }
         }
 
+        // Vykreslenie príspevkov (bez časov)
         function renderRedditItems(items, container) {
             container.innerHTML = items.map(p => `
                 <a href="${p.link}" target="_blank" class="block p-3 rounded-xl bg-gray-900/75 hover:bg-gray-800 border border-white/5 transition group">
                     <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
                         <span class="truncate pr-2 font-medium text-gray-400">${p.author || 'u/redditor'}</span>
+                        ${p.score ? `<span class="text-amber-400 font-bold shrink-0">${p.score}</span>` : ''}
                     </div>
                     <div class="text-xs font-semibold text-gray-200 group-hover:text-white leading-snug">${p.title}</div>
                 </a>
             `).join('');
         }
 
-        // Spoľahlivé načítanie cez Embed/JSONP endpointy, ktoré obchádzajú Cloudflare a blokovanie
-        async function loadRedditViaEmbed(subreddit, elementId) {
-            const container = document.getElementById(elementId);
-            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
+        // Univerzálny parser pre rss2json formát, natívny Reddit JSON aj PullPush API
+        function extractPostsFromAnyFormat(data, subreddit) {
+            if (!data) return [];
 
-            try {
-                // Využívame verejný RSS prenos so štandardnou transformáciou
-                const targetUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
-                const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(targetUrl)}`);
-                const data = await res.json();
-
-                if (data.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
-                    const items = data.items.slice(0, 8).map(i => ({
-                        title: i.title,
-                        link: i.link,
-                        author: i.author || `u/redditor`
-                    }));
-                    renderRedditItems(items, container);
-                    return;
-                }
-                throw new Error('rss2json failed');
-            } catch (err) {
-                // Záložný pokus cez AllOrigins textový prenos
-                try {
-                    const altUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://old.reddit.com/r/${subreddit}/hot/.rss`)}`;
-                    const res = await fetch(altUrl);
-                    const text = await res.text();
-                    const doc = new DOMParser().parseFromString(text, 'text/xml');
-                    const entries = Array.from(doc.querySelectorAll('entry'));
-                    
-                    if (entries.length > 0) {
-                        const items = entries.slice(0, 8).map(entry => ({
-                            title: entry.querySelector('title')?.textContent || 'Bez názvu',
-                            link: entry.querySelector('link')?.getAttribute('href') || '#',
-                            author: entry.querySelector('author > name')?.textContent || 'u/redditor'
-                        }));
-                        renderRedditItems(items, container);
-                        return;
-                    }
-                } catch (e2) {}
-
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
+            // Formát A: rss2json ({ status: 'ok', items: [...] })
+            if (data.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
+                return data.items.slice(0, 8).map(i => ({
+                    title: i.title,
+                    link: i.link,
+                    author: i.author || `r/${subreddit}`,
+                    score: ''
+                }));
             }
+
+            // Formát B: Natívny Reddit JSON ({ data: { children: [...] } })
+            if (data.data && Array.isArray(data.data.children) && data.data.children.length > 0) {
+                return data.data.children
+                    .filter(c => !c.data.stickied)
+                    .slice(0, 8)
+                    .map(c => ({
+                        title: c.data.title,
+                        link: `https://www.reddit.com${c.data.permalink}`,
+                        author: `u/${c.data.author}`,
+                        score: c.data.ups ? `▲ ${c.data.ups}` : ''
+                    }));
+            }
+
+            // Formát C: PullPush Reddit API ({ data: [ { title, full_link, author, score } ] })
+            if (Array.isArray(data.data) && data.data.length > 0) {
+                return data.data.slice(0, 8).map(post => ({
+                    title: post.title,
+                    link: post.full_link || `https://www.reddit.com${post.permalink || '/r/' + subreddit}`,
+                    author: `u/${post.author || 'redditor'}`,
+                    score: ''
+                }));
+            }
+
+            return [];
         }
 
-        function loadAllReddit() {
-            loadRedditViaEmbed('Slovakia', 'list-slovakia');
-            setTimeout(() => loadRedditViaEmbed('Gunners', 'list-gunners'), 400);
-            setTimeout(() => loadRedditViaEmbed('FantasyPL', 'list-fantasypl'), 800);
+        async function fetchSingleSubreddit(subreddit, elementId, forceRefresh = false) {
+            const container = document.getElementById(elementId);
+            const cacheKey = 'arsenal_reddit_v7_' + subreddit.toLowerCase();
+
+            if (!forceRefresh) {
+                try {
+                    const cached = localStorage.getItem(cacheKey);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Date.now() - parsed.ts < 15 * 60 * 1000 && parsed.items?.length) {
+                            renderRedditItems(parsed.items, container);
+                            return false;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
+
+            // VRSTVA 1: Lokálny súbor ./reddit-{subreddit}.json z GitHub Actions
+            try {
+                const localRes = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
+                if (localRes.ok) {
+                    const localData = await localRes.json();
+                    const posts = extractPostsFromAnyFormat(localData, subreddit);
+                    if (posts.length > 0) {
+                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
+                        renderRedditItems(posts, container);
+                        return false;
+                    }
+                }
+            } catch (e) {}
+
+            // VRSTVA 2: rss2json s čistou URL "https://www.reddit.com/r/{subreddit}.rss" (nepadá na 422!)
+            try {
+                const rssUrl = `https://www.reddit.com/r/${subreddit}.rss`;
+                const r = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
+                if (r.ok) {
+                    const d = await r.json();
+                    const posts = extractPostsFromAnyFormat(d, subreddit);
+                    if (posts.length > 0) {
+                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
+                        renderRedditItems(posts, container);
+                        return true;
+                    }
+                }
+            } catch (e) {}
+
+            // VRSTVA 3: PullPush Reddit API (natívne CORS v prehliadači, neblokuje IP adresy)
+            try {
+                const ppRes = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=8&sort=desc&sort_type=created_utc`);
+                if (ppRes.ok) {
+                    const ppData = await ppRes.json();
+                    const posts = extractPostsFromAnyFormat(ppData, subreddit);
+                    if (posts.length > 0) {
+                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
+                        renderRedditItems(posts, container);
+                        return false;
+                    }
+                }
+            } catch (e) {}
+
+            // VRSTVA 4: AllOrigins XML parser
+            try {
+                const aoRes = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(`https://www.reddit.com/r/${subreddit}.rss`)}`);
+                if (aoRes.ok) {
+                    const aoData = await aoRes.json();
+                    const doc = new DOMParser().parseFromString(aoData.contents, 'text/xml');
+                    const entries = Array.from(doc.querySelectorAll('entry'));
+                    if (entries.length > 0) {
+                        const posts = entries.slice(0, 8).map(entry => ({
+                            title: entry.querySelector('title')?.textContent || 'Bez názvu',
+                            link: entry.querySelector('link')?.getAttribute('href') || '#',
+                            author: entry.querySelector('author > name')?.textContent || `r/${subreddit}`,
+                            score: ''
+                        }));
+                        localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: posts }));
+                        renderRedditItems(posts, container);
+                        return false;
+                    }
+                }
+            } catch (e) {}
+
+            // Staršia cache ak je k dispozícii
+            const oldCache = localStorage.getItem(cacheKey);
+            if (oldCache) {
+                try {
+                    renderRedditItems(JSON.parse(oldCache).items, container);
+                    return false;
+                } catch (e) {}
+            }
+
+            container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">Nepodarilo sa načítať r/${subreddit}. Skús ↻ Obnoviť.</div>`;
+            return false;
+        }
+
+        let redditBusy = false;
+        async function loadAllReddit(force = false) {
+            if (redditBusy) return;
+            redditBusy = true;
+            try {
+                const usedRss1 = await fetchSingleSubreddit('Slovakia', 'list-slovakia', force);
+                if (usedRss1) await new Promise(r => setTimeout(r, 1200));
+
+                const usedRss2 = await fetchSingleSubreddit('Gunners', 'list-gunners', force);
+                if (usedRss2) await new Promise(r => setTimeout(r, 1200));
+
+                await fetchSingleSubreddit('FantasyPL', 'list-fantasypl', force);
+            } finally {
+                redditBusy = false;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
@@ -819,7 +924,7 @@
             renderArsenalMatches();
             fetchFPLData(false);
             fetchWeather();
-            loadAllReddit();
+            loadAllReddit(false);
         });
     </script>
 </body>
