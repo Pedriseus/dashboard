@@ -178,7 +178,7 @@
             <div class="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-white/10">
                 <div class="flex items-center gap-2">
                     <span class="text-lg">🌦️</span>
-                    <h2 class="text-base font-extrabold tracking-wide uppercase text-white">Počasie Bratislava & Model SHMÚ ALADIN</h2>
+                    <h2 class="text-base font-extrabold tracking-wide uppercase text-white">Počasie Bratislava (Yr.no) & Model SHMÚ ALADIN</h2>
                 </div>
                 <div class="flex items-center gap-3 text-xs">
                     <button onclick="fetchWeather()" class="text-gray-400 hover:text-white transition">↻ Obnoviť počasie</button>
@@ -382,27 +382,6 @@
                 if (teamName && teamName.toLowerCase().includes(k.toLowerCase())) return logos[k];
             }
             return '';
-        }
-
-        function raceToSuccess(promises) {
-            return new Promise(function(resolve, reject) {
-                var failCount = 0;
-                var total = promises.length;
-                if (total === 0) return reject(new Error('No providers'));
-                promises.forEach(function(p) {
-                    Promise.resolve(p).then(function(val) {
-                        if (val && Array.isArray(val) && val.length > 0) {
-                            resolve(val);
-                        } else {
-                            failCount++;
-                            if (failCount === total) reject(new Error('All failed'));
-                        }
-                    }).catch(function() {
-                        failCount++;
-                        if (failCount === total) reject(new Error('All failed'));
-                    });
-                });
-            });
         }
 
         function updateDateTime() {
@@ -653,17 +632,25 @@
             } catch (e) {}
         }
 
+        // POČASIE Z YR.NO
         async function fetchWeather() {
             try {
-                const url = `https://api.open-meteo.com/v1/forecast?latitude=48.1486&longitude=17.1077&current=temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m&hourly=temperature_2m,precipitation_probability,precipitation,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=Europe%2FBratislava&forecast_days=4&_t=${Date.now()}`;
-                const res = await fetch(url);
+                const url = 'https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=48.1486&lon=17.1077';
+                const res = await fetch(url, {
+                    headers: { 'User-Agent': 'ArsenalDashboardApp/1.0 github.com/pedriseus' }
+                });
+                if (!res.ok) throw new Error('Yr.no API error');
                 const data = await res.json();
 
-                const curr = data.current;
-                const temp = Math.round(curr.temperature_2m);
-                const wind = Math.round(curr.wind_speed_10m);
-                const rain = curr.precipitation;
-                const info = getWeatherMeta(curr.weather_code);
+                const timeseries = data.properties.timeseries;
+                const current = timeseries[0].data.instant.details;
+                const next1Hour = timeseries[0].data.next_1_hours;
+
+                const temp = Math.round(current.air_temperature);
+                const wind = Math.round(current.wind_speed * 3.6);
+                const rain = next1Hour ? next1Hour.details.precipitation_amount : 0;
+                const symbolCode = next1Hour ? next1Hour.summary.symbol_code : 'clearsky_day';
+                const info = getYrWeatherMeta(symbolCode);
 
                 document.getElementById('weather-temp').textContent = `${temp}°C`;
                 document.getElementById('weather-desc').textContent = info.desc;
@@ -677,32 +664,25 @@
                 else if (temp >= 22) tipNow = 'Teplo – stačí krátke tričko.';
                 if (rain > 0) tipNow += ' Prší, vezmi si nepremokavú bundu alebo dáždnik!';
                 document.getElementById('w-tip-now').textContent = tipNow;
+                document.getElementById('w-tip-day').textContent = `Aktuálna teplota v Bratislave je ${temp}°C, stav: ${info.desc.toLowerCase()}, vietor ${wind} km/h.`;
 
-                const maxT = Math.round(data.daily.temperature_2m_max[0]);
-                const minT = Math.round(data.daily.temperature_2m_min[0]);
-                document.getElementById('w-tip-day').textContent = `Dnešné maximum ${maxT}°C (minimum ${minT}°C). Aktuálne je ${info.desc.toLowerCase()}, vietor ${wind} km/h.`;
-
-                const nowMs = Date.now();
-                let startIdx = data.hourly.time.findIndex(t => new Date(t).getTime() >= nowMs);
-                if (startIdx === -1) startIdx = 0;
-
-                const offsets = [1, 3, 6, 9];
                 let hHtml = '';
-                offsets.forEach(offset => {
-                    const idx = startIdx + offset - 1;
-                    if (data.hourly.time[idx]) {
-                        const hDate = new Date(data.hourly.time[idx]);
+                [2, 4, 6, 8].forEach(offset => {
+                    if (timeseries[offset]) {
+                        const item = timeseries[offset];
+                        const hDate = new Date(item.time);
                         const hourStr = hDate.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
-                        const hTemp = Math.round(data.hourly.temperature_2m[idx]);
-                        const hProb = data.hourly.precipitation_probability?.[idx] ?? 0;
-                        const hMeta = getWeatherMeta(data.hourly.weather_code[idx]);
+                        const hTemp = Math.round(item.data.instant.details.air_temperature);
+                        const hSym = item.data.next_1_hours ? item.data.next_1_hours.summary.symbol_code : 'clearsky_day';
+                        const hMeta = getYrWeatherMeta(hSym);
+                        const hRain = item.data.next_1_hours ? item.data.next_1_hours.details.precipitation_amount : 0;
 
                         hHtml += `
                             <div class="bg-slate-800/80 border border-white/5 rounded-lg p-1.5 flex flex-col items-center justify-between">
                                 <div class="text-[10px] font-bold text-gray-400">${hourStr}</div>
                                 <div class="text-base my-0.5">${hMeta.icon}</div>
                                 <div class="text-xs font-extrabold text-white">${hTemp}°C</div>
-                                <div class="text-[9px] text-sky-400 font-semibold">💧 ${hProb}%</div>
+                                <div class="text-[9px] text-sky-400 font-semibold">💧 ${hRain} mm</div>
                             </div>
                         `;
                     }
@@ -710,59 +690,40 @@
                 document.getElementById('weather-hourly').innerHTML = hHtml;
 
                 let dHtml = '';
-                for (let i = 1; i <= 3; i++) {
-                    const dayStr = data.daily.time[i];
-                    if (dayStr) {
-                        const dObj = new Date(dayStr);
-                        const dayLabel = i === 1 ? 'Zajtra' : dObj.toLocaleDateString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
-                        const dMax = Math.round(data.daily.temperature_2m_max[i]);
-                        const dMin = Math.round(data.daily.temperature_2m_min[i]);
-
-                        let dayRainMm = 0;
-                        let dayProbSum = 0;
-                        let dayCount = 0;
-                        let middayCode = data.daily.weather_code[i];
-
-                        data.hourly.time.forEach((tStr, idx) => {
-                            if (tStr.startsWith(dayStr)) {
-                                const hr = new Date(tStr).getHours();
-                                if (hr >= 8 && hr <= 20) {
-                                    dayRainMm += (data.hourly.precipitation?.[idx] ?? 0);
-                                    dayProbSum += (data.hourly.precipitation_probability?.[idx] ?? 0);
-                                    dayCount++;
-                                    if (hr === 13) middayCode = data.hourly.weather_code[idx];
-                                }
-                            }
-                        });
-
-                        const avgDayProb = dayCount > 0 ? Math.round(dayProbSum / dayCount) : 0;
-                        const cleanMm = Math.round(dayRainMm * 10) / 10;
-                        const dMeta = getWeatherMeta(middayCode);
+                [12, 36, 60].forEach((idx, i) => {
+                    if (timeseries[idx]) {
+                        const item = timeseries[idx];
+                        const dObj = new Date(item.time);
+                        const dayLabel = i === 0 ? 'Zajtra' : dObj.toLocaleDateString('sk-SK', { weekday: 'short', day: 'numeric', month: 'numeric' });
+                        const dTemp = Math.round(item.data.instant.details.air_temperature);
+                        const dSym = item.data.next_6_hours ? item.data.next_6_hours.summary.symbol_code : 'clearsky_day';
+                        const dMeta = getYrWeatherMeta(dSym);
+                        const dRain = item.data.next_6_hours ? item.data.next_6_hours.details.precipitation_amount : 0;
 
                         dHtml += `
                             <div class="bg-slate-800/80 border border-white/5 rounded-xl p-2.5 flex flex-col items-center justify-between">
                                 <div class="text-[10px] uppercase font-bold text-amber-300">${dayLabel}</div>
                                 <div class="text-2xl my-1">${dMeta.icon}</div>
-                                <div class="text-xs font-extrabold text-white">${dMax}° <span class="text-gray-400 font-normal">/ ${dMin}°C</span></div>
-                                <div class="text-[10px] text-sky-400 font-semibold mt-1">💧 ${cleanMm} mm (${avgDayProb}%)</div>
+                                <div class="text-xs font-extrabold text-white">${dTemp}°C</div>
+                                <div class="text-[10px] text-sky-400 font-semibold mt-1">💧 ${dRain} mm</div>
                             </div>
                         `;
                     }
-                }
+                });
                 document.getElementById('weather-daily').innerHTML = dHtml;
 
             } catch (err) {
-                console.error('Chyba počasia:', err);
+                console.error('Chyba Yr.no počasia:', err);
             }
         }
 
-        function getWeatherMeta(code) {
-            if (code === 0) return { desc: 'Jasno', icon: '☀️' };
-            if ([1, 2, 3].includes(code)) return { desc: 'Polooblačno', icon: '⛅' };
-            if ([45, 48].includes(code)) return { desc: 'Hmlisto', icon: '🌫️' };
-            if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return { desc: 'Dážď', icon: '🌧️' };
-            if ([71, 73, 75, 85, 86].includes(code)) return { desc: 'Sneženie', icon: '❄️' };
-            if ([95, 96, 99].includes(code)) return { desc: 'Búrka', icon: '⛈️' };
+        function getYrWeatherMeta(symbolCode) {
+            if (symbolCode.includes('clearsky')) return { desc: 'Jasno', icon: '☀️' };
+            if (symbolCode.includes('fair') || symbolCode.includes('partlycloudy')) return { desc: 'Polooblačno', icon: '⛅' };
+            if (symbolCode.includes('cloud')) return { desc: 'Oblačno', icon: '☁️' };
+            if (symbolCode.includes('rain') || symbolCode.includes('sleet')) return { desc: 'Dážď', icon: '🌧️' };
+            if (symbolCode.includes('snow')) return { desc: 'Sneženie', icon: '❄️' };
+            if (symbolCode.includes('thunder')) return { desc: 'Búrka', icon: '⛈️' };
             return { desc: 'Oblačno', icon: '☁️' };
         }
 
@@ -803,112 +764,41 @@
             `).join('');
         }
 
-        function parseXmlFeed(xmlText, subreddit) {
-            if (!xmlText || (!xmlText.includes('<entry>') && !xmlText.includes('<item>'))) throw new Error('Not Valid XML');
-            const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
-            let entries = Array.from(doc.querySelectorAll('entry'));
-            if (!entries.length) entries = Array.from(doc.querySelectorAll('item'));
-            if (!entries.length) throw new Error('No entries');
-            return entries.slice(0, 8).map(entry => {
-                let link = entry.querySelector('link')?.textContent || entry.querySelector('link')?.getAttribute('href') || '#';
-                if (!link.startsWith('http')) {
-                    const linkEl = entry.getElementsByTagName('link')[0];
-                    link = linkEl?.getAttribute('href') || '#';
-                }
-                return {
-                    title: entry.querySelector('title')?.textContent || 'Bez názvu',
-                    link: link,
-                    author: entry.querySelector('author > name')?.textContent || `r/${subreddit}`,
-                    score: ''
-                };
-            });
-        }
-
-        function parseJsonFeed(data, subreddit) {
+        function parseRssJsonFeed(data, subreddit) {
             if (data?.status === 'ok' && Array.isArray(data.items) && data.items.length > 0) {
                 return data.items.slice(0, 8).map(i => ({
                     title: i.title,
                     link: i.link,
-                    author: i.author || `r/${subreddit}`,
+                    author: i.author || `u/redditor`,
                     score: ''
                 }));
             }
-            const children = data?.data?.children;
-            if (Array.isArray(children) && children.length > 0) {
-                return children.filter(c => !c.data.stickied).slice(0, 8).map(c => ({
-                    title: c.data.title,
-                    link: `https://www.reddit.com${c.data.permalink}`,
-                    author: `u/${c.data.author}`,
-                    score: c.data.ups ? `▲ ${c.data.ups}` : ''
-                }));
-            }
-            throw new Error('Invalid JSON structure');
+            throw new Error('Invalid rss2json structure');
         }
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v9_' + subreddit.toLowerCase();
-
-            if (!forceRefresh) {
-                try {
-                    const cached = localStorage.getItem(cacheKey);
-                    if (cached) {
-                        const parsed = JSON.parse(cached);
-                        if (Date.now() - parsed.ts < 30 * 60 * 1000 && parsed.items?.length) {
-                            renderRedditItems(parsed.items, container);
-                            return;
-                        }
-                    }
-                } catch (e) {}
-            }
+            const cacheKey = 'arsenal_reddit_v10_' + subreddit.toLowerCase();
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
 
-            const slashRssUrl = `https://www.reddit.com/r/${subreddit}/hot/.rss`;
-            const jsonUrl = `https://www.reddit.com/r/${subreddit}/hot.json?limit=10&raw_json=1`;
-
-            const providers = [
-                // 1. Lokálny JSON súbor (z GitHub Actions)
-                fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' })
-                    .then(r => r.text())
-                    .then(txt => txt.trim().startsWith('{') ? parseJsonFeed(JSON.parse(txt), subreddit) : parseXmlFeed(txt, subreddit)),
-
-                // 2. rss2json API
-                fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(slashRssUrl)}`)
-                    .then(r => r.json())
-                    .then(d => parseJsonFeed(d, subreddit)),
-
-                // 3. CodeTabs Proxy na RSS
-                fetch(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(slashRssUrl)}`)
-                    .then(r => r.text())
-                    .then(txt => parseXmlFeed(txt, subreddit)),
-
-                // 4. AllOrigins Proxy na JSON
-                fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(jsonUrl)}`)
-                    .then(r => r.json())
-                    .then(d => parseJsonFeed(JSON.parse(d.contents), subreddit))
-            ];
-
             try {
-                const items = await raceToSuccess(providers);
-                localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
+                // Načítanie lokálneho JSON súboru, ktorý vygeneroval GitHub Actions cez rss2json
+                const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
+                if (!res.ok) throw new Error('Network response not ok');
+                const data = await res.json();
+                
+                const items = parseRssJsonFeed(data, subreddit);
                 renderRedditItems(items, container);
             } catch (err) {
-                const oldCache = localStorage.getItem(cacheKey);
-                if (oldCache) {
-                    try {
-                        renderRedditItems(JSON.parse(oldCache).items, container);
-                        return;
-                    } catch (e) {}
-                }
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} je momentálne obmedzený Redditom. Skús ↻ Obnoviť neskôr.</div>`;
+                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} - nepodarilo sa načítať dáta.</div>`;
             }
         }
 
         function loadAllReddit(force = false) {
             loadSingleReddit('Gunners', 'list-gunners', force);
-            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 1000);
-            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 2000);
+            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 800);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 1600);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
