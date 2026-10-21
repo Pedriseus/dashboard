@@ -1,1 +1,38 @@
-<!DOCTYPE html><html lang="en-US"><head><title>Just a moment...</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="content-security-policy" content="default-src &#39;none&#39;; script-src &#39;nonce-vpbsTczBXxt0W0z8F80QVe&#39; &#39;unsafe-eval&#39; https://challenges.cloudflare.com; script-src-attr &#39;none&#39;; style-src &#39;unsafe-inline&#39;; img-src &#39;self&#39; https://challenges.cloudflare.com; connect-src &#39;self&#39; https://challenges.cloudflare.com; frame-src &#39;self&#39; https://challenges.cloudflare.com blob:; child-src &#39;self&#39; https://challenges.cloudflare.com blob:; worker-src blob:; form-action http: https:; base-uri &#39;self&#39;"><style>*{box-sizing:border-box;margin:0;padding:0}html{line-height:1.15;-webkit-text-size-adjust:100%;color:#313131;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}body{display:flex;flex-direction:column;height:100vh;min-height:100vh}.main-content{margin:8rem auto;padding-left:1.5rem;max-width:60rem}@media (width <= 720px){.main-content{margin-top:4rem}}#challenge-error-text{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSI+PHBhdGggZmlsbD0iI0IyMEYwMyIgZD0iTTE2IDNhMTMgMTMgMCAxIDAgMTMgMTNBMTMuMDE1IDEzLjAxNSAwIDAgMCAxNiAzbTAgMjRhMTEgMTEgMCAxIDEgMTEtMTEgMTEuMDEgMTEuMDEgMCAwIDEtMTEgMTEiLz48cGF0aCBmaWxsPSIjQjIwRjAzIiBkPSJNMTcuMDM4IDE4LjYxNUgxNC44N0wxNC41NjMgOS41aDIuNzgzem0tMS4wODQgMS40MjdxLjY2IDAgMS4wNTcuMzg4LjQwNy4zODkuNDA3Ljk5NCAwIC41OTYtLjQwNy45ODQtLjM5Ny4zOS0xLjA1Ny4zODktLjY1IDAtMS4wNTYtLjM4OS0uMzk4LS4zODktLjM5OC0uOTg0IDAtLjU5Ny4zOTgtLjk4NS40MDYtLjM5NyAxLjA1Ni0uMzk3Ii8+PC9zdmc+");background-repeat:no-repeat;background-size:contain;padding-left:34px}</style><meta http-equiv="refresh" content="360"></head><body><div class="main-wrapper" role="main"><div class="main-content"><noscript><div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div></noscript></div></div><script nonce="vpbsTczBXxt0W0z8F80QVe">(function(){window._cf_chl_opt = {cFPWv: 'b',cH: 'fAo3Le96oLx9EfDrK.V_8UsvF0PjYKeFZ1_Okul2.RI-1792602024-1.2.1.1-IbDu9pFXfVHj9Oc8vgphI4TbyU9eou_aO3WSmZI8m8FMGuF7RjkyR0c2vuSSGuwA',cITimeS: '1792602024',cN: 'vpbsTczBXxt0W0z8F80QVe',cRay: 'a4e1d17a8b10934e',cTplC:0,cTplO:0,cTplV:5,cType: 'interactive',cUPMDTk:"/v1/api.json?rss_url=https://www.reddit.com/r/Slovakia/hot/.rss\u0026__cf_chl_tk=3IpPxhehUBKFl.rVfy3SjwMNoMY84_VCs1A7b5idQws-1792602024-1.0.1.1-ZVas2bE7hXLBjG4zcWeJT3gm15yg_J9lvXq.kAu_508",cvId: '3',cZone: 'api.rss2json.com',fa:"/v1/api.json?rss_url=https://www.reddit.com/r/Slovakia/hot/.rss\u0026__cf_chl_f_tk=3IpPxhehUBKFl.rVfy3SjwMNoMY84_VCs1A7b5idQws-1792602024-1.0.1.1-ZVas2bE7hXLBjG4zcWeJT3gm15yg_J9lvXq.kAu_508",md: 'RyXiSwSGoEDNAgnYf3eWWkQ9SQpKuWyXmS7M4hostb4-1792602024-1.2.1.1-ZJsKozEY4ENHGmutMnievMxBaNlHji3EONKyMBOJR5kOyl_Of2TSySIXirZd_WaKzZlY7YIBJlfhYPGP8_xamk9q9Fxj_rXs4vhSN1IlsypD2Ruk6d9lJw1kdhJBAX46JrCM121MDHl2V.FVow.378TafcwbCqE7WXuT6fVlvhtBst6ha.D5Vne8cOibM.Zo27vfQDxqiK485O5.79aUXWwqLufX1T7iqwJAFlaRoX3jja.HGJKd3gCv7JBSMCMBZrR49wgTxWUsigKqWU1V_.TogTX5Ci6POKumBJBGSeAYz6Y7.Z8SaXv2vnJoSxnGqMwtEuhMbzf_2.I9Gkj57RaVmfsiuNxTxgugCwnsYzShxht1xa96U_TLz7Q_BoVpsNFRJdvyBu2f9qvO6PLz4KOcSB6x6_egDu8muEeYo9_ytQKlUp0R.PhRYntHt2oi.XeBNvHBawoZg3GQDjv6PgBo.Nc1R7bcirgDVFh8q6SoL6HjHvc3RZeqZSRTZLkZiWrTYmMibsYCnA.wR9QDJ.9N4ZySuv4aXriarzoW1yV0FwdUAO1o.TStFwyxqQS0BULeMRGL4H8A.Ryo46V0d7EQQ_qRCIXenvta2xN22jDmPyaOPXPl9L_tkn.kjscpLaywn73dcBhRvUY0xCoaS88lY7UD1OuJ7PfHf1.TzgCI5tT6qcR64NIDRj_FhuqhfX.VUHBXW5pZWNcp7eMU.IMTs9_5zgJQwFg6JDsXVd4X2w0PwQVe84AWCgv52wCpbruRPc18CAQNeoGDnjkuVs9bzLQ1bscVfZLUwsmNja5FFxpnIneUmGmYpdU4SKBEAYUtbbozW1JAQmrKyGNVMdF53_JtJPJ3vsVJ_dVuBfmQCIB6ZSg5ZvDra9IPJIrv45wDuHjrgEjOdML9EskZPM7OkbG67Sa4PyhhuYM_Kvbgn8s9S0sc.uVc5uwWCYKm08DvELGHI9YUd9_U02fMzg07I5UvBEEqJfFWtwSnqezlFpgRzM8YFO34QSgTMbc9tAg00thhBxtIdp.Q7yAQOsbZ8j6ndmgUDkRGklkB8Ut21_ojdxu_R3oDLUp4yCMe1Bjf4TbfFwGIkwsqgpXk9lU.12V1JjX3DfYLOnwjRtA',mdrd: 'rcaRNPKiHknZhjnYAm3dnAFSxlt6bz3XdtI8mBrmoZg-1792602024-1.2.1.1-kwyGTWEgAJD59lVFFsWh_yWmZWLlDTEPECv0SicUj8g0QeKG7aVMSu6iijqdXEZ04XkABsgFrmhofscGVlcvBl_k.2W0J0ir6xmWBmHa3yopGO8s7OMuloFBTKT_UuudV9vWnZr6E4Eyencf_RdFH9XVfnrk8J.7H1mfBgELW08yVDIIMhT6xWVSlJHELSS5DAWnDujDRJ3DBLGRscPlLg',};var a = document.createElement('script');a.nonce = 'vpbsTczBXxt0W0z8F80QVe';a.src = '/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a4e1d17a8b10934e';window._cf_chl_opt.cOgUHash = location.hash === '' && location.href.indexOf('#') !== -1 ? '#' : location.hash;window._cf_chl_opt.cOgUQuery = location.search === '' && location.href.slice(0, location.href.length - window._cf_chl_opt.cOgUHash.length).indexOf('?') !== -1 ? '?' : location.search;if (window.history && window.history.replaceState) {var ogU = location.pathname + window._cf_chl_opt.cOgUQuery + window._cf_chl_opt.cOgUHash;history.replaceState(null, null,"/v1/api.json?rss_url=https://www.reddit.com/r/Slovakia/hot/.rss\u0026__cf_chl_rt_tk=3IpPxhehUBKFl.rVfy3SjwMNoMY84_VCs1A7b5idQws-1792602024-1.0.1.1-ZVas2bE7hXLBjG4zcWeJT3gm15yg_J9lvXq.kAu_508"+ window._cf_chl_opt.cOgUHash);a.onload = function() {history.replaceState(null, null, ogU);}}document.getElementsByTagName('head')[0].appendChild(a);}());</script></body></html>
+<!doctype html>
+     <html>
+  <head>
+    <title>Blocked</title>
+    <style>
+      body {
+          font: small verdana, arial, helvetica, sans-serif;
+          width: 600px;
+          margin: 0 auto;
+      }
+
+      h1 {
+          height: 40px;
+          background: transparent url(//www.redditstatic.com/reddit.com.header.png) no-repeat scroll top right;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>whoa there, pardner!</h1>
+
+<p>Your request has been blocked due to a network policy.</p>
+
+<p>Try logging in or creating an account <a href=https://www.reddit.com/login/>here</a> to get back to browsing.</p>
+
+<p>If you're running a script or application, please register or sign in with your developer credentials <a href=https://www.reddit.com/wiki/api/>here</a>. Additionally make sure your User-Agent is not empty and is something unique and descriptive and try again. if you're supplying an alternate User-Agent string,
+try changing back to default as that can sometimes result in a block.</p>
+
+<p>You can read Reddit's Terms of Service <a href=https://www.reddit.com/wiki/api/>here</a>.</p>
+
+<p>If you think that we've incorrectly blocked you or you would like to discuss
+easier ways to get the data you want, please file a ticket <a href=https://support.reddithelp.com/hc/en-us/requests/new?ticket_form_id=21879292693140>here</a>.</p>
+
+<p>When contacting us, please include your Reddit account along with the following code:</p>
+
+<p><strong>01a15f77-c9b2-7d03-ae25-928b33d13fc4</strong></p>
+  </body>
+</html>
+    

@@ -1,1 +1,38 @@
-<!DOCTYPE html><html lang="en-US"><head><title>Just a moment...</title><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=Edge"><meta name="robots" content="noindex,nofollow"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="content-security-policy" content="default-src &#39;none&#39;; script-src &#39;nonce-sBWqgR1QA5MaAUkqZJVDAh&#39; &#39;unsafe-eval&#39; https://challenges.cloudflare.com; script-src-attr &#39;none&#39;; style-src &#39;unsafe-inline&#39;; img-src &#39;self&#39; https://challenges.cloudflare.com; connect-src &#39;self&#39; https://challenges.cloudflare.com; frame-src &#39;self&#39; https://challenges.cloudflare.com blob:; child-src &#39;self&#39; https://challenges.cloudflare.com blob:; worker-src blob:; form-action http: https:; base-uri &#39;self&#39;"><style>*{box-sizing:border-box;margin:0;padding:0}html{line-height:1.15;-webkit-text-size-adjust:100%;color:#313131;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"}body{display:flex;flex-direction:column;height:100vh;min-height:100vh}.main-content{margin:8rem auto;padding-left:1.5rem;max-width:60rem}@media (width <= 720px){.main-content{margin-top:4rem}}#challenge-error-text{background-image:url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMiIgaGVpZ2h0PSIzMiIgZmlsbD0ibm9uZSI+PHBhdGggZmlsbD0iI0IyMEYwMyIgZD0iTTE2IDNhMTMgMTMgMCAxIDAgMTMgMTNBMTMuMDE1IDEzLjAxNSAwIDAgMCAxNiAzbTAgMjRhMTEgMTEgMCAxIDEgMTEtMTEgMTEuMDEgMTEuMDEgMCAwIDEtMTEgMTEiLz48cGF0aCBmaWxsPSIjQjIwRjAzIiBkPSJNMTcuMDM4IDE4LjYxNUgxNC44N0wxNC41NjMgOS41aDIuNzgzem0tMS4wODQgMS40MjdxLjY2IDAgMS4wNTcuMzg4LjQwNy4zODkuNDA3Ljk5NCAwIC41OTYtLjQwNy45ODQtLjM5Ny4zOS0xLjA1Ny4zODktLjY1IDAtMS4wNTYtLjM4OS0uMzk4LS4zODktLjM5OC0uOTg0IDAtLjU5Ny4zOTgtLjk4NS40MDYtLjM5NyAxLjA1Ni0uMzk3Ii8+PC9zdmc+");background-repeat:no-repeat;background-size:contain;padding-left:34px}</style><meta http-equiv="refresh" content="360"></head><body><div class="main-wrapper" role="main"><div class="main-content"><noscript><div class="h2"><span id="challenge-error-text">Enable JavaScript and cookies to continue</span></div></noscript></div></div><script nonce="sBWqgR1QA5MaAUkqZJVDAh">(function(){window._cf_chl_opt = {cFPWv: 'b',cH: 'XtoBaoZOHF8UvBZhBm5U9Y2vekaagyNGRqb8lYxXVNw-1792602027-1.2.1.1-jIo8A8CqEDp0Sw_l4tAfULwdfB2Z2xqTevk_WZyp4FOBzDgDmMY4cF_Hw1cZEJ31',cITimeS: '1792602027',cN: 'sBWqgR1QA5MaAUkqZJVDAh',cRay: 'a4e1d18dadf75281',cTplC:0,cTplO:0,cTplV:5,cType: 'interactive',cUPMDTk:"/v1/api.json?rss_url=https://www.reddit.com/r/Gunners/hot/.rss\u0026__cf_chl_tk=1BBBdqytgmMvARicYY4asxja5qcAW10zdMqTRyuXF2g-1792602027-1.0.1.1-xkequ60ARW82GkIpuRwukBsXL08ct13aBfOkWaoLQfg",cvId: '3',cZone: 'api.rss2json.com',fa:"/v1/api.json?rss_url=https://www.reddit.com/r/Gunners/hot/.rss\u0026__cf_chl_f_tk=1BBBdqytgmMvARicYY4asxja5qcAW10zdMqTRyuXF2g-1792602027-1.0.1.1-xkequ60ARW82GkIpuRwukBsXL08ct13aBfOkWaoLQfg",md: 'VMuHiFw3pCKgPScR4MtQ72bR3SM5DbnFHGndMyzhlYc-1792602027-1.2.1.1-RDD_KF3jx008KXxXL3mFRfjVBuB8OleJ_wMvrCzSOWYid0_AE35hHI0BSx41tWorTa3H1mJarNXWrl8igRVStbDcSqLNbXuyvQzxWqDfyjfbbtYb1xCsLEg.zq21bz7gAYovw7YXLNp8JSPEbzLXTRWnb35iVrWpFJEyHQgZ7XBpgk8HddjggoiHGmdPFhGy.wDvE7INCaMzlTanVDhLi8Hpw_OAFGsk6KzJoyx0SE7AAHT.7067uwErpD_bllVKxC99KWIWIHLusiw5GN2kamEvwhHNzo8JZMmPJCR1._8t_ISjsntJhcRzkuneagv_Iox6I0hQ65HofVJGWRxr.gkzX21owWonfd.rjeGusXaic5TiahvBJd86glhDUPHrlghy5pyQ0PvSKGjxpwD5c6p9BWC8CMhP1uROcamasKVZi_GD8Xi8zY3cjZDgdVzxAmEm4W4L23YlwOkfxBXF7EFmd2qVD7skkLsxa9HSvXY3JFPRaIjJiOeViZ4h5tvS4P8ZyRbXpplRK7OWpQAa_csHScEENY1DE7l_ELQo6nW7ZvoAeWhegx2vSJSKA27ld7j.1jqr.W7OqW.aJwHnQIBNGos6hV9DztCjzCJAeOtKWXUujfPQJN0f5VN.B3pT.34LfJd5rNicF_.eYWT2r0VRrwQ7gQjvB3k3.3gqjH6x6WK2o_HCPcbNED0UvwSTd4XioixQN4JdESGw4EhmEqiCGZCYjnOlbeWXcfdHT54lLff4fa4dZvStZwW1l.vxyQfKMSaBox9_pCc9qI0B1Mb_Sc3eRtrx014RJyyuKetC9GVGJf8Re6X932ieuTPVMGZNuH7l2sPHPiGc9reGy_1T__WPwyD6Rf3K1GT34RBcw9SxFVkrZWLQi8BuZmEI6049VlVwebqOOUSTch2T.FMtGVKqzVMtaqdzexbDjEcI8YPmXhEN8lv8_ppcLGOGCvI7bkWRhJPPgoFl66DQz4khQY7kXkQDsJNVkX_51ZD1j5Dtu_OkHSX9YuANmNJXoO.3e7_.HlJ7mKyI6SgXYx_Ys2EFzfRGr4yILy9WuD0gF5SHcrJoEcuAX8ZgTWqYoTlsSCat0oIOrKrUfILIdxTXq3ztBZzo6q.UjKXzE80',mdrd: 'G9SxkIjXex5vZlGQcNg38CaqSW40nIO88eynP8uhMUI-1792602027-1.2.1.1-H.c4Ifd3ach971xoRzmzqKUA6tch6pm6ROnZg_wsWOcW4GPveUPorQaohZY2PGHOt02oV3U2e2eAXGacQiXP3rYbTLTjPK4cASk92J7u05eRf1mYE_qPYn5DMfsQT.tlQCYQe8UZxnS88oFG6uqcQePNKP2sG7JMS4VCFIbPf9tEGM7wXURANLMlXctlERWRVu5HANHZ.qDuo200iGGBzQ',};var a = document.createElement('script');a.nonce = 'sBWqgR1QA5MaAUkqZJVDAh';a.src = '/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1?ray=a4e1d18dadf75281';window._cf_chl_opt.cOgUHash = location.hash === '' && location.href.indexOf('#') !== -1 ? '#' : location.hash;window._cf_chl_opt.cOgUQuery = location.search === '' && location.href.slice(0, location.href.length - window._cf_chl_opt.cOgUHash.length).indexOf('?') !== -1 ? '?' : location.search;if (window.history && window.history.replaceState) {var ogU = location.pathname + window._cf_chl_opt.cOgUQuery + window._cf_chl_opt.cOgUHash;history.replaceState(null, null,"/v1/api.json?rss_url=https://www.reddit.com/r/Gunners/hot/.rss\u0026__cf_chl_rt_tk=1BBBdqytgmMvARicYY4asxja5qcAW10zdMqTRyuXF2g-1792602027-1.0.1.1-xkequ60ARW82GkIpuRwukBsXL08ct13aBfOkWaoLQfg"+ window._cf_chl_opt.cOgUHash);a.onload = function() {history.replaceState(null, null, ogU);}}document.getElementsByTagName('head')[0].appendChild(a);}());</script></body></html>
+<!doctype html>
+     <html>
+  <head>
+    <title>Blocked</title>
+    <style>
+      body {
+          font: small verdana, arial, helvetica, sans-serif;
+          width: 600px;
+          margin: 0 auto;
+      }
+
+      h1 {
+          height: 40px;
+          background: transparent url(//www.redditstatic.com/reddit.com.header.png) no-repeat scroll top right;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>whoa there, pardner!</h1>
+
+<p>Your request has been blocked due to a network policy.</p>
+
+<p>Try logging in or creating an account <a href=https://www.reddit.com/login/>here</a> to get back to browsing.</p>
+
+<p>If you're running a script or application, please register or sign in with your developer credentials <a href=https://www.reddit.com/wiki/api/>here</a>. Additionally make sure your User-Agent is not empty and is something unique and descriptive and try again. if you're supplying an alternate User-Agent string,
+try changing back to default as that can sometimes result in a block.</p>
+
+<p>You can read Reddit's Terms of Service <a href=https://www.reddit.com/wiki/api/>here</a>.</p>
+
+<p>If you think that we've incorrectly blocked you or you would like to discuss
+easier ways to get the data you want, please file a ticket <a href=https://support.reddithelp.com/hc/en-us/requests/new?ticket_form_id=21879292693140>here</a>.</p>
+
+<p>When contacting us, please include your Reddit account along with the following code:</p>
+
+<p><strong>01a15f77-d223-7bb3-adb0-5fe5eec46dee</strong></p>
+  </body>
+</html>
+    
