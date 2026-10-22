@@ -789,8 +789,33 @@
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit}...</div>`;
+            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit} (Top 24h)...</div>`;
 
+            // 1. Pokus: Priame načítanie TOP 24h z Redditu cez prehliadač (domáca IP nie je blokovaná)
+            try {
+                const directRes = await fetch(`https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=8&raw_json=1`);
+                if (directRes.ok) {
+                    const directData = await directRes.json();
+                    const children = directData?.data?.children || [];
+                    const items = children
+                        .map(c => c.data)
+                        .filter(p => p && !p.stickied)
+                        .slice(0, 8)
+                        .map(p => ({
+                            title: p.title,
+                            link: `https://www.reddit.com${p.permalink}`,
+                            author: `u/${p.author} • ⬆️ ${p.score}`
+                        }));
+                    if (items.length > 0) {
+                        renderRedditItems(items, container);
+                        return;
+                    }
+                }
+            } catch (e) {
+                // Ak prehliadač zablokuje priamy prístup (napr. kvôli adblocku/tracking protection), pokračujeme na GitHub JSON
+            }
+
+            // 2. Pokus: Lokálny JSON súbor vygenerovaný cez GitHub Actions
             try {
                 const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
                 if (!res.ok) throw new Error('Lokálny súbor nedostupný');
@@ -800,7 +825,7 @@
                     const items = data.items.slice(0, 8).map(item => ({
                         title: item.title,
                         link: item.link,
-                        author: item.author ? `u/${item.author.replace('/u/', '')}` : `r/${subreddit}`
+                        author: item.author ? `u/${item.author.replace('/u/', '')}${item.score ? ` • ⬆️ ${item.score}` : ''}` : `r/${subreddit}`
                     }));
                     renderRedditItems(items, container);
                 } else {
