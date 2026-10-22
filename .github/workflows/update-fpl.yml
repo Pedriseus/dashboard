@@ -19,10 +19,11 @@ jobs:
         run: |
           curl -s -L -A "Mozilla/5.0" "https://fantasy.premierleague.com/api/leagues-classic/28856/standings/?page_standings=1" -o fpl-league.json
 
-      - name: Stiahnutie Reddit feedov (Priamy parser + Fallbacky)
+      - name: Stiahnutie Reddit Top 24h (Multi-Proxy + Mirror)
         run: |
           python3 - << 'EOF'
           import urllib.request
+          import urllib.parse
           import json
           import xml.etree.ElementTree as ET
           import time
@@ -30,102 +31,119 @@ jobs:
 
           subs = ["Slovakia", "Gunners", "FantasyPL"]
 
-          def fetch_sub(sub):
-              # Unikátny User-Agent podľa pravidiel Redditu, aby neblokoval GitHub IP
-              ua = f"linux:arsenal.daily.dashboard:v2.4.{random.randint(100,999)} (by /u/odeargod_sk)"
-              headers = {
-                  "User-Agent": ua,
-                  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,application/json,*/*;q=0.8",
-                  "Accept-Language": "sk-SK,sk;q=0.9,en-US;q=0.8,en;q=0.7"
-              }
+          def parse_reddit_json(raw_text, sub):
+              data = json.loads(raw_text)
+              items = []
+              for child in data.get("data", {}).get("children", []):
+                  p = child.get("data", {})
+                  if not p.get("stickied"):
+                      items.append({
+                          "title": p.get("title", "Bez názvu"),
+                          "link": f"https://www.reddit.com{p.get('permalink', '')}",
+                          "author": p.get("author", f"r/{sub}"),
+                          "score": p.get("score", 0)
+                      })
+              return items[:10]
 
-              # 1. POKUS: Priamy Reddit RSS (.rss) - spracovaný lokálne bez rss2json
-              for domain in ["https://www.reddit.com", "https://old.reddit.com"]:
-                  url_rss = f"{domain}/r/{sub}/hot/.rss?limit=12"
+          def parse_rss_xml(raw_bytes, sub, replace_domain=None):
+              root = ET.fromstring(raw_bytes)
+              items = []
+              # Atom format (Reddit / Redlib)
+              ns = {"atom": "http://www.w3.org/2005/Atom"}
+              for entry in root.findall("atom:entry", ns):
+                  title_el = entry.find("atom:title", ns)
+                  link_el = entry.find("atom:link", ns)
+                  author_el = entry.find("atom:author/atom:name", ns)
+                  link = link_el.attrib.get("href", "") if link_el is not None else ""
+                  if replace_domain and replace_domain in link:
+                      link = link.replace(replace_domain, "https://www.reddit.com")
+                  items.append({
+                      "title": title_el.text if title_el is not None else "Bez názvu",
+                      "link": link or f"https://www.reddit.com/r/{sub}/",
+                      "author": (author_el.text if author_el is not None else f"r/{sub}").replace("/u/", "")
+                  })
+              if items:
+                  return items[:10]
+
+              # Standard RSS 2.0 format
+              for item in root.findall(".//item"):
+                  t = item.find("title")
+                  l = item.find("link")
+                  dc = item.find("{http://purl.org/dc/elements/1.1/}creator")
+                  link = (l.text or "") if l is not None else ""
+                  if replace_domain and replace_domain in link:
+                      link = link.replace(replace_domain, "https://www.reddit.com")
+                  items.append({
+                      "title": t.text if t is not None else "Bez názvu",
+                      "link": link or f"https://www.reddit.com/r/{sub}/",
+                      "author": (dc.text if dc is not None else f"r/{sub}").replace("/u/", "")
+                  })
+              return items[:10]
+
+          def fetch_top_24h(sub):
+              target_json = f"https://old.reddit.com/r/{sub}/top.json?t=day&limit=10&raw_json=1"
+              target_rss = f"https://old.reddit.com/r/{sub}/top/.rss?t=day&limit=10"
+              enc_json = urllib.parse.quote(target_json, safe="")
+              enc_rss = urllib.parse.quote(target_rss, safe="")
+
+              # Zoznam proxy zdrojov pre TOP 24h JSON
+              json_sources = [
+                  ("CodeTabs Proxy", f"https://api.codetabs.com/v1/proxy?quest={enc_json}"),
+                  ("AllOrigins Raw", f"https://api.allorigins.win/raw?url={enc_json}"),
+                  ("Direct OldReddit", target_json)
+              ]
+
+              for name, url in json_sources:
                   try:
-                      req = urllib.request.Request(url_rss, headers=headers)
+                      req = urllib.request.Request(url, headers={
+                          "User-Agent": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/12{random.randint(0,9)}.0.0.0"
+                      })
                       with urllib.request.urlopen(req, timeout=15) as resp:
-                          root = ET.fromstring(resp.read())
-                          ns = {"atom": "http://www.w3.org/2005/Atom"}
-                          items = []
-                          for entry in root.findall("atom:entry", ns):
-                              title_el = entry.find("atom:title", ns)
-                              link_el = entry.find("atom:link", ns)
-                              author_el = entry.find("atom:author/atom:name", ns)
-
-                              title = title_el.text if title_el is not None else "Bez názvu"
-                              link = link_el.attrib.get("href", f"https://www.reddit.com/r/{sub}/") if link_el is not None else f"https://www.reddit.com/r/{sub}/"
-                              author = author_el.text if author_el is not None else f"r/{sub}"
-
-                              items.append({
-                                  "title": title,
-                                  "link": link,
-                                  "author": author
-                              })
+                          text = resp.read().decode("utf-8")
+                          items = parse_reddit_json(text, sub)
                           if items:
-                              print(f"[OK - RSS {domain}] r/{sub}: {len(items)} príspevkov")
-                              return items[:10]
+                              print(f"[OK - {name}] r/{sub} (Top 24h): {len(items)} príspevkov")
+                              return items
                   except Exception as e:
-                      print(f"[WARN] RSS {domain} pre r/{sub} zlyhal: {e}")
+                      print(f"[WARN] {name} JSON pre r/{sub} zlyhal: {e}")
 
-              # 2. POKUS: Reddit JSON endpoint
-              for domain in ["https://old.reddit.com", "https://www.reddit.com"]:
-                  url_json = f"{domain}/r/{sub}/hot.json?limit=12&raw_json=1"
+              # Záloha: RSS Top 24h cez proxy a rôzne Redlib inštancie (premiešané, aby nedali rate-limit)
+              mirrors = [
+                  "https://redlib.perennialte.ch",
+                  "https://redlib.catsarch.com",
+                  "https://redlib.tux.pizza",
+                  "https://libreddit.northboot.xyz",
+                  "https://redlib.ducks.party"
+              ]
+              random.shuffle(mirrors)
+
+              rss_sources = [
+                  ("CodeTabs RSS", f"https://api.codetabs.com/v1/proxy?quest={enc_rss}", None),
+                  ("AllOrigins RSS", f"https://api.allorigins.win/raw?url={enc_rss}", None)
+              ] + [(f"Mirror {m}", f"{m}/r/{sub}/top.rss?t=day", m) for m in mirrors]
+
+              for name, url, dom in rss_sources:
                   try:
-                      req = urllib.request.Request(url_json, headers=headers)
+                      req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:128.0) Gecko/20100101 Firefox/128.0"})
                       with urllib.request.urlopen(req, timeout=15) as resp:
-                          data = json.loads(resp.read().decode("utf-8"))
-                          items = []
-                          for child in data.get("data", {}).get("children", []):
-                              p = child.get("data", {})
-                              if not p.get("stickied"):
-                                  items.append({
-                                      "title": p.get("title", "Bez názvu"),
-                                      "link": f"https://www.reddit.com{p.get('permalink', '')}",
-                                      "author": p.get("author", f"r/{sub}")
-                                  })
+                          items = parse_rss_xml(resp.read(), sub, dom)
                           if items:
-                              print(f"[OK - JSON {domain}] r/{sub}: {len(items)} príspevkov")
-                              return items[:10]
+                              print(f"[OK - {name}] r/{sub} (Top 24h RSS): {len(items)} príspevkov")
+                              return items
                   except Exception as e:
-                      print(f"[WARN] JSON {domain} pre r/{sub} zlyhal: {e}")
-
-              # 3. POKUS: Záložné Redlib zrkadlá (ak by Reddit blokoval celú GitHub podsieť)
-              mirrors = ["https://redlib.catsarch.com", "https://redlib.perennialte.ch", "https://redlib.tux.pizza"]
-              for mirror in mirrors:
-                  try:
-                      req = urllib.request.Request(f"{mirror}/r/{sub}/hot.rss", headers={"User-Agent": "Mozilla/5.0"})
-                      with urllib.request.urlopen(req, timeout=15) as resp:
-                          root = ET.fromstring(resp.read())
-                          items = []
-                          # Redlib vracia štandardný RSS 2.0 (<item>) alebo Atom
-                          for item in root.findall(".//item"):
-                              t = item.find("title")
-                              l = item.find("link")
-                              dc = item.find("{http://purl.org/dc/elements/1.1/}creator")
-                              link_txt = (l.text or "").replace(mirror, "https://www.reddit.com")
-                              items.append({
-                                  "title": t.text if t is not None else "Bez názvu",
-                                  "link": link_txt,
-                                  "author": dc.text if dc is not None else f"r/{sub}"
-                              })
-                          if items:
-                              print(f"[OK - Mirror {mirror}] r/{sub}: {len(items)} príspevkov")
-                              return items[:10]
-                  except Exception as e:
-                      print(f"[WARN] Mirror {mirror} pre r/{sub} zlyhal: {e}")
+                      print(f"[WARN] {name} pre r/{sub} zlyhal: {e}")
 
               return []
 
           for s in subs:
-              posts = fetch_sub(s)
+              posts = fetch_top_24h(s)
               filename = f"reddit-{s.lower()}.json"
               if posts:
                   with open(filename, "w", encoding="utf-8") as f:
                       json.dump({"status": "ok", "items": posts}, f, ensure_ascii=False, indent=2)
               else:
-                  print(f"[ERROR] Nepodarilo sa stiahnuť r/{s}, ponechávam predošlý súbor.")
-              time.sleep(2)
+                  print(f"[ERROR] Nepodarilo sa stiahnuť r/{s}")
+              time.sleep(4)
           EOF
 
       - name: Commit a Push dát do repozitára
