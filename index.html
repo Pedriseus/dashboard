@@ -404,76 +404,67 @@
         updateDateTime();
 
         // =========================================================================
-        // 1. ŽIVÁ FORMA PRIAMO Z FPL API (100% PRESNÁ HISTÓRIA POSLEDNÝCH 5 ZÁPASOV)
+        // 1. ŽIVÁ FORMA Z ESPNSCOREBOARD API (MATCHING PODĽA NÁZVU TÍMU)
         // =========================================================================
-        let fplTeamsMap = {};
-        let fplFixturesData = [];
-
-        async function preloadFPLFormSource() {
+        async function fetchLiveFormMap() {
+            const formMap = {};
             try {
-                // Stiahneme tímové mapovanie a rozpis zápasov priamo z oficiálneho FPL API
-                const [bootstrapRes, fixturesRes] = await Promise.all([
-                    fetch('https://fantasy.premierleague.com/api/bootstrap-static/'),
-                    fetch('https://fantasy.premierleague.com/api/fixtures/')
-                ]);
-                if (bootstrapRes.ok) {
-                    const bData = await bootstrapRes.json();
-                    (bData.teams || []).forEach(t => {
-                        fplTeamsMap[t.id] = t.name; // napr. 1 = Arsenal, 2 = Man City atď.
-                    });
+                const now = new Date();
+                const past = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
+                const fmt = (d) => d.toISOString().slice(0,10).replace(/-/g,'');
+                
+                const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?limit=100&dates=${fmt(past)}-${fmt(now)}&_t=${Date.now()}`);
+                if (!res.ok) return formMap;
+
+                const data = await res.json();
+                const events = data.events || [];
+
+                events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                for (const ev of events) {
+                    const comp = ev.competitions?.[0];
+                    const isFinished = comp?.status?.type?.completed === true || comp?.status?.type?.state === 'post';
+                    if (!comp || !isFinished) continue;
+
+                    const competitors = comp.competitors || [];
+                    if (competitors.length !== 2) continue;
+
+                    const c1 = competitors[0];
+                    const c2 = competitors[1];
+                    const s1 = parseInt(c1.score, 10);
+                    const s2 = parseInt(c2.score, 10);
+                    if (isNaN(s1) || isNaN(s2)) continue;
+
+                    const name1 = (c1.team?.shortDisplayName || c1.team?.name || '').toLowerCase();
+                    const name2 = (c2.team?.shortDisplayName || c2.team?.name || '').toLowerCase();
+
+                    if (!formMap[name1]) formMap[name1] = [];
+                    if (!formMap[name2]) formMap[name2] = [];
+
+                    let r1 = 'R', r2 = 'R';
+                    if (s1 > s2) { r1 = 'V'; r2 = 'P'; }
+                    else if (s1 < s2) { r1 = 'P'; r2 = 'V'; }
+
+                    if (formMap[name1].length < 5) formMap[name1].push(r1);
+                    if (formMap[name2].length < 5) formMap[name2].push(r2);
                 }
-                if (fixturesRes.ok) {
-                    fplFixturesData = await fixturesRes.json();
-                }
-            } catch (e) {
-                console.warn('FPL forma feed nedostupný, použije sa záloha.');
+            } catch (err) {
+                console.warn('Chyba živej formy:', err);
             }
-        }
-
-        function getFPLTeamForm(teamRealName) {
-            if (!fplFixturesData.length || !Object.keys(fplTeamsMap).length) return null;
-
-            // Nájdeme ID tímu v mape
-            let teamId = null;
-            const searchStr = teamRealName.toLowerCase();
-            for (const [id, name] of Object.entries(fplTeamsMap)) {
-                if (name.toLowerCase().includes(searchStr) || searchStr.includes(name.toLowerCase())) {
-                    teamId = parseInt(id, 10);
-                    break;
-                }
-            }
-            if (!teamId) return null;
-
-            // Filtrujeme iba odohrané zápasy tohto tímu
-            const playedMatches = fplFixturesData.filter(f => f.finished && (f.team_h === teamId || f.team_a === teamId));
-            // Zoradíme od najnovšieho po najstaršie
-            playedMatches.sort((a, b) => b.event - a.event);
-
-            const formLetters = [];
-            for (const match of playedMatches.slice(0, 5)) {
-                const isHome = match.team_h === teamId;
-                const myScore = isHome ? match.team_h_score : match.team_a_score;
-                const oppScore = isHome ? match.team_a_score : match.team_h_score;
-
-                if (myScore > oppScore) formLetters.push('V');
-                else if (myScore < oppScore) formLetters.push('P');
-                else formLetters.push('R');
-            }
-
-            return formLetters.length > 0 ? formLetters : null;
+            return formMap;
         }
 
         async function updateLivePLStandings() {
             const container = document.getElementById('pl-table-rows');
             try {
-                if (!fplFixturesData.length) {
-                    await preloadFPLFormSource();
-                }
+                const [standingsRes, liveFormMap] = await Promise.all([
+                    fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`),
+                    fetchLiveFormMap()
+                ]);
 
-                const res = await fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`);
-                if (!res.ok) throw new Error('Chyba API');
-                
-                const data = await res.json();
+                if (!standingsRes.ok) throw new Error('Chyba tabuľky');
+
+                const data = await standingsRes.json();
                 const entries = data?.children?.[0]?.standings?.entries || data?.standings?.entries || [];
 
                 container.innerHTML = entries.map((item, idx) => {
@@ -490,10 +481,15 @@
                     const played = getStat('gamesPlayed');
                     const pts = getStat('points');
 
-                    // Získame presnú formu z FPL API (najnovší zápas vľavo ako na Flashscore)
-                    let formArr = getFPLTeamForm(rawName);
+                    const lookupKey = rawName.toLowerCase();
+                    let formArr = null;
+                    for (const [k, arr] of Object.entries(liveFormMap)) {
+                        if (lookupKey.includes(k) || k.includes(lookupKey)) {
+                            formArr = arr;
+                            break;
+                        }
+                    }
 
-                    // Záloha ak by FPL zlyhalo
                     if (!formArr || formArr.length === 0) {
                         let w = getStat('wins'), d = getStat('ties'), l = getStat('losses');
                         formArr = [];
@@ -787,7 +783,7 @@
         }
 
         // ============================================================================
-        // 4. ROBUSTNÝ REDDIT FEED (CORS PROXY BRÁNY + LOKÁLNY JSON)
+        // 4. ROBUSTNÝ REDDIT FEED (CORS PROXY + LOKÁLNY JSON)
         // ============================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
