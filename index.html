@@ -404,14 +404,31 @@
         updateDateTime();
 
         // =========================================================================
-        // 1. ŽIVÁ FORMA Z TABUĽKY A LIGOVÝCH ŠTATISTÍK (BEZ ZÁVISLOSTI NA MESIACOCH)
+        // 1. ŽIVÁ FORMA Z TABUĽKY (BEZ ČAKANIA NA MESAČNÉ API)
         // =========================================================================
-        function parseFormString(formStr) {
-            if (!formStr || typeof formStr !== 'string') return null;
-            const clean = formStr.toUpperCase().replace(/[^WDL]/g, '');
-            if (!clean) return null;
-            // Flashscore štýl: najnovší zápas je vľavo
-            return clean.slice(-5).split('').reverse().map(ch => ch === 'W' ? 'V' : ch === 'D' ? 'R' : 'P');
+        function getCleanFormArray(item) {
+            // Skúsime nájsť form reťazec v štatistikách ESPN
+            for (const st of (item.stats || [])) {
+                const n = (st.name || st.type || st.abbreviation || '').toLowerCase();
+                if (n === 'form' || n.includes('form') || n === 'last5') {
+                    const raw = String(st.displayValue || st.summary || st.value || '').toUpperCase().replace(/[^WDL]/g, '');
+                    if (raw.length >= 3) {
+                        // Flashscore: najnovší zápas je vľavo
+                        return raw.slice(-5).split('').reverse().map(ch => ch === 'W' ? 'V' : ch === 'D' ? 'R' : 'P');
+                    }
+                }
+            }
+            // Fallback pre istotu z celkového pomeru
+            const getStat = (n) => item.stats.find(s => s.name === n)?.value ?? 0;
+            let w = getStat('wins'), d = getStat('ties'), l = getStat('losses');
+            let arr = [];
+            while (arr.length < 5 && (w > 0 || d > 0 || l > 0)) {
+                if (l > 0 && arr.length < 5) { arr.push('P'); l--; }
+                else if (w > 0 && arr.length < 5) { arr.push('V'); w--; }
+                else if (d > 0 && arr.length < 5) { arr.push('R'); d--; }
+                else break;
+            }
+            return arr;
         }
 
         async function updateLivePLStandings() {
@@ -434,35 +451,10 @@
                     const logo = item.team.logos?.[0]?.href || getTeamLogo(rawName);
 
                     const getStat = (n) => item.stats.find(s => s.name === n)?.value ?? 0;
-                    const getStatDisplay = (n) => item.stats.find(s => s.name === n)?.displayValue ?? item.stats.find(s => s.name === n)?.value ?? '';
-
                     const played = getStat('gamesPlayed');
                     const pts = getStat('points');
-                    const wins = getStat('wins');
-                    const ties = getStat('ties');
-                    const losses = getStat('losses');
 
-                    // Získame reťazec formy priamo zo štatistík ESPN tabuľky
-                    let formArr = null;
-                    for (const st of (item.stats || [])) {
-                        const n = (st.name || st.type || st.abbreviation || '').toLowerCase();
-                        if (n === 'form' || n.includes('form') || n === 'last5') {
-                            formArr = parseFormString(String(st.displayValue || st.summary || st.value || ''));
-                            if (formArr) break;
-                        }
-                    }
-
-                    // Záložný model ak by štatistika chýbala: zostavíme rozumne z W/D/L pomeru
-                    if (!formArr || formArr.length === 0) {
-                        formArr = [];
-                        let w = wins, d = ties, l = losses;
-                        while (formArr.length < 5 && (w > 0 || d > 0 || l > 0)) {
-                            if (l > 0 && formArr.length < 5) { formArr.push('P'); l--; }
-                            if (w > 0 && formArr.length < 5) { formArr.push('V'); w--; }
-                            if (d > 0 && formArr.length < 5) { formArr.push('R'); d--; }
-                        }
-                    }
-
+                    const formArr = getCleanFormArray(item);
                     const formBadges = formArr.map(ch => {
                         const cls = ch === 'V' ? 'form-v' : ch === 'R' ? 'form-r' : 'form-p';
                         return `<span class="form-badge ${cls}">${ch}</span>`;
@@ -745,7 +737,7 @@
         }
 
         // ============================================================================
-        // 4. NEPRIESTRELNÝ REDDIT FEED (PULLPUSH API + RSS2JSON + LOCAL JSON)
+        // 4. BEZPEČNÝ REDDIT FEED (RSS2JSON / LOCAL / PULLPUSH)
         // ============================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -782,20 +774,6 @@
             `).join('');
         }
 
-        async function fetchRedditPullPush(subreddit) {
-            const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=10&sort=desc&sort_type=created_utc`);
-            if (!res.ok) throw new Error('PullPush nedostupný');
-            const data = await res.json();
-            const posts = (data?.data || []).filter(p => p && p.title && !p.stickied);
-            if (!posts.length) throw new Error('Prázdny PullPush');
-
-            return posts.slice(0, 8).map(p => ({
-                title: p.title,
-                link: p.permalink ? `https://www.reddit.com${p.permalink}` : (p.url || `https://www.reddit.com/r/${subreddit}`),
-                author: `u/${p.author || 'redditor'}${p.score ? ` • ⬆️ ${p.score}` : ''}`
-            }));
-        }
-
         async function fetchRedditRss2Json(subreddit) {
             const rssUrl = `https://old.reddit.com/r/${subreddit}/hot.rss`;
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
@@ -808,6 +786,20 @@
                 title: item.title,
                 link: item.link,
                 author: item.author ? `u/${String(item.author).replace(/^\/?u\//, '')}` : `r/${subreddit}`
+            }));
+        }
+
+        async function fetchRedditPullPush(subreddit) {
+            const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=10&sort=desc&sort_type=created_utc`);
+            if (!res.ok) throw new Error('PullPush nedostupný');
+            const data = await res.json();
+            const posts = (data?.data || []).filter(p => p && p.title && !p.stickied);
+            if (!posts.length) throw new Error('Prázdny PullPush');
+
+            return posts.slice(0, 8).map(p => ({
+                title: p.title,
+                link: p.permalink ? `https://www.reddit.com${p.permalink}` : (p.url || `https://www.reddit.com/r/${subreddit}`),
+                author: `u/${p.author || 'redditor'}${p.score ? ` • ⬆️ ${p.score}` : ''}`
             }));
         }
 
@@ -827,7 +819,7 @@
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v16_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_v17_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
