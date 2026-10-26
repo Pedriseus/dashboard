@@ -264,7 +264,7 @@
             <div id="reddit-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div id="col-slovakia" class="space-y-2">
                     <div class="flex items-center justify-between text-xs font-bold text-sky-400 uppercase px-1">
-                        <span>🇸🇰 r/Slovakia (Hot)</span>
+                        <span>🇸🇰 r/Slovakia (Top 24h)</span>
                         <a href="https://www.reddit.com/r/Slovakia/" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
                     </div>
                     <div id="list-slovakia" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
@@ -402,56 +402,77 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
-        const FLASHSCORE_EXACT_FORM = {
-            'man city': ['V', 'V', 'V', 'V', 'V'],
-            'man cheaters': ['V', 'V', 'V', 'V', 'V'],
-            'manchester city': ['V', 'V', 'V', 'V', 'V'],
-            'arsenal': ['V', 'V', 'P', 'V', 'V'],
-            'brighton': ['V', 'V', 'V', 'V', 'R'],
-            'chelsea': ['V', 'V', 'P', 'R', 'P'],
-            'liverpool': ['V', 'P', 'V', 'R', 'V'],
-            'brentford': ['P', 'R', 'V', 'R', 'R'],
-            'leeds': ['R', 'P', 'R', 'V', 'R'],
-            'everton': ['P', 'R', 'V', 'R', 'R'],
-            'hull': ['P', 'R', 'P', 'R', 'R'],
-            'tottenham': ['V', 'P', 'V', 'P', 'R'],
-            'spurs': ['V', 'P', 'V', 'P', 'R'],
-            'newcastle': ['P', 'R', 'V', 'R', 'P'],
-            'aston villa': ['P', 'V', 'R', 'P', 'V'],
-            'man utd': ['P', 'R', 'P', 'V', 'R'],
-            'manchester united': ['P', 'R', 'P', 'V', 'R'],
-            'fulham': ['P', 'R', 'V', 'P', 'R'],
-            'west ham': ['P', 'P', 'R', 'V', 'P'],
-            'crystal palace': ['P', 'R', 'P', 'R', 'V'],
-            'bournemouth': ['P', 'P', 'V', 'P', 'R'],
-            'nott': ['P', 'R', 'P', 'P', 'R'],
-            'wolves': ['P', 'P', 'R', 'P', 'P'],
-            'burnley': ['P', 'P', 'R', 'P', 'P'],
-            'leicester': ['P', 'P', 'P', 'V', 'P'],
-            'sunderland': ['P', 'R', 'P', 'P', 'R']
-        };
+        // ========================================================
+        // 1. ŽIVÁ FORMA A TABUĽKA PREMIER LEAGUE (ESPN SCOREBOARD)
+        // ========================================================
+        async function fetchLiveFormMap() {
+            const formMap = {};
+            try {
+                const now = new Date();
+                const startYear = now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1;
+                const endYear = startYear + 1;
+                const res = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?limit=450&dates=${startYear}0801-${endYear}0601&_t=${Date.now()}`);
+                if (!res.ok) return formMap;
 
-        function getFlashscoreForm(teamName, wins, ties, losses) {
-            const lower = (teamName || '').toLowerCase();
-            for (const key in FLASHSCORE_EXACT_FORM) {
-                if (lower.includes(key)) return FLASHSCORE_EXACT_FORM[key];
+                const data = await res.json();
+                const events = data.events || [];
+
+                // Zoradíme od najstaršieho po najnovší zápas
+                events.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+                for (const ev of events) {
+                    const comp = ev.competitions?.[0];
+                    if (!comp || comp.status?.type?.state !== 'post') continue;
+
+                    const competitors = comp.competitors || [];
+                    if (competitors.length !== 2) continue;
+
+                    const c1 = competitors[0];
+                    const c2 = competitors[1];
+                    const s1 = parseInt(c1.score, 10);
+                    const s2 = parseInt(c2.score, 10);
+                    if (isNaN(s1) || isNaN(s2)) continue;
+
+                    const id1 = String(c1.team?.id);
+                    const id2 = String(c2.team?.id);
+
+                    if (!formMap[id1]) formMap[id1] = [];
+                    if (!formMap[id2]) formMap[id2] = [];
+
+                    if (s1 > s2) {
+                        formMap[id1].push('V');
+                        formMap[id2].push('P');
+                    } else if (s1 < s2) {
+                        formMap[id1].push('P');
+                        formMap[id2].push('V');
+                    } else {
+                        formMap[id1].push('R');
+                        formMap[id2].push('R');
+                    }
+                }
+            } catch (err) {
+                console.warn('Chyba pri sťahovaní živej formy:', err);
             }
-            const res = [];
-            let w = wins, d = ties, l = losses;
-            while (res.length < 5 && (w > 0 || d > 0 || l > 0)) {
-                if (l > 0) { res.push('P'); l--; }
-                if (d > 0 && res.length < 5) { res.push('R'); d--; }
-                if (w > 0 && res.length < 5) { res.push('V'); w--; }
-            }
-            return res.slice(0, 5);
+            return formMap;
+        }
+
+        function parseStandingFormString(formStr) {
+            if (!formStr || typeof formStr !== 'string') return null;
+            const clean = formStr.toUpperCase().replace(/[^WDL]/g, '');
+            if (!clean) return null;
+            return clean.slice(-5).split('').map(ch => ch === 'W' ? 'V' : ch === 'D' ? 'R' : 'P');
         }
 
         async function updateLivePLStandings() {
             const container = document.getElementById('pl-table-rows');
             try {
-                const res = await fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`);
+                const [res, liveFormMap] = await Promise.all([
+                    fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`),
+                    fetchLiveFormMap()
+                ]);
+
                 const data = await res.json();
-                const entries = data.children[0].standings.entries;
+                const entries = data?.children?.[0]?.standings?.entries || data?.standings?.entries || [];
 
                 container.innerHTML = entries.map((item, idx) => {
                     const pos = idx + 1;
@@ -460,17 +481,38 @@
                         ? 'Man Cheaters'
                         : rawName;
 
+                    const teamId = String(item.team.id);
                     const isArs = rawName.toLowerCase().includes('arsenal');
                     const logo = item.team.logos?.[0]?.href || getTeamLogo(rawName);
 
                     const getStat = (n) => item.stats.find(s => s.name === n)?.value ?? 0;
+                    const getStatDisplay = (n) => item.stats.find(s => s.name === n)?.displayValue ?? item.stats.find(s => s.name === n)?.value ?? '';
+
                     const played = getStat('gamesPlayed');
                     const pts = getStat('points');
                     const wins = getStat('wins');
                     const ties = getStat('ties');
                     const losses = getStat('losses');
 
-                    const formArr = getFlashscoreForm(rawName, wins, ties, losses);
+                    // 1. Priorita: Reálnych posledných 5 odohraných zápasov zo Scoreboardu
+                    let formArr = liveFormMap[teamId] ? liveFormMap[teamId].slice(-5) : null;
+
+                    // 2. Priorita: Ak zo Scoreboardu neprišli dáta, skúsime form string zo Standings API
+                    if (!formArr || formArr.length === 0) {
+                        const apiFormStr = getStatDisplay('form') || item.stats.find(s => s.type === 'form')?.summary;
+                        formArr = parseStandingFormString(apiFormStr);
+                    }
+
+                    // 3. Priorita: Núdzový výpočet z celkových W/D/L
+                    if (!formArr || formArr.length === 0) {
+                        formArr = [];
+                        let w = wins, d = ties, l = losses;
+                        while (formArr.length < 5 && (w > 0 || d > 0 || l > 0)) {
+                            if (w > 0 && formArr.length < 5) { formArr.push('V'); w--; }
+                            if (d > 0 && formArr.length < 5) { formArr.push('R'); d--; }
+                            if (l > 0 && formArr.length < 5) { formArr.push('P'); l--; }
+                        }
+                    }
 
                     const formBadges = formArr.map(ch => {
                         const cls = ch === 'V' ? 'form-v' : ch === 'R' ? 'form-r' : 'form-p';
@@ -496,6 +538,9 @@
             }
         }
 
+        // ========================================================
+        // 2. ZÁPASY ARSENALU & FPL MINI-LIGA
+        // ========================================================
         function renderArsenalMatches() {
             const container = document.getElementById('arsenal-fixtures-rows');
             const nextVenueEl = document.getElementById('arsenal-next-venue');
@@ -632,13 +677,14 @@
             } catch (e) {}
         }
 
-        // POČASIE: PETRŽALKA (YR.NO AKTUÁLNE + OPEN-METEO PRE DENNÉ MAX/MIN A ZRÁŽKY)
+        // ========================================================
+        // 3. POČASIE: PETRŽALKA (YR.NO + OPEN-METEO)
+        // ========================================================
         async function fetchWeather() {
             const lat = 48.11508;
             const lon = 17.10279;
 
             try {
-                // 1. Yr.no pre presnú aktuálnu teplotu (Petržalka)
                 const yrUrl = `https://api.met.no/weatherapi/locationforecast/2.0/compact?lat=${lat}&lon=${lon}`;
                 const yrRes = await fetch(yrUrl, { headers: { 'User-Agent': 'ArsenalDashboardPetrzalka/1.0 github.com/pedriseus' } });
                 
@@ -667,7 +713,6 @@
                     if (rain > 0) tipNow += ' Prší, vezmi si nepremokavú bundu alebo dáždnik!';
                     document.getElementById('w-tip-now').textContent = tipNow;
 
-                    // Hodinový výhľad z Yr.no
                     let hHtml = '';
                     [2, 4, 6, 8].forEach(offset => {
                         if (timeseries[offset]) {
@@ -692,7 +737,6 @@
                     document.getElementById('weather-hourly').innerHTML = hHtml;
                 }
 
-                // 2. Open-Meteo pre denné max/min teploty a úhrn zrážok (mm)
                 const omUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=precipitation,precipitation_probability&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum&timezone=Europe%2FBratislava&forecast_days=4&_t=${Date.now()}`;
                 const omRes = await fetch(omUrl);
                 
@@ -751,7 +795,9 @@
             return { desc: 'Oblačno', icon: '☁️' };
         }
 
-        // REDDIT FEED LOGIC (LOKÁLNE JSON SÚBORY Z GITHUB ACTIONS)
+        // ========================================================
+        // 4. NEPRIESTRELNÝ REDDIT FEED (JSONP + LOCAL JSON + PROXY)
+        // ========================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
             const colGu = document.getElementById('col-gunners');
@@ -778,7 +824,7 @@
 
         function renderRedditItems(items, container) {
             container.innerHTML = items.map(p => `
-                <a href="${p.link}" target="_blank" class="block p-3 rounded-xl bg-gray-900/75 hover:bg-gray-800 border border-white/5 transition group">
+                <a href="${p.link}" target="_blank" rel="noopener noreferrer" class="block p-3 rounded-xl bg-gray-900/75 hover:bg-gray-800 border border-white/5 transition group">
                     <div class="flex items-center justify-between text-[10px] text-gray-400 mb-1">
                         <span class="truncate pr-2 font-medium text-gray-400">${p.author || 'u/redditor'}</span>
                     </div>
@@ -787,16 +833,71 @@
             `).join('');
         }
 
-        async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
-            const container = document.getElementById(elementId);
-            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs">Načítavam r/${subreddit} (Top 24h)...</div>`;
+        // JSONP metóda obíde CORS obmedzenia prehliadača vložením <script> tagu
+        function fetchRedditJSONP(subreddit, sort = 'top', time = 'day', limit = 8) {
+            return new Promise((resolve, reject) => {
+                const cbName = 'reddit_cb_' + subreddit.replace(/[^a-zA-Z0-9]/g, '') + '_' + Math.floor(Math.random() * 1000000);
+                const script = document.createElement('script');
 
-            // 1. Pokus: Priame načítanie TOP 24h z Redditu cez prehliadač (domáca IP nie je blokovaná)
-            try {
-                const directRes = await fetch(`https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=8&raw_json=1`);
-                if (directRes.ok) {
-                    const directData = await directRes.json();
-                    const children = directData?.data?.children || [];
+                const timer = setTimeout(() => {
+                    cleanup();
+                    reject(new Error('JSONP timeout'));
+                }, 6000);
+
+                function cleanup() {
+                    clearTimeout(timer);
+                    try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
+                    if (script.parentNode) script.parentNode.removeChild(script);
+                }
+
+                window[cbName] = function(data) {
+                    cleanup();
+                    const children = data?.data?.children || [];
+                    const items = children
+                        .map(c => c.data)
+                        .filter(p => p && !p.stickied)
+                        .slice(0, limit)
+                        .map(p => ({
+                            title: p.title,
+                            link: `https://www.reddit.com${p.permalink}`,
+                            author: `u/${p.author} • ⬆️ ${p.ups || p.score || 0}${p.num_comments ? ` • 💬 ${p.num_comments}` : ''}`
+                        }));
+                    if (items.length > 0) {
+                        resolve(items);
+                    } else {
+                        reject(new Error('Prázdne JSONP dáta'));
+                    }
+                };
+
+                script.onerror = () => {
+                    cleanup();
+                    reject(new Error('JSONP script error'));
+                };
+
+                script.src = `https://www.reddit.com/r/${subreddit}/${sort}.json?t=${time}&limit=${limit + 4}&raw_json=1&jsonp=${cbName}`;
+                document.body.appendChild(script);
+            });
+        }
+
+        // Záložné proxy brány ak má používateľ zapnuté blokovanie trackerov tretej strany
+        async function fetchRedditViaProxies(subreddit) {
+            const targetUrl = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=10&raw_json=1`;
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`,
+                `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`
+            ];
+
+            for (const proxyUrl of proxies) {
+                try {
+                    const controller = new AbortController();
+                    const id = setTimeout(() => controller.abort(), 5000);
+                    const res = await fetch(proxyUrl, { signal: controller.signal });
+                    clearTimeout(id);
+                    if (!res.ok) continue;
+
+                    const data = await res.json();
+                    const children = data?.data?.children || [];
                     const items = children
                         .map(c => c.data)
                         .filter(p => p && !p.stickied)
@@ -804,42 +905,119 @@
                         .map(p => ({
                             title: p.title,
                             link: `https://www.reddit.com${p.permalink}`,
-                            author: `u/${p.author} • ⬆️ ${p.score}`
+                            author: `u/${p.author} • ⬆️ ${p.ups || p.score || 0}${p.num_comments ? ` • 💬 ${p.num_comments}` : ''}`
                         }));
-                    if (items.length > 0) {
-                        renderRedditItems(items, container);
-                        return;
+                    if (items.length > 0) return items;
+                } catch (e) {}
+            }
+            throw new Error('Proxy zlyhali');
+        }
+
+        async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
+            const container = document.getElementById(elementId);
+            const cacheKey = 'arsenal_reddit_v12_' + subreddit.toLowerCase();
+
+            if (!forceRefresh) {
+                try {
+                    const cached = localStorage.getItem(cacheKey);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Date.now() - parsed.ts < 15 * 60 * 1000 && parsed.items?.length > 0) {
+                            renderRedditItems(parsed.items, container);
+                            return;
+                        }
                     }
-                }
-            } catch (e) {
-                // Ak prehliadač zablokuje priamy prístup (napr. kvôli adblocku/tracking protection), pokračujeme na GitHub JSON
+                } catch (e) {}
             }
 
-            // 2. Pokus: Lokálny JSON súbor vygenerovaný cez GitHub Actions
-            try {
-                const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
-                if (!res.ok) throw new Error('Lokálny súbor nedostupný');
-                const data = await res.json();
+            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs animate-pulse">Načítavam r/${subreddit} (Top 24h)...</div>`;
 
-                if (data.status === 'ok' && data.items && data.items.length > 0) {
-                    const items = data.items.slice(0, 8).map(item => ({
-                        title: item.title,
-                        link: item.link,
-                        author: item.author ? `u/${item.author.replace('/u/', '')}${item.score ? ` • ⬆️ ${item.score}` : ''}` : `r/${subreddit}`
-                    }));
-                    renderRedditItems(items, container);
-                } else {
-                    throw new Error('Chybná štruktúra dát');
-                }
-            } catch (err) {
-                container.innerHTML = `<div class="py-6 text-center text-red-400 text-xs">r/${subreddit} - čaká sa na aktualizáciu GitHub Actions.</div>`;
+            let items = null;
+
+            // 1. Pokus: JSONP priamo z Redditu (Top 24h, následne Hot ak by Top bolo prázdne)
+            try {
+                items = await fetchRedditJSONP(subreddit, 'top', 'day', 8);
+            } catch (e) {
+                try {
+                    items = await fetchRedditJSONP(subreddit, 'hot', 'day', 8);
+                } catch (e2) {}
+            }
+
+            // 2. Pokus: Priamy fetch (ak prehliadač povolí CORS)
+            if (!items || !items.length) {
+                try {
+                    const directRes = await fetch(`https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=10&raw_json=1`);
+                    if (directRes.ok) {
+                        const directData = await directRes.json();
+                        const children = directData?.data?.children || [];
+                        items = children
+                            .map(c => c.data)
+                            .filter(p => p && !p.stickied)
+                            .slice(0, 8)
+                            .map(p => ({
+                                title: p.title,
+                                link: `https://www.reddit.com${p.permalink}`,
+                                author: `u/${p.author} • ⬆️ ${p.score}`
+                            }));
+                    }
+                } catch (e) {}
+            }
+
+            // 3. Pokus: Lokálne JSON súbory z GitHub Actions (reddit-gunners.json alebo reddit-data.json)
+            if (!items || !items.length) {
+                try {
+                    const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const rawItems = data.items || (Array.isArray(data) ? data : []);
+                        if (rawItems.length > 0) {
+                            items = rawItems.slice(0, 8).map(item => ({
+                                title: item.title,
+                                link: item.link || item.url,
+                                author: item.author ? `u/${String(item.author).replace(/^\/?u\//, '')}${item.score ? ` • ⬆️ ${item.score}` : ''}` : `r/${subreddit}`
+                            }));
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // 4. Pokus: Záložné CORS Proxy brány
+            if (!items || !items.length) {
+                try {
+                    items = await fetchRedditViaProxies(subreddit);
+                } catch (e) {}
+            }
+
+            // Vykreslenie alebo fallback na staršiu cache
+            if (items && items.length > 0) {
+                try {
+                    localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items }));
+                } catch (e) {}
+                renderRedditItems(items, container);
+            } else {
+                try {
+                    const oldCache = JSON.parse(localStorage.getItem(cacheKey) || '{}');
+                    if (oldCache.items?.length > 0) {
+                        renderRedditItems(oldCache.items, container);
+                        return;
+                    }
+                } catch (e) {}
+
+                container.innerHTML = `
+                    <div class="py-6 text-center text-red-400 text-xs">
+                        Nepodarilo sa načítať r/${subreddit}.
+                        <button onclick="loadSingleReddit('${subreddit}', '${elementId}', true)" class="block mx-auto mt-2 px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-white text-[11px]">
+                            Skúsiť znova
+                        </button>
+                    </div>
+                `;
             }
         }
 
         function loadAllReddit(force = false) {
             loadSingleReddit('Gunners', 'list-gunners', force);
-            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 500);
-            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 1000);
+            setTimeout(() => loadSingleReddit('Slovakia', 'list-slovakia', force), 350);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 700);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
