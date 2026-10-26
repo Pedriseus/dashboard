@@ -404,108 +404,22 @@
         updateDateTime();
 
         // =========================================================================
-        // 1. ŽIVÁ FORMA A TABUĽKA PREMIER LEAGUE (20-DŇOVÉ OKNÁ + STANDINGS EXTRACTION)
+        // 1. ŽIVÁ FORMA Z TABUĽKY A LIGOVÝCH ŠTATISTÍK (BEZ ZÁVISLOSTI NA MESIACOCH)
         // =========================================================================
-        function formatYYYYMMDD(dateObj) {
-            const y = dateObj.getFullYear();
-            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-            const d = String(dateObj.getDate()).padStart(2, '0');
-            return `${y}${m}${d}`;
-        }
-
-        // ESPN Scoreboard povoľuje max ~28 dní na jeden dopyt. Stiahneme preto 3 krátke 24-dňové okná paralelne!
-        async function fetchLiveFormMap() {
-            const formMap = {};
-            try {
-                const now = new Date();
-                const w1End = now;
-                const w1Start = new Date(now.getTime() - 24 * 86400000);
-                const w2End = new Date(w1Start.getTime() - 86400000);
-                const w2Start = new Date(w2End.getTime() - 24 * 86400000);
-                const w3End = new Date(w2Start.getTime() - 86400000);
-                const w3Start = new Date(w3End.getTime() - 24 * 86400000);
-
-                const urls = [
-                    `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=${formatYYYYMMDD(w1Start)}-${formatYYYYMMDD(w1End)}&limit=100`,
-                    `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=${formatYYYYMMDD(w2Start)}-${formatYYYYMMDD(w2End)}&limit=100`,
-                    `https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard?dates=${formatYYYYMMDD(w3Start)}-${formatYYYYMMDD(w3End)}&limit=100`
-                ];
-
-                const responses = await Promise.allSettled(urls.map(u => fetch(u)));
-                const allEvents = [];
-                const seenIds = new Set();
-
-                for (const r of responses) {
-                    if (r.status === 'fulfilled' && r.value.ok) {
-                        const json = await r.value.json();
-                        for (const ev of (json.events || [])) {
-                            if (ev.id && !seenIds.has(ev.id)) {
-                                seenIds.add(ev.id);
-                                allEvents.push(ev);
-                            }
-                        }
-                    }
-                }
-
-                // Zoradíme od najnovšieho po najstarší (Flashscore štýl: najnovší vľavo)
-                allEvents.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-                for (const ev of allEvents) {
-                    const comp = ev.competitions?.[0];
-                    const isFinished = comp?.status?.type?.completed === true || comp?.status?.type?.state === 'post';
-                    if (!comp || !isFinished) continue;
-
-                    const competitors = comp.competitors || [];
-                    if (competitors.length !== 2) continue;
-
-                    const c1 = competitors[0];
-                    const c2 = competitors[1];
-                    const s1 = parseInt(c1.score, 10);
-                    const s2 = parseInt(c2.score, 10);
-                    if (isNaN(s1) || isNaN(s2)) continue;
-
-                    const id1 = String(c1.team?.id);
-                    const id2 = String(c2.team?.id);
-
-                    if (!formMap[id1]) formMap[id1] = [];
-                    if (!formMap[id2]) formMap[id2] = [];
-
-                    let r1 = 'R', r2 = 'R';
-                    if (s1 > s2) { r1 = 'V'; r2 = 'P'; }
-                    else if (s1 < s2) { r1 = 'P'; r2 = 'V'; }
-
-                    if (formMap[id1].length < 5) formMap[id1].push(r1);
-                    if (formMap[id2].length < 5) formMap[id2].push(r2);
-                }
-            } catch (err) {
-                console.warn('Chyba pri sťahovaní 24-dňových okien zo Scoreboardu:', err);
-            }
-            return formMap;
-        }
-
-        // Hĺbková extrakcia formy priamo zo Standings objektu ESPN (ak tam je reťazec typu "WWLWD")
-        function extractFormFromStandingItem(item) {
-            for (const st of (item.stats || [])) {
-                const n = (st.name || st.type || st.abbreviation || '').toLowerCase();
-                if (n === 'form' || n.includes('form') || n === 'last5') {
-                    const raw = String(st.displayValue || st.summary || st.value || '').toUpperCase().replace(/[^WDL]/g, '');
-                    if (raw.length > 0) {
-                        // V ESPN reťazci je najnovší zápas na konci (alebo na začiatku), na Flashscore je najnovší VĽAVO
-                        return raw.slice(-5).split('').reverse().map(ch => ch === 'W' ? 'V' : ch === 'D' ? 'R' : 'P');
-                    }
-                }
-            }
-            return null;
+        function parseFormString(formStr) {
+            if (!formStr || typeof formStr !== 'string') return null;
+            const clean = formStr.toUpperCase().replace(/[^WDL]/g, '');
+            if (!clean) return null;
+            // Flashscore štýl: najnovší zápas je vľavo
+            return clean.slice(-5).split('').reverse().map(ch => ch === 'W' ? 'V' : ch === 'D' ? 'R' : 'P');
         }
 
         async function updateLivePLStandings() {
             const container = document.getElementById('pl-table-rows');
             try {
-                const [res, liveFormMap] = await Promise.all([
-                    fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`),
-                    fetchLiveFormMap()
-                ]);
-
+                const res = await fetch(`https://site.api.espn.com/apis/v2/sports/soccer/eng.1/standings?_t=${Date.now()}`);
+                if (!res.ok) throw new Error('Chyba API');
+                
                 const data = await res.json();
                 const entries = data?.children?.[0]?.standings?.entries || data?.standings?.entries || [];
 
@@ -516,28 +430,29 @@
                         ? 'Man Cheaters'
                         : rawName;
 
-                    const teamId = String(item.team.id);
                     const isArs = rawName.toLowerCase().includes('arsenal');
                     const logo = item.team.logos?.[0]?.href || getTeamLogo(rawName);
 
                     const getStat = (n) => item.stats.find(s => s.name === n)?.value ?? 0;
+                    const getStatDisplay = (n) => item.stats.find(s => s.name === n)?.displayValue ?? item.stats.find(s => s.name === n)?.value ?? '';
+
                     const played = getStat('gamesPlayed');
                     const pts = getStat('points');
                     const wins = getStat('wins');
                     const ties = getStat('ties');
                     const losses = getStat('losses');
 
-                    // 1. Priorita: Živá forma z 24-dňových okien Scoreboard API (najnovší zápas vľavo)
-                    let formArr = (liveFormMap[teamId] && liveFormMap[teamId].length >= 3)
-                        ? liveFormMap[teamId].slice(0, 5)
-                        : null;
-
-                    // 2. Priorita: Form string priamo zo Standings API
-                    if (!formArr || formArr.length === 0) {
-                        formArr = extractFormFromStandingItem(item);
+                    // Získame reťazec formy priamo zo štatistík ESPN tabuľky
+                    let formArr = null;
+                    for (const st of (item.stats || [])) {
+                        const n = (st.name || st.type || st.abbreviation || '').toLowerCase();
+                        if (n === 'form' || n.includes('form') || n === 'last5') {
+                            formArr = parseFormString(String(st.displayValue || st.summary || st.value || ''));
+                            if (formArr) break;
+                        }
                     }
 
-                    // 3. Priorita: Ak by zlyhalo API zápasov, nikdy nenecháme stĺpec prázdny – vyskladáme pomer W/D/L
+                    // Záložný model ak by štatistika chýbala: zostavíme rozumne z W/D/L pomeru
                     if (!formArr || formArr.length === 0) {
                         formArr = [];
                         let w = wins, d = ties, l = losses;
@@ -830,7 +745,7 @@
         }
 
         // ============================================================================
-        // 4. NEPRIESTRELNÝ REDDIT FEED (PULLPUSH API + RSS2JSON + JSONP + LOCAL CACHE)
+        // 4. NEPRIESTRELNÝ REDDIT FEED (PULLPUSH API + RSS2JSON + LOCAL JSON)
         // ============================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -867,9 +782,8 @@
             `).join('');
         }
 
-        // Metóda A: PullPush API (verejný Reddit index s plným CORS povolením, neblokovaný AdBlockom ani Redditom)
         async function fetchRedditPullPush(subreddit) {
-            const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=12&sort=desc&sort_type=created_utc`);
+            const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=10&sort=desc&sort_type=created_utc`);
             if (!res.ok) throw new Error('PullPush nedostupný');
             const data = await res.json();
             const posts = (data?.data || []).filter(p => p && p.title && !p.stickied);
@@ -882,7 +796,6 @@
             }));
         }
 
-        // Metóda B: rss2json API cez old.reddit.com RSS (má povolené CORS, server sťahuje RSS namiesto prehliadača)
         async function fetchRedditRss2Json(subreddit) {
             const rssUrl = `https://old.reddit.com/r/${subreddit}/hot.rss`;
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`);
@@ -898,42 +811,6 @@
             }));
         }
 
-        // Metóda C: JSONP priamo z Redditu (ak prehliadač neblokuje reddit.com skripty)
-        function fetchRedditJSONP(subreddit) {
-            return new Promise((resolve, reject) => {
-                const cbName = 'rcb_' + subreddit.replace(/[^a-zA-Z0-9]/g, '') + '_' + Math.floor(Math.random() * 999999);
-                const script = document.createElement('script');
-                const timer = setTimeout(() => { cleanup(); reject(new Error('JSONP timeout')); }, 4500);
-
-                function cleanup() {
-                    clearTimeout(timer);
-                    try { delete window[cbName]; } catch (e) { window[cbName] = undefined; }
-                    if (script.parentNode) script.parentNode.removeChild(script);
-                }
-
-                window[cbName] = function(data) {
-                    cleanup();
-                    const children = data?.data?.children || [];
-                    const items = children
-                        .map(c => c.data)
-                        .filter(p => p && !p.stickied)
-                        .slice(0, 8)
-                        .map(p => ({
-                            title: p.title,
-                            link: `https://www.reddit.com${p.permalink}`,
-                            author: `u/${p.author} • ⬆️ ${p.ups || p.score || 0}`
-                        }));
-                    if (items.length > 0) resolve(items);
-                    else reject(new Error('Prázdne JSONP'));
-                };
-
-                script.onerror = () => { cleanup(); reject(new Error('JSONP error')); };
-                script.src = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=10&raw_json=1&jsonp=${cbName}`;
-                document.body.appendChild(script);
-            });
-        }
-
-        // Metóda D: Lokálny JSON súbor vygenerovaný v repozitári cez GitHub Actions
         async function fetchRedditLocalJson(subreddit) {
             const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
             if (!res.ok) throw new Error('Lokálny JSON neexistuje');
@@ -950,7 +827,7 @@
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
-            const cacheKey = 'arsenal_reddit_v15_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_v16_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -967,10 +844,8 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs animate-pulse">Načítavam r/${subreddit}...</div>`;
 
-            // Spustíme všetky 4 nezávislé metódy naraz – prvá, ktorá vráti články, okamžite vyhráva!
             try {
                 const items = await Promise.any([
-                    fetchRedditJSONP(subreddit),
                     fetchRedditRss2Json(subreddit),
                     fetchRedditPullPush(subreddit),
                     fetchRedditLocalJson(subreddit)
@@ -982,10 +857,9 @@
                     return;
                 }
             } catch (err) {
-                console.warn(`Všetky 4 zdroje pre r/${subreddit} zlyhali:`, err);
+                console.warn(`Zdroje pre r/${subreddit} zlyhali:`, err);
             }
 
-            // Ak zlyhali všetky živé zdroje, skúsime staršiu cache z localStorage
             try {
                 const oldCache = JSON.parse(localStorage.getItem(cacheKey) || '{}');
                 if (oldCache.items?.length > 0) {
