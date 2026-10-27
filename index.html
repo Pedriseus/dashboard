@@ -471,7 +471,7 @@
 
         async function updateLivePLStandings(forceRefresh = false) {
             const container = document.getElementById('pl-table-rows');
-            const formCacheKey = 'espn_pl_live_forms_v26';
+            const formCacheKey = 'espn_pl_live_forms_v27';
             let cachedForms = {};
 
             if (!forceRefresh) {
@@ -802,7 +802,7 @@
         }
 
         // =========================================================================================
-        // 4. NEPRIESTRELNÝ REDDIT ENGINE (TOP ZA POSLEDNÝCH 24 HODÍN / HOT FALLBACK)
+        // 4. REDDIT ENGINE S PRIORITOU PLNEJ KVALITY (TOP 24H + UPVOTY PRE VŠETKY 3 SUBREDDITY)
         // =========================================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -839,12 +839,12 @@
             `).join('');
         }
 
-        // Zdroj 1: JSONP priamo z Redditu - Top za posledných 24 hodín (t=day)
+        // Priorita 1: Priamy JSONP z Redditu (Top 24h + presné upvoty + odfiltrované pripnuté posty)
         function fetchRedditJSONP(subreddit) {
             return new Promise((resolve, reject) => {
-                const cb = 'rcb_' + subreddit.replace(/[^a-zA-Z0-9]/g, '') + '_' + Math.floor(Math.random() * 999999);
+                const cb = 'rcb_' + subreddit.replace(/[^a-zA-Z0-9]/g, '') + '_' + Date.now() + '_' + Math.floor(Math.random() * 99999);
                 const s = document.createElement('script');
-                const t = setTimeout(() => { clean(); reject(new Error('JSONP timeout')); }, 4000);
+                const t = setTimeout(() => { clean(); reject(new Error('JSONP timeout')); }, 5500);
                 function clean() {
                     clearTimeout(t);
                     try { delete window[cb]; } catch (e) { window[cb] = undefined; }
@@ -855,72 +855,59 @@
                     const children = data?.data?.children || [];
                     const items = children
                         .map(c => c.data)
-                        .filter(p => p && !p.stickied)
-                        .sort((a, b) => (b.score || 0) - (a.score || 0))
+                        .filter(p => p && !p.stickied && !p.pinned)
+                        .sort((a, b) => (b.ups ?? b.score ?? 0) - (a.ups ?? a.score ?? 0))
                         .slice(0, 8)
                         .map(p => ({
                             title: p.title,
                             link: `https://www.reddit.com${p.permalink}`,
-                            author: `u/${p.author} • ⬆️ ${p.score || 0}`
+                            author: `u/${p.author} • ⬆️ ${p.ups ?? p.score ?? 0}`
                         }));
                     if (items.length > 0) resolve(items);
                     else reject(new Error('JSONP empty'));
                 };
                 s.onerror = () => { clean(); reject(new Error('JSONP err')); };
-                s.src = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=12&raw_json=1&jsonp=${cb}`;
+                s.src = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=15&raw_json=1&jsonp=${cb}`;
                 document.body.appendChild(s);
             });
         }
 
-        // Zdroj 2: rss2json nastavený priamo na TOP za 24 hodín (top.rss?t=day)
-        async function fetchRss2JsonTop24h(subreddit) {
-            const rss = `https://www.reddit.com/r/${subreddit}/top.rss?t=day`;
-            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`);
-            if (!res.ok) throw new Error('rss2json fail');
-            const data = await res.json();
-            if (data.status !== 'ok' || !data.items?.length) throw new Error('rss2json empty');
-            return data.items.slice(0, 8).map(item => ({
-                title: item.title,
-                link: item.link,
-                author: item.author ? `u/${String(item.author).replace(/^\/?u\//, '')}` : `r/${subreddit}`
-            }));
-        }
-
-        // Zdroj 3: ArcticShift - stiahne príspevky za posledných 24h (after) a zoradí ich podľa najvyššieho skóre (Top 24h)
-        async function fetchArcticShiftTop24h(subreddit) {
-            const since24h = Math.floor(Date.now() / 1000) - 86400;
-            const res = await fetch(`https://arctic-shift.photon-reddit.com/api/posts/search?subreddit=${subreddit}&after=${since24h}&limit=40&sort=desc`);
-            if (!res.ok) throw new Error('ArcticShift fail');
-            const json = await res.json();
-            let posts = (json.data || []).filter(p => p && p.title && !p.stickied);
-
-            // Ak archív mešká pár hodín, stiahneme posledných 25 príspevkov a zoradíme podľa skóre
-            if (posts.length < 4) {
-                const resFallback = await fetch(`https://arctic-shift.photon-reddit.com/api/posts/search?subreddit=${subreddit}&limit=25&sort=desc`);
-                if (resFallback.ok) {
-                    const jsonFallback = await resFallback.json();
-                    posts = (jsonFallback.data || []).filter(p => p && p.title && !p.stickied);
-                }
+        // Priorita 2: Priamy Reddit JSON cez CORS proxy (tiež Top 24h + presné upvoty)
+        async function fetchRedditJsonProxy(subreddit) {
+            const target = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=15&raw_json=1`;
+            const proxies = [
+                `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(target)}`,
+                `https://api.allorigins.win/raw?url=${encodeURIComponent(target)}`
+            ];
+            for (const url of proxies) {
+                try {
+                    const res = await fetch(url);
+                    if (!res.ok) continue;
+                    const data = await res.json();
+                    const children = data?.data?.children || [];
+                    const items = children
+                        .map(c => c.data)
+                        .filter(p => p && !p.stickied && !p.pinned)
+                        .sort((a, b) => (b.ups ?? b.score ?? 0) - (a.ups ?? a.score ?? 0))
+                        .slice(0, 8)
+                        .map(p => ({
+                            title: p.title,
+                            link: `https://www.reddit.com${p.permalink}`,
+                            author: `u/${p.author} • ⬆️ ${p.ups ?? p.score ?? 0}`
+                        }));
+                    if (items.length > 0) return items;
+                } catch (e) {}
             }
-            if (!posts.length) throw new Error('ArcticShift empty');
-
-            // Zoradíme zostupne podľa skóre (Top za 24h)
-            posts.sort((a, b) => (b.score || 0) - (a.score || 0));
-
-            return posts.slice(0, 8).map(p => ({
-                title: p.title,
-                link: p.permalink ? `https://www.reddit.com${p.permalink}` : `https://www.reddit.com/r/${subreddit}/comments/${p.id}`,
-                author: `u/${p.author || 'redditor'}${p.score !== undefined ? ` • ⬆️ ${p.score}` : ''}`
-            }));
+            throw new Error('Proxy JSON fail');
         }
 
-        // Zdroj 4: PullPush - stiahne príspevky za posledných 24h zoradené priamo podľa skóre (sort_type=score)
-        async function fetchPullPushTop24h(subreddit) {
+        // Priorita 3: PullPush & ArcticShift (Top 24h + upvoty)
+        async function fetchArchiveTop24h(subreddit) {
             const since24h = Math.floor(Date.now() / 1000) - 86400;
             const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&after=${since24h}&size=25&sort=desc&sort_type=score`);
             if (!res.ok) throw new Error('PullPush fail');
             const json = await res.json();
-            const posts = (json.data || []).filter(p => p && p.title && !p.stickied);
+            const posts = (json.data || []).filter(p => p && p.title && !p.stickied && p.author !== 'AutoModerator');
             if (!posts.length) throw new Error('PullPush empty');
 
             posts.sort((a, b) => (b.score || 0) - (a.score || 0));
@@ -928,29 +915,32 @@
             return posts.slice(0, 8).map(p => ({
                 title: p.title,
                 link: p.permalink ? `https://www.reddit.com${p.permalink}` : (p.url || `https://www.reddit.com/r/${subreddit}`),
-                author: `u/${p.author || 'redditor'}${p.score !== undefined ? ` • ⬆️ ${p.score}` : ''}`
+                author: `u/${p.author || 'redditor'} • ⬆️ ${p.score ?? 0}`
             }));
         }
 
-        // Zdroj 5: Lokálny JSON z GitHub Actions
-        async function fetchRedditLocalJson(subreddit) {
-            const res = await fetch(`./reddit-${subreddit.toLowerCase()}.json?_t=${Date.now()}`, { cache: 'no-store' });
-            if (!res.ok) throw new Error('Local JSON missing');
+        // Priorita 4 (Posledná záloha): RSS2JSON nastavený na top.rss?t=day
+        async function fetchRss2JsonTop24h(subreddit) {
+            const rss = `https://www.reddit.com/r/${subreddit}/top.rss?t=day&_t=${Date.now()}`;
+            const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`);
+            if (!res.ok) throw new Error('rss2json fail');
             const data = await res.json();
-            const rawItems = data.items || data?.data?.children?.map(c => c.data) || (Array.isArray(data) ? data : []);
-            if (!rawItems.length) throw new Error('Local JSON empty');
-            return rawItems.slice(0, 8).map(item => ({
-                title: item.title,
-                link: item.link || (item.permalink ? `https://www.reddit.com${item.permalink}` : item.url),
-                author: item.author ? `u/${String(item.author).replace(/^\/?u\//, '')}${item.score ? ` • ⬆️ ${item.score}` : ''}` : `r/${subreddit}`
-            }));
+            if (data.status !== 'ok' || !data.items?.length) throw new Error('rss2json empty');
+            return data.items
+                .filter(item => item.author !== '/u/AutoModerator')
+                .slice(0, 8)
+                .map(item => ({
+                    title: item.title,
+                    link: item.link,
+                    author: item.author ? `u/${String(item.author).replace(/^\/?u\//, '')}` : `r/${subreddit}`
+                }));
         }
 
         async function loadSingleReddit(subreddit, elementId, forceRefresh = false) {
             const container = document.getElementById(elementId);
             if (!container) return;
 
-            const cacheKey = 'arsenal_reddit_top24h_v26_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_top24h_v28_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -967,22 +957,38 @@
 
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs animate-pulse">Načítavam r/${subreddit} (Top 24h)...</div>`;
 
-            try {
-                const items = await Promise.any([
-                    fetchRedditJSONP(subreddit),
-                    fetchRss2JsonTop24h(subreddit),
-                    fetchArcticShiftTop24h(subreddit),
-                    fetchPullPushTop24h(subreddit),
-                    fetchRedditLocalJson(subreddit)
-                ]);
+            let items = null;
 
-                if (items && items.length > 0) {
-                    try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items })); } catch (e) {}
-                    renderRedditItems(items, container);
-                    return;
-                }
-            } catch (err) {
-                console.warn(`Všetky zdroje pre r/${subreddit} zlyhali:`, err);
+            // Krok 1: Najprv skúsime plnohodnotný JSONP priamo z Redditu (Top 24h + Upvoty)
+            try {
+                items = await fetchRedditJSONP(subreddit);
+            } catch (e) {}
+
+            // Krok 2: Ak JSONP zlyhal, skúsime plný Reddit JSON cez Proxy (Top 24h + Upvoty)
+            if (!items || !items.length) {
+                try {
+                    items = await fetchRedditJsonProxy(subreddit);
+                } catch (e) {}
+            }
+
+            // Krok 3: Ak zlyhali oba, skúsime PullPush archív za posledných 24h (Top 24h + Upvoty)
+            if (!items || !items.length) {
+                try {
+                    items = await fetchArchiveTop24h(subreddit);
+                } catch (e) {}
+            }
+
+            // Krok 4: Núdzový fallback na RSS Top 24h
+            if (!items || !items.length) {
+                try {
+                    items = await fetchRss2JsonTop24h(subreddit);
+                } catch (e) {}
+            }
+
+            if (items && items.length > 0) {
+                try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items })); } catch (e) {}
+                renderRedditItems(items, container);
+                return;
             }
 
             try {
@@ -1004,9 +1010,10 @@
         }
 
         function loadAllReddit(force = false) {
-            loadSingleReddit('Gunners', 'list-gunners', force);
+            // Jemný rozostup 150ms medzi JSONP volaniami, aby Reddit neaplikoval rate-limit na tretí request
             loadSingleReddit('Slovakia', 'list-slovakia', force);
-            loadSingleReddit('FantasyPL', 'list-fantasypl', force);
+            setTimeout(() => loadSingleReddit('Gunners', 'list-gunners', force), 150);
+            setTimeout(() => loadSingleReddit('FantasyPL', 'list-fantasypl', force), 300);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
