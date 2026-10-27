@@ -250,7 +250,7 @@
             <div class="flex flex-wrap items-center justify-between gap-3 pb-3 mb-4 border-b border-white/10">
                 <div class="flex flex-wrap items-center gap-3">
                     <span class="text-lg">🔥</span>
-                    <h2 class="text-base font-extrabold tracking-wide uppercase text-white">Reddit Prehľad</h2>
+                    <h2 class="text-base font-extrabold tracking-wide uppercase text-white">Reddit Prehľad (Top 24h)</h2>
                     <div class="flex flex-wrap bg-gray-900 p-0.5 rounded-lg border border-white/10 text-xs">
                         <button id="tab-all" onclick="switchRedditTab('all')" class="px-3 py-1 rounded-md font-bold bg-[#EF0107] text-white transition">Všetky 3</button>
                         <button id="tab-slovakia" onclick="switchRedditTab('slovakia')" class="px-3 py-1 rounded-md font-bold text-gray-400 hover:text-white transition">🇸🇰 r/Slovakia</button>
@@ -265,7 +265,7 @@
                 <div id="col-slovakia" class="space-y-2">
                     <div class="flex items-center justify-between text-xs font-bold text-sky-400 uppercase px-1">
                         <span>🇸🇰 r/Slovakia (Top 24h)</span>
-                        <a href="https://www.reddit.com/r/Slovakia/" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
+                        <a href="https://www.reddit.com/r/Slovakia/top/?t=day" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
                     </div>
                     <div id="list-slovakia" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                         <div class="py-10 text-center text-gray-400 text-xs">Načítavam r/Slovakia...</div>
@@ -274,8 +274,8 @@
 
                 <div id="col-gunners" class="space-y-2">
                     <div class="flex items-center justify-between text-xs font-bold text-red-400 uppercase px-1">
-                        <span>🔴 r/Gunners (Arsenal FC)</span>
-                        <a href="https://www.reddit.com/r/Gunners/" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
+                        <span>🔴 r/Gunners (Top 24h)</span>
+                        <a href="https://www.reddit.com/r/Gunners/top/?t=day" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
                     </div>
                     <div id="list-gunners" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                         <div class="py-10 text-center text-gray-400 text-xs">Načítavam r/Gunners...</div>
@@ -284,8 +284,8 @@
 
                 <div id="col-fantasypl" class="space-y-2">
                     <div class="flex items-center justify-between text-xs font-bold text-emerald-400 uppercase px-1">
-                        <span>⚽ r/FantasyPL (FPL Komunita)</span>
-                        <a href="https://www.reddit.com/r/FantasyPL/" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
+                        <span>⚽ r/FantasyPL (Top 24h)</span>
+                        <a href="https://www.reddit.com/r/FantasyPL/top/?t=day" target="_blank" class="hover:underline text-[11px]">Otvoriť ↗</a>
                     </div>
                     <div id="list-fantasypl" class="space-y-2 max-h-[420px] overflow-y-auto pr-1">
                         <div class="py-10 text-center text-gray-400 text-xs">Načítavam r/FantasyPL...</div>
@@ -413,7 +413,6 @@
                 const data = await res.json();
                 const events = data.events || [];
 
-                // Vyfiltrujeme len ukončené zápasy
                 const finished = events.filter(ev => {
                     const st = ev.competitions?.[0]?.status?.type;
                     return st?.completed === true || st?.state === 'post';
@@ -431,7 +430,6 @@
 
                     if (!me || !opp) continue;
 
-                    // Skóre môže byť v me.score.value, me.score.displayValue alebo priamo me.score
                     const parseScore = (s) => {
                         if (s === null || s === undefined) return NaN;
                         if (typeof s === 'number') return s;
@@ -473,7 +471,7 @@
 
         async function updateLivePLStandings(forceRefresh = false) {
             const container = document.getElementById('pl-table-rows');
-            const formCacheKey = 'espn_pl_live_forms_v25';
+            const formCacheKey = 'espn_pl_live_forms_v26';
             let cachedForms = {};
 
             if (!forceRefresh) {
@@ -495,7 +493,6 @@
                 const data = await res.json();
                 const entries = data?.children?.[0]?.standings?.entries || data?.standings?.entries || [];
 
-                // 1. Okamžite vykreslíme tabuľku (ak máme formy v cache, hneď ich ukážeme)
                 container.innerHTML = entries.map((item, idx) => {
                     const pos = idx + 1;
                     const teamId = String(item.team.id);
@@ -527,7 +524,6 @@
                     `;
                 }).join('');
 
-                // 2. Paralelne dotiahneme 100% reálnych posledných 5 zápasov pre každý tím priamo z jeho rozpisu
                 const freshForms = { ...cachedForms };
                 await Promise.all(entries.map(async (item) => {
                     const teamId = String(item.team.id);
@@ -806,7 +802,7 @@
         }
 
         // =========================================================================================
-        // 4. NEPRIESTRELNÝ 6-VRSTVOVÝ REDDIT ENGINE (ARCTICSHIFT + PULLPUSH + RSS2JSON + JSONP)
+        // 4. NEPRIESTRELNÝ REDDIT ENGINE (TOP ZA POSLEDNÝCH 24 HODÍN / HOT FALLBACK)
         // =========================================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -843,37 +839,42 @@
             `).join('');
         }
 
-        // Zdroj 1: ArcticShift Public Reddit Archive API (má plný CORS *, neblokuje ho AdBlock ani Reddit IP filter)
-        async function fetchArcticShift(subreddit) {
-            const res = await fetch(`https://arctic-shift.photon-reddit.com/api/posts/search?subreddit=${subreddit}&limit=10&sort=desc`);
-            if (!res.ok) throw new Error('ArcticShift fail');
-            const json = await res.json();
-            const posts = (json.data || []).filter(p => p && p.title && !p.stickied);
-            if (!posts.length) throw new Error('ArcticShift empty');
-            return posts.slice(0, 8).map(p => ({
-                title: p.title,
-                link: p.permalink ? `https://www.reddit.com${p.permalink}` : `https://www.reddit.com/r/${subreddit}/comments/${p.id}`,
-                author: `u/${p.author || 'redditor'}${p.score ? ` • ⬆️ ${p.score}` : ''}`
-            }));
+        // Zdroj 1: JSONP priamo z Redditu - Top za posledných 24 hodín (t=day)
+        function fetchRedditJSONP(subreddit) {
+            return new Promise((resolve, reject) => {
+                const cb = 'rcb_' + subreddit.replace(/[^a-zA-Z0-9]/g, '') + '_' + Math.floor(Math.random() * 999999);
+                const s = document.createElement('script');
+                const t = setTimeout(() => { clean(); reject(new Error('JSONP timeout')); }, 4000);
+                function clean() {
+                    clearTimeout(t);
+                    try { delete window[cb]; } catch (e) { window[cb] = undefined; }
+                    if (s.parentNode) s.parentNode.removeChild(s);
+                }
+                window[cb] = (data) => {
+                    clean();
+                    const children = data?.data?.children || [];
+                    const items = children
+                        .map(c => c.data)
+                        .filter(p => p && !p.stickied)
+                        .sort((a, b) => (b.score || 0) - (a.score || 0))
+                        .slice(0, 8)
+                        .map(p => ({
+                            title: p.title,
+                            link: `https://www.reddit.com${p.permalink}`,
+                            author: `u/${p.author} • ⬆️ ${p.score || 0}`
+                        }));
+                    if (items.length > 0) resolve(items);
+                    else reject(new Error('JSONP empty'));
+                };
+                s.onerror = () => { clean(); reject(new Error('JSONP err')); };
+                s.src = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=12&raw_json=1&jsonp=${cb}`;
+                document.body.appendChild(s);
+            });
         }
 
-        // Zdroj 2: PullPush Reddit Mirror API (plný CORS *)
-        async function fetchPullPush(subreddit) {
-            const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&size=10&sort=desc&sort_type=created_utc`);
-            if (!res.ok) throw new Error('PullPush fail');
-            const json = await res.json();
-            const posts = (json.data || []).filter(p => p && p.title && !p.stickied);
-            if (!posts.length) throw new Error('PullPush empty');
-            return posts.slice(0, 8).map(p => ({
-                title: p.title,
-                link: p.permalink ? `https://www.reddit.com${p.permalink}` : (p.url || `https://www.reddit.com/r/${subreddit}`),
-                author: `u/${p.author || 'redditor'}${p.score ? ` • ⬆️ ${p.score}` : ''}`
-            }));
-        }
-
-        // Zdroj 3: rss2json cez www.reddit.com/.rss
-        async function fetchRss2Json(subreddit) {
-            const rss = `https://www.reddit.com/r/${subreddit}/hot.rss`;
+        // Zdroj 2: rss2json nastavený priamo na TOP za 24 hodín (top.rss?t=day)
+        async function fetchRss2JsonTop24h(subreddit) {
+            const rss = `https://www.reddit.com/r/${subreddit}/top.rss?t=day`;
             const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rss)}`);
             if (!res.ok) throw new Error('rss2json fail');
             const data = await res.json();
@@ -885,32 +886,50 @@
             }));
         }
 
-        // Zdroj 4: JSONP <script> tag priamo z Redditu
-        function fetchRedditJSONP(subreddit) {
-            return new Promise((resolve, reject) => {
-                const cb = 'rcb_' + subreddit.replace(/[^a-zA-Z0-9]/g, '') + '_' + Math.floor(Math.random() * 999999);
-                const s = document.createElement('script');
-                const t = setTimeout(() => { clean(); reject(new Error('JSONP timeout')); }, 4500);
-                function clean() {
-                    clearTimeout(t);
-                    try { delete window[cb]; } catch (e) { window[cb] = undefined; }
-                    if (s.parentNode) s.parentNode.removeChild(s);
+        // Zdroj 3: ArcticShift - stiahne príspevky za posledných 24h (after) a zoradí ich podľa najvyššieho skóre (Top 24h)
+        async function fetchArcticShiftTop24h(subreddit) {
+            const since24h = Math.floor(Date.now() / 1000) - 86400;
+            const res = await fetch(`https://arctic-shift.photon-reddit.com/api/posts/search?subreddit=${subreddit}&after=${since24h}&limit=40&sort=desc`);
+            if (!res.ok) throw new Error('ArcticShift fail');
+            const json = await res.json();
+            let posts = (json.data || []).filter(p => p && p.title && !p.stickied);
+
+            // Ak archív mešká pár hodín, stiahneme posledných 25 príspevkov a zoradíme podľa skóre
+            if (posts.length < 4) {
+                const resFallback = await fetch(`https://arctic-shift.photon-reddit.com/api/posts/search?subreddit=${subreddit}&limit=25&sort=desc`);
+                if (resFallback.ok) {
+                    const jsonFallback = await resFallback.json();
+                    posts = (jsonFallback.data || []).filter(p => p && p.title && !p.stickied);
                 }
-                window[cb] = (data) => {
-                    clean();
-                    const children = data?.data?.children || [];
-                    const items = children.map(c => c.data).filter(p => p && !p.stickied).slice(0, 8).map(p => ({
-                        title: p.title,
-                        link: `https://www.reddit.com${p.permalink}`,
-                        author: `u/${p.author} • ⬆️ ${p.score || 0}`
-                    }));
-                    if (items.length > 0) resolve(items);
-                    else reject(new Error('JSONP empty'));
-                };
-                s.onerror = () => { clean(); reject(new Error('JSONP err')); };
-                s.src = `https://www.reddit.com/r/${subreddit}/top.json?t=day&limit=10&raw_json=1&jsonp=${cb}`;
-                document.body.appendChild(s);
-            });
+            }
+            if (!posts.length) throw new Error('ArcticShift empty');
+
+            // Zoradíme zostupne podľa skóre (Top za 24h)
+            posts.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+            return posts.slice(0, 8).map(p => ({
+                title: p.title,
+                link: p.permalink ? `https://www.reddit.com${p.permalink}` : `https://www.reddit.com/r/${subreddit}/comments/${p.id}`,
+                author: `u/${p.author || 'redditor'}${p.score !== undefined ? ` • ⬆️ ${p.score}` : ''}`
+            }));
+        }
+
+        // Zdroj 4: PullPush - stiahne príspevky za posledných 24h zoradené priamo podľa skóre (sort_type=score)
+        async function fetchPullPushTop24h(subreddit) {
+            const since24h = Math.floor(Date.now() / 1000) - 86400;
+            const res = await fetch(`https://api.pullpush.io/reddit/search/submission/?subreddit=${subreddit}&after=${since24h}&size=25&sort=desc&sort_type=score`);
+            if (!res.ok) throw new Error('PullPush fail');
+            const json = await res.json();
+            const posts = (json.data || []).filter(p => p && p.title && !p.stickied);
+            if (!posts.length) throw new Error('PullPush empty');
+
+            posts.sort((a, b) => (b.score || 0) - (a.score || 0));
+
+            return posts.slice(0, 8).map(p => ({
+                title: p.title,
+                link: p.permalink ? `https://www.reddit.com${p.permalink}` : (p.url || `https://www.reddit.com/r/${subreddit}`),
+                author: `u/${p.author || 'redditor'}${p.score !== undefined ? ` • ⬆️ ${p.score}` : ''}`
+            }));
         }
 
         // Zdroj 5: Lokálny JSON z GitHub Actions
@@ -931,7 +950,7 @@
             const container = document.getElementById(elementId);
             if (!container) return;
 
-            const cacheKey = 'arsenal_reddit_v25_' + subreddit.toLowerCase();
+            const cacheKey = 'arsenal_reddit_top24h_v26_' + subreddit.toLowerCase();
 
             if (!forceRefresh) {
                 try {
@@ -946,15 +965,14 @@
                 } catch (e) {}
             }
 
-            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs animate-pulse">Načítavam r/${subreddit}...</div>`;
+            container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs animate-pulse">Načítavam r/${subreddit} (Top 24h)...</div>`;
 
             try {
-                // Spustíme všetky metódy paralelne - prvá úspešná okamžite vykreslí dáta
                 const items = await Promise.any([
-                    fetchArcticShift(subreddit),
-                    fetchPullPush(subreddit),
-                    fetchRss2Json(subreddit),
                     fetchRedditJSONP(subreddit),
+                    fetchRss2JsonTop24h(subreddit),
+                    fetchArcticShiftTop24h(subreddit),
+                    fetchPullPushTop24h(subreddit),
                     fetchRedditLocalJson(subreddit)
                 ]);
 
