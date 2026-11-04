@@ -134,7 +134,7 @@
                         <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
                             <span class="text-xs font-extrabold tracking-wider uppercase text-amber-400">📅 Zápasy Arsenalu</span>
                             <div class="flex items-center gap-1.5 text-[9px] font-bold">
-                                <button onclick="updateLiveArsenalMatches(true)" class="text-[11px] font-normal text-gray-400 hover:text-white transition mr-1">↻</button>
+                                <button onclick="updateLiveArsenalMatches(true)" class="text-[11px] font-normal text-gray-400 hover:text-white transition mr-1" title="Obnoviť rozpis">↻</button>
                                 <span class="px-1.5 py-0.5 rounded badge-pl">PL</span>
                                 <span class="px-1.5 py-0.5 rounded badge-ucl">UCL</span>
                                 <span class="px-1.5 py-0.5 rounded badge-efl">EFL</span>
@@ -450,7 +450,7 @@
 
         async function updateLivePLStandings(forceRefresh = false) {
             const container = document.getElementById('pl-table-rows');
-            const formCacheKey = 'espn_pl_live_forms_v30';
+            const formCacheKey = 'espn_pl_live_forms_v31';
             let cachedForms = {};
 
             if (!forceRefresh) {
@@ -524,8 +524,15 @@
         }
 
         // ====================================================================================
-        // 2. ŽIVÉ ZÁPASY ARSENALU PRIAMO Z ESPN API (PL + UCL + EFL + FA CUP, NAJBLIŽŠÍCH 5 Z)
+        // 2. ŽIVÉ ZÁPASY ARSENALU PRIAMO Z ESPN API (?fixture=true + SCOREBOARD OKNÁ)
         // ====================================================================================
+        function formatYYYYMMDD(dateObj) {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return `${y}${m}${d}`;
+        }
+
         function renderArsenalFixtureItems(matches) {
             const container = document.getElementById('arsenal-fixtures-rows');
             const nextVenueEl = document.getElementById('arsenal-next-venue');
@@ -585,9 +592,64 @@
             }).join('');
         }
 
+        function extractArsenalEvent(ev, defaultCompLabel, defaultTv) {
+            const comp = ev?.competitions?.[0];
+            if (!comp) return null;
+
+            const now = new Date();
+            const state = comp.status?.type?.state;
+            const completed = comp.status?.type?.completed;
+            const matchEnd = new Date(new Date(ev.date).getTime() + 2.5 * 60 * 60 * 1000);
+
+            // Berieme len budúce alebo práve prebiehajúce zápasy
+            if (completed === true || state === 'post' || matchEnd < now) return null;
+
+            const competitors = comp.competitors || [];
+            const isArsenalComp = (c) => {
+                const id = String(c.id || c.team?.id || '');
+                const name = String(c.team?.displayName || c.team?.shortDisplayName || c.team?.name || '').toLowerCase();
+                return id === ARSENAL_ESPN_ID || name.includes('arsenal');
+            };
+
+            const me = competitors.find(isArsenalComp);
+            const opp = competitors.find(c => !isArsenalComp(c));
+            if (!me || !opp) return null;
+
+            const rawOppName = opp.team?.shortDisplayName || opp.team?.displayName || opp.team?.name || 'Súper';
+            const oppName = (rawOppName.toLowerCase().includes('man city') || rawOppName.toLowerCase().includes('manchester city'))
+                ? 'Man Cheaters'
+                : rawOppName;
+
+            const oppLogo = opp.team?.logos?.[0]?.href || getTeamLogo(rawOppName);
+            const isHome = me.homeAway === 'home';
+            const venueName = comp.venue?.fullName || (isHome ? 'Emirates Stadium' : 'Štadión súpera');
+            const venueCity = comp.venue?.address?.city ? ` (${comp.venue.address.city})` : '';
+
+            // Rozpoznanie súťaže ak prišla zo všeobecného endpointu
+            let compLabel = defaultCompLabel;
+            let tvChannel = defaultTv;
+            const leagueSlug = String(ev.season?.slug || comp.league?.slug || comp.notes?.[0]?.headline || '').toLowerCase();
+            if (!compLabel) {
+                if (leagueSlug.includes('champions') || leagueSlug.includes('ucl')) { compLabel = 'UCL'; tvChannel = 'Nova Sport / Voyo'; }
+                else if (leagueSlug.includes('cup') || leagueSlug.includes('efl') || leagueSlug.includes('carabao')) { compLabel = 'EFL'; tvChannel = 'Nova Sport / Voyo'; }
+                else { compLabel = 'PL'; tvChannel = 'CANAL+ Sport'; }
+            }
+
+            return {
+                id: String(ev.id),
+                utc: ev.date,
+                opp: oppName,
+                logo: oppLogo,
+                comp: compLabel,
+                isHome: isHome,
+                venue: `${venueName}${venueCity}`,
+                tv: tvChannel
+            };
+        }
+
         async function updateLiveArsenalMatches(forceRefresh = false) {
             const container = document.getElementById('arsenal-fixtures-rows');
-            const cacheKey = 'arsenal_live_fixtures_v30';
+            const cacheKey = 'arsenal_live_fixtures_v32';
 
             if (!forceRefresh) {
                 try {
@@ -602,6 +664,8 @@
                 } catch (e) {}
             }
 
+            container.innerHTML = `<div class="py-10 text-center text-gray-400 animate-pulse">Načítavam živý rozpis...</div>`;
+
             const leagues = [
                 { slug: 'eng.1', label: 'PL', tv: 'CANAL+ Sport' },
                 { slug: 'uefa.champions', label: 'UCL', tv: 'Nova Sport / Voyo' },
@@ -610,61 +674,51 @@
             ];
 
             try {
-                const responses = await Promise.allSettled(
-                    leagues.map(l => fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${l.slug}/teams/${ARSENAL_ESPN_ID}/schedule?_t=${Date.now()}`))
-                );
-
                 const now = new Date();
+                const w1End = new Date(now.getTime() + 21 * 86400000);
+                const w2Start = new Date(w1End.getTime() + 86400000);
+                const w2End = new Date(w2Start.getTime() + 21 * 86400000);
+                const range1 = `${formatYYYYMMDD(now)}-${formatYYYYMMDD(w1End)}`;
+                const range2 = `${formatYYYYMMDD(w2Start)}-${formatYYYYMMDD(w2End)}`;
+
+                // KĽÚČOVÉ: ?fixture=true prinúti ESPN vrátiť budúce naplánované zápasy!
+                const requests = [
+                    ...leagues.map(l => ({
+                        url: `https://site.api.espn.com/apis/site/v2/sports/soccer/${l.slug}/teams/${ARSENAL_ESPN_ID}/schedule?fixture=true&_t=${Date.now()}`,
+                        label: l.label,
+                        tv: l.tv
+                    })),
+                    ...leagues.map(l => ({
+                        url: `https://site.api.espn.com/apis/site/v2/sports/soccer/${l.slug}/scoreboard?dates=${range1}&limit=100&_t=${Date.now()}`,
+                        label: l.label,
+                        tv: l.tv
+                    })),
+                    ...leagues.map(l => ({
+                        url: `https://site.api.espn.com/apis/site/v2/sports/soccer/${l.slug}/scoreboard?dates=${range2}&limit=100&_t=${Date.now()}`,
+                        label: l.label,
+                        tv: l.tv
+                    }))
+                ];
+
+                const responses = await Promise.allSettled(requests.map(r => fetch(r.url)));
                 const upcomingMap = new Map();
 
                 for (let i = 0; i < responses.length; i++) {
-                    const r = responses[i];
-                    const leagueInfo = leagues[i];
-                    if (r.status !== 'fulfilled' || !r.value.ok) continue;
+                    const res = responses[i];
+                    const meta = requests[i];
+                    if (res.status !== 'fulfilled' || !res.value.ok) continue;
 
-                    const data = await r.value.json();
+                    const data = await res.value.json();
                     const events = data.events || [];
 
                     for (const ev of events) {
-                        const comp = ev.competitions?.[0];
-                        if (!comp) continue;
-
-                        const state = comp.status?.type?.state;
-                        const completed = comp.status?.type?.completed;
-                        const matchEnd = new Date(new Date(ev.date).getTime() + 2.5 * 60 * 60 * 1000);
-
-                        // Berieme len budúce alebo práve prebiehajúce zápasy
-                        if (completed === true || state === 'post' || matchEnd < now) continue;
-
-                        const competitors = comp.competitors || [];
-                        const me = competitors.find(c => String(c.id) === ARSENAL_ESPN_ID || String(c.team?.id) === ARSENAL_ESPN_ID);
-                        const opp = competitors.find(c => String(c.id) !== ARSENAL_ESPN_ID && String(c.team?.id) !== ARSENAL_ESPN_ID);
-                        if (!me || !opp) continue;
-
-                        const rawOppName = opp.team?.shortDisplayName || opp.team?.displayName || opp.team?.name || 'Súper';
-                        const oppName = (rawOppName.toLowerCase().includes('man city') || rawOppName.toLowerCase().includes('manchester city'))
-                            ? 'Man Cheaters'
-                            : rawOppName;
-
-                        const oppLogo = opp.team?.logos?.[0]?.href || getTeamLogo(rawOppName);
-                        const isHome = me.homeAway === 'home';
-                        const venueName = comp.venue?.fullName || (isHome ? 'Emirates Stadium' : 'Štadión súpera');
-                        const venueCity = comp.venue?.address?.city ? ` (${comp.venue.address.city})` : '';
-
-                        upcomingMap.set(ev.id, {
-                            id: ev.id,
-                            utc: ev.date,
-                            opp: oppName,
-                            logo: oppLogo,
-                            comp: leagueInfo.label,
-                            isHome: isHome,
-                            venue: `${venueName}${venueCity}`,
-                            tv: leagueInfo.tv
-                        });
+                        const parsed = extractArsenalEvent(ev, meta.label, meta.tv);
+                        if (parsed && !upcomingMap.has(parsed.id)) {
+                            upcomingMap.set(parsed.id, parsed);
+                        }
                     }
                 }
 
-                // Zoradíme chronologicky od najbližšieho zápasu a vezmeme presne 5 nasledujúcich
                 const upcomingMatches = Array.from(upcomingMap.values())
                     .sort((a, b) => new Date(a.utc) - new Date(b.utc))
                     .slice(0, 5);
