@@ -70,6 +70,7 @@
         .badge-pl { background-color: #800020; color: #ffd6e0; border: 1px solid #a60029; }
         .badge-ucl { background-color: #9C824A; color: #fffbeb; border: 1px solid #d4af37; }
         .badge-efl { background-color: #063672; color: #dbeafe; border: 1px solid #1d4ed8; }
+        .badge-fac { background-color: #374151; color: #f3f4f6; border: 1px solid #6b7280; }
 
         ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: rgba(17, 24, 39, 0.5); }
@@ -132,7 +133,8 @@
                     <div class="card p-3.5 exact-box">
                         <div class="flex items-center justify-between pb-2 mb-2 border-b border-white/10">
                             <span class="text-xs font-extrabold tracking-wider uppercase text-amber-400">📅 Zápasy Arsenalu</span>
-                            <div class="flex items-center gap-1 text-[9px] font-bold">
+                            <div class="flex items-center gap-1.5 text-[9px] font-bold">
+                                <button onclick="updateLiveArsenalMatches(true)" class="text-[11px] font-normal text-gray-400 hover:text-white transition mr-1">↻</button>
                                 <span class="px-1.5 py-0.5 rounded badge-pl">PL</span>
                                 <span class="px-1.5 py-0.5 rounded badge-ucl">UCL</span>
                                 <span class="px-1.5 py-0.5 rounded badge-efl">EFL</span>
@@ -299,25 +301,7 @@
     <script>
         const FPL_LEAGUE_ID = 28856;
         const MY_TEAM_NAME = "Ødeargod";
-
-        const arsenalSeasonFixtures = [
-            { utc: "2026-10-17T14:00:00Z", opp: "Nottingham Forest", comp: "PL", isHome: false, venue: "City Ground (Nottingham)", tv: "CANAL+ Sport" },
-            { utc: "2026-10-21T19:00:00Z", opp: "Bayern Mníchov", comp: "UCL", isHome: false, venue: "Allianz Arena (Mníchov)", tv: "Nova Sport 3 / Voyo" },
-            { utc: "2026-10-24T14:00:00Z", opp: "Everton", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
-            { utc: "2026-10-27T19:45:00Z", opp: "Fleetwood", comp: "EFL", isHome: false, venue: "Highbury Stadium (Fleetwood)", tv: "Nova Sport 2 / Voyo" },
-            { utc: "2026-11-01T16:30:00Z", opp: "Liverpool", comp: "PL", isHome: false, venue: "Anfield (Liverpool)", tv: "CANAL+ Sport" },
-            { utc: "2026-11-04T20:00:00Z", opp: "Inter Miláno", comp: "UCL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "Nova Sport 3 / Voyo" },
-            { utc: "2026-11-07T15:00:00Z", opp: "Newcastle", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
-            { utc: "2026-11-21T12:30:00Z", opp: "Tottenham", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
-            { utc: "2026-11-25T20:00:00Z", opp: "Sporting CP", comp: "UCL", isHome: false, venue: "Estádio José Alvalade (Lisabon)", tv: "Nova Sport 4 / Voyo" },
-            { utc: "2026-11-28T15:00:00Z", opp: "Fulham", comp: "PL", isHome: false, venue: "Craven Cottage (Londýn)", tv: "CANAL+ Sport" },
-            { utc: "2026-12-02T20:15:00Z", opp: "Manchester United", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
-            { utc: "2026-12-05T17:30:00Z", opp: "Aston Villa", comp: "PL", isHome: false, venue: "Villa Park (Birmingham)", tv: "CANAL+ Sport" },
-            { utc: "2026-12-09T20:00:00Z", opp: "AS Monaco", comp: "UCL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "Nova Sport 3 / Voyo" },
-            { utc: "2026-12-12T15:00:00Z", opp: "Brighton", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" },
-            { utc: "2026-12-19T15:00:00Z", opp: "Brentford", comp: "PL", isHome: false, venue: "Gtech Community Stadium", tv: "CANAL+ Sport" },
-            { utc: "2026-12-26T15:00:00Z", opp: "Chelsea", comp: "PL", isHome: true, venue: "Emirates Stadium (Londýn)", tv: "CANAL+ Sport" }
-        ];
+        const ARSENAL_ESPN_ID = "359";
 
         const fplScheduleUTC = [
             { gw: 8,  utc: "2026-10-16T17:30:00Z" },
@@ -366,18 +350,14 @@
                 'Manchester United': 'https://resources.premierleague.com/premierleague/badges/t1.svg',
                 'Newcastle': 'https://resources.premierleague.com/premierleague/badges/t4.svg',
                 'Nott': 'https://resources.premierleague.com/premierleague/badges/t17.svg',
+                'Southampton': 'https://resources.premierleague.com/premierleague/badges/t20.svg',
                 'Sunderland': 'https://resources.premierleague.com/premierleague/badges/t56.svg',
                 'Tottenham': 'https://resources.premierleague.com/premierleague/badges/t6.svg',
                 'Spurs': 'https://resources.premierleague.com/premierleague/badges/t6.svg',
                 'West Ham': 'https://resources.premierleague.com/premierleague/badges/t21.svg',
                 'Wolves': 'https://resources.premierleague.com/premierleague/badges/t39.svg',
                 'Hull': 'https://resources.premierleague.com/premierleague/badges/t88.svg',
-                'Coventry': 'https://resources.premierleague.com/premierleague/badges/t9.svg',
-                'Bayern': 'https://a.espncdn.com/i/teamlogos/soccer/500/132.png',
-                'Inter': 'https://a.espncdn.com/i/teamlogos/soccer/500/110.png',
-                'Sporting': 'https://a.espncdn.com/i/teamlogos/soccer/500/2250.png',
-                'Monaco': 'https://a.espncdn.com/i/teamlogos/soccer/500/174.png',
-                'Fleetwood': 'https://a.espncdn.com/i/teamlogos/soccer/500/3802.png'
+                'Coventry': 'https://resources.premierleague.com/premierleague/badges/t9.svg'
             };
             for (const k in logos) {
                 if (teamName && teamName.toLowerCase().includes(k.toLowerCase())) return logos[k];
@@ -470,7 +450,7 @@
 
         async function updateLivePLStandings(forceRefresh = false) {
             const container = document.getElementById('pl-table-rows');
-            const formCacheKey = 'espn_pl_live_forms_v29';
+            const formCacheKey = 'espn_pl_live_forms_v30';
             let cachedForms = {};
 
             if (!forceRefresh) {
@@ -543,26 +523,26 @@
             }
         }
 
-        // ========================================================
-        // 2. ZÁPASY ARSENALU & FPL MINI-LIGA
-        // ========================================================
-        function renderArsenalMatches() {
+        // ====================================================================================
+        // 2. ŽIVÉ ZÁPASY ARSENALU PRIAMO Z ESPN API (PL + UCL + EFL + FA CUP, NAJBLIŽŠÍCH 5 Z)
+        // ====================================================================================
+        function renderArsenalFixtureItems(matches) {
             const container = document.getElementById('arsenal-fixtures-rows');
             const nextVenueEl = document.getElementById('arsenal-next-venue');
             const now = new Date();
 
-            const upcoming = arsenalSeasonFixtures.filter(m => {
-                const matchEnd = new Date(new Date(m.utc).getTime() + 2.5 * 60 * 60 * 1000);
-                return matchEnd >= now;
-            }).slice(0, 7);
+            if (!matches || matches.length === 0) {
+                container.innerHTML = `<div class="py-10 text-center text-gray-400">Žiadne nadchádzajúce zápasy.</div>`;
+                return;
+            }
 
-            if (upcoming.length > 0 && nextVenueEl) {
-                const nextMatch = upcoming[0];
+            if (nextVenueEl) {
+                const nextMatch = matches[0];
                 nextVenueEl.textContent = `🏟️ ${nextMatch.opp} • ${nextMatch.venue}`;
             }
 
-            container.innerHTML = upcoming.map(m => {
-                const badgeClass = m.comp === 'UCL' ? 'badge-ucl' : m.comp === 'EFL' ? 'badge-efl' : 'badge-pl';
+            container.innerHTML = matches.slice(0, 5).map(m => {
+                const badgeClass = m.comp === 'UCL' ? 'badge-ucl' : m.comp === 'EFL' ? 'badge-efl' : m.comp === 'FA' ? 'badge-fac' : 'badge-pl';
                 const d = new Date(m.utc);
                 const dni = ['Ne', 'Po', 'Ut', 'St', 'Št', 'Pi', 'So'];
                 const timeStr = d.toLocaleTimeString('sk-SK', { hour: '2-digit', minute: '2-digit' });
@@ -575,8 +555,7 @@
                     ? `<span class="text-[10px] font-extrabold text-amber-300 bg-amber-500/20 px-1.5 py-0.2 rounded border border-amber-400/40 animate-pulse">🔥 DNES o ${timeStr}</span>`
                     : `<span class="text-[10px] text-gray-300 font-medium">${dni[d.getDay()]} ${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}. ${timeStr}</span>`;
 
-                const tvChannel = m.tv || (m.comp === 'UCL' ? 'Nova Sport / Voyo' : m.comp === 'PL' ? 'CANAL+ Sport' : 'Nova Sport');
-                const logo = getTeamLogo(m.opp);
+                const logo = m.logo || getTeamLogo(m.opp);
 
                 return `
                     <div class="p-2 rounded-lg ${isToday ? 'bg-amber-950/35 border border-amber-400/40' : 'bg-gray-900/75 border border-white/5'} flex items-center justify-between gap-2 hover:border-white/15 transition">
@@ -592,7 +571,7 @@
                                 </div>
                                 <div class="flex items-center gap-2 mt-0.5 truncate">
                                     <span class="font-bold text-white truncate text-xs">${m.opp}</span>
-                                    <span class="text-[9px] text-sky-300 font-medium shrink-0">📺 ${tvChannel}</span>
+                                    <span class="text-[9px] text-sky-300 font-medium shrink-0">📺 ${m.tv}</span>
                                 </div>
                             </div>
                         </div>
@@ -606,6 +585,105 @@
             }).join('');
         }
 
+        async function updateLiveArsenalMatches(forceRefresh = false) {
+            const container = document.getElementById('arsenal-fixtures-rows');
+            const cacheKey = 'arsenal_live_fixtures_v30';
+
+            if (!forceRefresh) {
+                try {
+                    const cached = localStorage.getItem(cacheKey);
+                    if (cached) {
+                        const parsed = JSON.parse(cached);
+                        if (Date.now() - parsed.ts < 15 * 60 * 1000 && parsed.matches?.length > 0) {
+                            renderArsenalFixtureItems(parsed.matches);
+                            return;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            const leagues = [
+                { slug: 'eng.1', label: 'PL', tv: 'CANAL+ Sport' },
+                { slug: 'uefa.champions', label: 'UCL', tv: 'Nova Sport / Voyo' },
+                { slug: 'eng.league_cup', label: 'EFL', tv: 'Nova Sport / Voyo' },
+                { slug: 'eng.fa', label: 'FA', tv: 'Nova Sport / Voyo' }
+            ];
+
+            try {
+                const responses = await Promise.allSettled(
+                    leagues.map(l => fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${l.slug}/teams/${ARSENAL_ESPN_ID}/schedule?_t=${Date.now()}`))
+                );
+
+                const now = new Date();
+                const upcomingMap = new Map();
+
+                for (let i = 0; i < responses.length; i++) {
+                    const r = responses[i];
+                    const leagueInfo = leagues[i];
+                    if (r.status !== 'fulfilled' || !r.value.ok) continue;
+
+                    const data = await r.value.json();
+                    const events = data.events || [];
+
+                    for (const ev of events) {
+                        const comp = ev.competitions?.[0];
+                        if (!comp) continue;
+
+                        const state = comp.status?.type?.state;
+                        const completed = comp.status?.type?.completed;
+                        const matchEnd = new Date(new Date(ev.date).getTime() + 2.5 * 60 * 60 * 1000);
+
+                        // Berieme len budúce alebo práve prebiehajúce zápasy
+                        if (completed === true || state === 'post' || matchEnd < now) continue;
+
+                        const competitors = comp.competitors || [];
+                        const me = competitors.find(c => String(c.id) === ARSENAL_ESPN_ID || String(c.team?.id) === ARSENAL_ESPN_ID);
+                        const opp = competitors.find(c => String(c.id) !== ARSENAL_ESPN_ID && String(c.team?.id) !== ARSENAL_ESPN_ID);
+                        if (!me || !opp) continue;
+
+                        const rawOppName = opp.team?.shortDisplayName || opp.team?.displayName || opp.team?.name || 'Súper';
+                        const oppName = (rawOppName.toLowerCase().includes('man city') || rawOppName.toLowerCase().includes('manchester city'))
+                            ? 'Man Cheaters'
+                            : rawOppName;
+
+                        const oppLogo = opp.team?.logos?.[0]?.href || getTeamLogo(rawOppName);
+                        const isHome = me.homeAway === 'home';
+                        const venueName = comp.venue?.fullName || (isHome ? 'Emirates Stadium' : 'Štadión súpera');
+                        const venueCity = comp.venue?.address?.city ? ` (${comp.venue.address.city})` : '';
+
+                        upcomingMap.set(ev.id, {
+                            id: ev.id,
+                            utc: ev.date,
+                            opp: oppName,
+                            logo: oppLogo,
+                            comp: leagueInfo.label,
+                            isHome: isHome,
+                            venue: `${venueName}${venueCity}`,
+                            tv: leagueInfo.tv
+                        });
+                    }
+                }
+
+                // Zoradíme chronologicky od najbližšieho zápasu a vezmeme presne 5 nasledujúcich
+                const upcomingMatches = Array.from(upcomingMap.values())
+                    .sort((a, b) => new Date(a.utc) - new Date(b.utc))
+                    .slice(0, 5);
+
+                if (upcomingMatches.length > 0) {
+                    try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), matches: upcomingMatches })); } catch (e) {}
+                    renderArsenalFixtureItems(upcomingMatches);
+                } else {
+                    container.innerHTML = `<div class="py-10 text-center text-gray-400">Žiadne naplánované zápasy.</div>`;
+                }
+            } catch (err) {
+                console.error('Chyba pri načítaní zápasov Arsenalu:', err);
+                container.innerHTML = `<div class="py-8 text-center text-red-400">Chyba načítania rozpisu.</div>`;
+            }
+        }
+
+        // ========================================================
+        // 3. FPL MINI-LIGA
+        // ========================================================
         function renderFPLRows(results) {
             const rowsContainer = document.getElementById('fpl-minileague-rows');
             const myEntry = results.find(r => r.entry_name.toLowerCase().includes('deargod') || r.entry_name === MY_TEAM_NAME);
@@ -683,7 +761,7 @@
         }
 
         // ========================================================
-        // 3. POČASIE: PETRŽALKA (YR.NO + OPEN-METEO)
+        // 4. POČASIE: PETRŽALKA (YR.NO + OPEN-METEO)
         // ========================================================
         async function fetchWeather() {
             const lat = 48.11508;
@@ -801,7 +879,7 @@
         }
 
         // =========================================================================================
-        // 4. ROBUSTNÝ REDDIT ENGINE PRE VŠETKY 3 SUBREDDITY (TOP 24H + UPVOTY)
+        // 5. ROBUSTNÝ REDDIT ENGINE PRE VŠETKY 3 SUBREDDITY (TOP 24H + UPVOTY)
         // =========================================================================================
         function switchRedditTab(mode) {
             const colSk = document.getElementById('col-slovakia');
@@ -838,7 +916,6 @@
             `).join('');
         }
 
-        // ArcticShift pre Top 24h so skutočnými upvotmi (funguje spoľahlivo aj pre r/Slovakia)
         async function fetchArcticShiftTop24h(subreddit) {
             const since24h = Math.floor(Date.now() / 1000) - 86400;
             const res = await fetch(`https://arctic-shift.photon-reddit.com/api/posts/search?subreddit=${subreddit}&after=${since24h}&limit=35&sort=desc`);
@@ -895,7 +972,6 @@
             container.innerHTML = `<div class="py-10 text-center text-gray-400 text-xs animate-pulse">Načítavam r/${subreddit} (Top 24h)...</div>`;
 
             try {
-                // Pre r/Slovakia aj ostatné využijeme ArcticShift / PullPush zoradené od najvyššieho skóre za 24h
                 const items = await Promise.any([
                     fetchArcticShiftTop24h(subreddit),
                     fetchPullPushTop24h(subreddit)
@@ -936,7 +1012,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             updateLivePLStandings(false);
-            renderArsenalMatches();
+            updateLiveArsenalMatches(false);
             fetchFPLData(false);
             fetchWeather();
             loadAllReddit(false);
